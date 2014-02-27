@@ -29,13 +29,20 @@
 #define SIZE_APP_MSG    70  //APP_MSG_SIZE
 #define SIZE_APP_RAM    254 //APP_RAM_SIZE
 
+//System Registers
 #define REG_PC  0
 #define REG_IRH 1
 #define REG_IRL 2
 #define REG_WIN 3
 #define REG_SP  4
 
+//General Purpose Registars
+#define REG_GEN_START NUM_SYS_REG
+#define REG_GEN_END   SIZE_REG - 1
+
 #define SIZE_WIN 8
+#define MAX_WIN_INDEX SIZE_REG - SIZE_WIN
+
 #define SIZE_REG 38
 
 #define NUM_SYS_REG 5 //Number of system registers (0-4) used for referencing GPRs starting at 0.

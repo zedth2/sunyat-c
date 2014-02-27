@@ -2,37 +2,37 @@
 	/*
 	 * Name        : sunyat-asm.y
 	 * Author      : William "Amos" Confer
-	 * 
+	 *
      * License     : Copyright (c) 2008--2014 William "Amos" Confer
-     *              
-     *    Permission is hereby granted, free of charge, to any person obtaining a 
+     *
+     *    Permission is hereby granted, free of charge, to any person obtaining a
      *    copy of this software and associated documentation files (the "Software"),
      *    to deal in the Software without restriction, including without limitation
-     *    the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+     *    the rights to use, copy, modify, merge, publish, distribute, sublicense,
      *    and/or sell copies of the Software, and to permit persons to whom the
      *    Software is furnished to do so, subject to the following conditions:
      *
      *    The above copyright notice and this permission notice shall be included in
-     *    all copies or substantial portions of the Software.;  
+     *    all copies or substantial portions of the Software.;
      *
      *    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
      *    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-     *    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
+     *    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
      *    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-     *    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
-     *    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+     *    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+     *    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
      *    DEALINGS IN THE SOFTWARE.
 	 */
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include <string.h>
 	#include <assert.h>
-	
+
 	#include "token.h"
 	#include "sunyat.h"
 
 	#define MAX_CNT 256
-	
+
 	extern int assembler_pass;	/* sunyat-asm.lex */
 	extern char* filename;	/* sunyat-asm.lex */
 
@@ -43,21 +43,21 @@
 	unsigned char msg_data [SIZE_APP_MSG];
 	unsigned char ram_data [SIZE_APP_RAM];
 	unsigned char address = 0;
-	
+
 	char *variables [MAX_CNT];
 	unsigned char variable_addrs [MAX_CNT];
 	int variable_cnt = 0;
-	
+
 	char *labels [MAX_CNT];
 	unsigned char label_addrs [MAX_CNT];
 	int label_cnt = 0;
-	
+
 	char *constants [MAX_CNT];
 	unsigned char constant_values [MAX_CNT];
 	int constant_cnt = 0;
 
 	int errors_found = 0;
-	
+
 	void message (int err, Token t, const char *primary_err, const char *optional_err) {
 		if (err) {
 			fprintf (stderr, "Error, ");
@@ -71,12 +71,12 @@
 		}
 		fprintf (stderr, "\n");
 	}
-	
+
 	void error (Token t, const char *primary_err, const char *optional_err) {
 		errors_found++;
 		message (1, t, primary_err, optional_err);
 	}
-	
+
 	void warning (Token t, const char *primary_warning, const char *optional_warning) {
 		message (0, t, primary_warning, optional_warning);
 	}
@@ -96,7 +96,7 @@
 		}
 		return result;
 	}
-	
+
 	int constant_pos (const char* s) {
 		int result = 0;
 		int found = 0;
@@ -112,7 +112,7 @@
 		}
 		return result;
 	}
-	
+
 	int label_pos (const char* s) {
 		int result = 0;
 		int found = 0;
@@ -128,7 +128,7 @@
 		}
 		return result;
 	}
-	
+
 	void store_instruction () {
 		ram_data [address++] = (high_opcode << 3) | (high_reg);
 		ram_data [address++] = low;
@@ -155,7 +155,7 @@
 	fprintf (stderr, "Giving up... parser stack overflow :-x\n");
 }
 
-program ::= lines. { 
+program ::= lines. {
 	if (errors_found == 0) {
 		if (assembler_pass == 2) {
 			FILE *outfile = fopen (filename, "wb");
@@ -192,7 +192,7 @@ line ::= .
 message_line ::= MESSAGE(msg).	{
 	if (assembler_pass == 1) {
 		if (msg.token_str == NULL) {
-			
+
 			warning (msg, ".MESSAGE string is empty... ignoring.", NULL);
 		}
 		else if (strlen (msg.token_str) > SIZE_APP_MSG) {
@@ -268,7 +268,7 @@ variable_line ::= VAR_DIRECTIVE IDENTIFIER(id) var_value(val).	{
 		else if ((pos = constant_pos (id.token_str)) >= 0 ) {
 			char s[100];
 			sprintf (s, "Variable name inuse by constant with value 0x%X.", constant_values [pos]);
-			error (id, s, NULL);		
+			error (id, s, NULL);
 		}
 		else {
 			/* new variable defined */
@@ -306,7 +306,7 @@ constant_line ::= CONST_DIRECTIVE IDENTIFIER(id) immediate(immed). {
 		else if ((pos = variable_pos (id.token_str)) >= 0 ) {
 			char s[100];
 			sprintf (s, "Constant name inuse by variable at address 0x%X.", variable_addrs [pos]);
-			error (id, s, NULL);		
+			error (id, s, NULL);
 		}
 		else {
 			/* new const defined */
@@ -373,7 +373,7 @@ code_line ::= ADD REGISTER(dst) REGISTER(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_ADD_RR;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;	
+		low = (unsigned char)src.data;
 		store_instruction ();
 	}
 }
@@ -391,7 +391,10 @@ code_line ::= SWR immediate(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_SWR_I;
 		high_reg = 0 ; //dst.data;
-		low = (unsigned char)src.data & ~(~0<<5) ;
+		if (src.data > MAX_WIN_INDEX) {
+            error (src, "Your set of the beginning window was to large.", src.token_str) ;
+        }
+        low = (unsigned char)src.data ;
 		store_instruction ();
 	}
 }
@@ -493,7 +496,7 @@ code_line ::= JEQ memory(addr). {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_JEQ_M;
 		high_reg = 0;
-		low = (unsigned char)addr.data;	
+		low = (unsigned char)addr.data;
 		store_instruction ();
 	}
 }
@@ -502,7 +505,7 @@ code_line ::= JNE memory(addr). {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_JNE_M;
 		high_reg = 0;
-		low = (unsigned char)addr.data;	
+		low = (unsigned char)addr.data;
 		store_instruction ();
 	}
 }
@@ -511,7 +514,7 @@ code_line ::= JGR memory(addr). {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_JGR_M;
 		high_reg = 0;
-		low = (unsigned char)addr.data;	
+		low = (unsigned char)addr.data;
 		store_instruction ();
 	}
 }
@@ -520,7 +523,7 @@ code_line ::= JLS memory(addr). {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_JLS_M;
 		high_reg = 0;
-		low = (unsigned char)addr.data;	
+		low = (unsigned char)addr.data;
 		store_instruction ();
 	}
 }
@@ -529,7 +532,7 @@ code_line ::= CALL memory(addr). {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_CALL_M;
 		high_reg = 0;
-		low = (unsigned char)addr.data;	
+		low = (unsigned char)addr.data;
 		store_instruction ();
 	}
 }
@@ -613,7 +616,7 @@ code_line ::= NEG REGISTER(dst).{ //THIS IS A PSEUDO-INSTRUCTION
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_MUL_RI;
 		high_reg = dst.data;
-		low = -1;		
+		low = -1;
 		store_instruction ();
 	}
 }
@@ -622,7 +625,7 @@ code_line ::= LOAD REGISTER(dst) memory(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_LOAD_RM;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;	
+		low = (unsigned char)src.data;
 		store_instruction ();
 	}
 }
@@ -640,7 +643,7 @@ code_line ::= STOR memory(dst) REGISTER(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_STOR_MR;
 		high_reg = src.data; /* src and dst are reverse in the encoding */
-		low = (unsigned char)dst.data;		
+		low = (unsigned char)dst.data;
 		store_instruction ();
 	}
 }
@@ -658,7 +661,7 @@ code_line ::= PUSH REGISTER(dst). {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_PUSH_R;
 		high_reg = dst.data;
-		low = 0;		
+		low = 0;
 		store_instruction ();
 	}
 }
@@ -667,7 +670,7 @@ code_line ::= POP REGISTER(dst). {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_POP_R;
 		high_reg = dst.data;
-		low = 0;			
+		low = 0;
 		store_instruction ();
 	}
 }
