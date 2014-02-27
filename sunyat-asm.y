@@ -389,23 +389,23 @@ code_line ::= ADD REGISTER(dst) immediate(src).{
 
 code_line ::= SUB REGISTER(dst) REGISTER(src).{
 	if (assembler_pass == 2) {
-		high_opcode = OPCODE_SUB_RR;
+		high_opcode = OPCODE_ADD_RR;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;
+		low = -1*(unsigned char)src.data;
 		store_instruction ();
 	}
 }
 
-/*	OPCODE_SUB_RI + OPCODE_NEG_R were removed to make room for OPCODE_SWR + AWR (windowing)
-	code_line ::= SUB REGISTER(dst) immediate(src).{
+    //OPCODE_SUB_RI + OPCODE_NEG_R were removed to make room for OPCODE_SWR + AWR (windowing)
+code_line ::= SUB REGISTER(dst) immediate(src).{
 	if (assembler_pass == 2) {
-		high_opcode = OPCODE_SUB_RI;
+		high_opcode = OPCODE_ADD_RI;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;
+		low = -1*(unsigned char)src.data;
 		store_instruction ();
 	}
 }
-*/
+
 code_line ::= MUL REGISTER(dst) REGISTER(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_MUL_RR;
@@ -587,16 +587,16 @@ code_line ::= NOT REGISTER(dst).{
 	}
 }
 
-/* OPCODE_SUB_RI + OPCODE_NEG_R were removed to make room for OPCODE_SWR + AWR (windowing)
-	code_line ::= NEG REGISTER(dst).{
+// OPCODE_SUB_RI + OPCODE_NEG_R were removed to make room for OPCODE_SWR + AWR (windowing)
+code_line ::= NEG REGISTER(dst).{
 	if (assembler_pass == 2) {
-		high_opcode = OPCODE_NEG_R;
+		high_opcode = OPCODE_MUL_RI;
 		high_reg = dst.data;
-		low = 0;		
+		low = -1;		
 		store_instruction ();
 	}
 }
-*/
+
 code_line ::= LOAD REGISTER(dst) memory(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_LOAD_RM;
