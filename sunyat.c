@@ -1,44 +1,44 @@
 /*
  * Name        : sunyat.c
  * Author      : William "Amos" Confer
- * Description : A simple architecture virtual machine designed to demonstrate
- *               one basic way to implement a theoretical ISA.  Because the
+ * Description : A simple RISC-like virtual machine designed to demonstrate 
+ *               one basic way to implement a theoretical ISA.  Because the 
  *               SUNYAT is not based on an ISA ever intended for the IC world,
- *               a few unrealistic liberties were taken to keep the
+ *               a few unrealistic liberties were taken to keep the 
  *               implementation minimal.  For example, "clock ticks" refer to
  *               a complete fetch-decode-execute cycle so that all instructions
  *               (even memory requests) take a single "clock tick" - although
  *               nothing resembling an instruction pipeline is virtualized.
- *               Also, character input (request at address 0xFE) requires an
+ *               Also, character input (request at address 0xFE) requires an 
  *               indeterminate amount of time as it hangs the application until
- *               the user types a character and presses the Enter key... still
+ *               the user types a character and presses the Enter key... still 
  *               counts as only one clock tick :-)
- *
+ * 
  * Usage       : 1st parameter is a 324 byte ROM image to execute. The first
  *               70 bytes is the application's identification string printed
  *               upon successfull load.  The remaining 254 bytes are the
  *               application "ROM image" which overwrite the entire 254 bytes of
  *               RAM.  Address 0xFE (254) is a key input device and 0xFF (255)
  *               is a character output device (terminal).
- *
+ * 
  * License     : Copyright (c) 2008--2014 William "Amos" Confer
- *
- *    Permission is hereby granted, free of charge, to any person obtaining a
+ *              
+ *    Permission is hereby granted, free of charge, to any person obtaining a 
  *    copy of this software and associated documentation files (the "Software"),
  *    to deal in the Software without restriction, including without limitation
- *    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ *    the rights to use, copy, modify, merge, publish, distribute, sublicense, 
  *    and/or sell copies of the Software, and to permit persons to whom the
  *    Software is furnished to do so, subject to the following conditions:
  *
  *    The above copyright notice and this permission notice shall be included in
- *    all copies or substantial portions of the Software.;
+ *    all copies or substantial portions of the Software.;  
  *
  *    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ *    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
  *    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- *    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ *    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+ *    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
  *    DEALINGS IN THE SOFTWARE.
  */
 
@@ -48,14 +48,11 @@
 #include <stdbool.h>
 
 #include "sunyat.h"
-#include "build_number.h"
 
 //////////////////////////////////////////////////
 
-const char MSG_STARTUP_BEGIN [] =
-	"\nThe SUNYAT Virtual Machine version ";
-const char MSG_STARTUP_END [] =
-	" - (C) 2007--2014, William \"Amos\" Confer\n\nLoading application: %s\n\n";
+const char MSG_STARTUP [] =
+	"\nThe SUNYAT Virtual Machine version 0x0 - (C) 2008, William \"Amos\" Confer\n\nLoading application: %s\n\n";
 const char MSG_BAR [] =
 	"----------------------------------------";
 
@@ -67,7 +64,6 @@ const char ERR_BYTE_SIZE [] =
 	"\tApplication is not the correct byte size.\n";
 const char ERR_FILE_NOT_OPEN [] =
 	"\tApplication file could not be opened.\n";
-
 const char ERR_INVALID_PC [] =
 	"\tProgram counter is invalid\n";
 const char ERR_IMPOSSIBLE_INSTRUCTION [] =
@@ -83,36 +79,36 @@ const char ERR_STOR [] =
 const char ERR_POP [] =
 	"\tPOP underflowed the stack\n";
 const char ERR_PUSH [] =
-		"\tPSH overflowed the stack\n";
+	"\tPSH overflowed the stack\n";
 const char ERR_CALL_OVERFLOW [] =
-		"\tCALL overflowed the stack\n";
+	"\tCALL overflowed the stack\n";
 const char ERR_CALL_RANGE [] =
 	"\tCALL instruction targets an out of range address\n";
+const char ERR_WINDOW_RANGE []=
+	"\tWindow position out of range. (Acceptable Values: 0-29)\n";
 //////////////////////////////////////////////////
 
-char app_msg [APP_MSG_SIZE + 1];	/* +1 is to add a guaranteed null terminator */
+char app_msg [SIZE_APP_MSG + 1];	/* +1 is to add a guaranteed null terminator */
 
-unsigned char sunyat_ram [APP_RAM_SIZE];
+unsigned char sunyat_ram [SIZE_APP_RAM];
 
 /*
  * register file for the sunyat-1.
- * 0-7:	general purpose
- * 8:	PC
- * 9:	IR high
- * 10:	IR low
- * 11:	SP
+ * 0:		REG_PC
+ * 1:		REG_IRH
+ * 2:		REG_IRL
+ * 3:		REG_WIN
+ * 4:		REG_SP
+ * 5-37:	33 General Purpose registers
  */
-#define REG_PC   8
-#define REG_IRH  9
-#define REG_IRL 10
-#define REG_SP  11
-unsigned char sunyat_regs [REG_SIZE] = {
-		0, 0, 0, 0,                             /* PC, IR-H, IR-L, WR */
-        APP_RAM_SIZE                            /* stack grows down from top of RAM */
-		'0', '7', '2', '8', '2', '0', '0', '7', /* GPRs default to my wedding date :-) */
-        '0', '7', '2', '8', '2', '0', '0', '7', /* GPRs default to my wedding date :-) */
-        '0', '7', '2', '8', '2', '0', '0', '7', /* GPRs default to my wedding date :-) */
-        '0', '7', '2', '8', '2', '0', '0', '7', /* GPRs default to my wedding date :-) */
+
+unsigned char sunyat_regs [SIZE_REG] = {
+	0, 0, 0, 5,                             /* REG_PC, REG_IRH, REG_IRL, REG_SP */
+	SIZE_APP_RAM                            /* stack grows down from top of RAM */
+	'1', '0', '2', '0', '2', '0', '0', '7', /* GPRS no longer default to Amos' wedding date */
+	'1', '0', '2', '0', '2', '0', '0', '7', /* GPRS no longer default to Amos' wedding date */
+	'1', '0', '2', '0', '2', '0', '0', '7', /* GPRS no longer default to Amos' wedding date */
+	'1', '0', '2', '0', '2', '0', '0', '7', /* GPRS no longer default to Amos' wedding date */
 };
 
 int sunyat_flag_zero = 0;
@@ -137,13 +133,7 @@ void sunyat_execute ();
 //////////////////////////////////////////////////
 
 int main (int argc, char *argv []) {
-	printf (MSG_STARTUP_BEGIN);
-	printf("%u.%u", VERSION_MAJOR, VERSION_MINOR);
-	if(strlen(VERSION_MODIFIER) > 0) {
-		printf("_%s", VERSION_MODIFIER);
-	}
-	printf(" Build %u", BUILD_NUMBER);
-	printf (MSG_STARTUP_END, argv [1]);
+	printf (MSG_STARTUP, argv [1]);
 
 	// check for application parameter
 	if (argc != 2) 	{
@@ -152,11 +142,11 @@ int main (int argc, char *argv []) {
 	}
 	else {
 		// test application size
-		unsigned char file_buffer [APP_ROM_SIZE];
+		unsigned char file_buffer [SIZE_APP_ROM];
 		FILE *infile = NULL;
 		if ((infile = fopen (argv [1], "rb")) != NULL) {
-			// is it at least APP_ROM_SIZE big ?
-			if (APP_ROM_SIZE != fread (file_buffer, sizeof (unsigned char), APP_ROM_SIZE, infile)) {
+			// is it at least SIZE_APP_ROM big ?
+			if (SIZE_APP_ROM != fread (file_buffer, sizeof (unsigned char), SIZE_APP_ROM, infile)) {
 				// not big enough
 				printf (ERR_BYTE_SIZE);
 				return 0;
@@ -183,12 +173,12 @@ int main (int argc, char *argv []) {
 		fclose (infile);
 
 		// print the application identification message
-		memcpy (app_msg, file_buffer, APP_MSG_SIZE);
-		app_msg [APP_MSG_SIZE] = '\0';	// make sure the ID message is terminated
+		memcpy (app_msg, file_buffer, SIZE_APP_MSG);
+		app_msg [SIZE_APP_MSG] = '\0';	// make sure the ID message is terminated
 		printf ("%s\n%s\n%s\n\n", MSG_BAR, app_msg, MSG_BAR);
 
 		// load RAM from the ROM image
-		memcpy (sunyat_ram, file_buffer + APP_MSG_SIZE, APP_RAM_SIZE);
+		memcpy (sunyat_ram, file_buffer + SIZE_APP_MSG, SIZE_APP_RAM);
 
 		// fetch->decode->exceute until returned beyond RAM
 		sunyat_execute ();
@@ -215,7 +205,7 @@ void sunyat_execute () {
 		 */
 
 		// make sure the PC is valid... -2 because each instruction is 2 bytes
-		if (sunyat_regs [REG_PC] > (APP_RAM_SIZE - 2)) {
+		if (sunyat_regs [REG_PC] > (SIZE_APP_RAM - 2)) {
 			printf (ERR_INVALID_PC);
 			return;
 		}
@@ -257,11 +247,13 @@ void sunyat_execute () {
 			sunyat_regs [dreg] = sunyat_regs [dreg] - sunyat_regs [sreg];
 			set_flags (sunyat_regs [dreg]);
 			break;
+    /*	OPCODE_SUB_RI + OPCODE_NEG_R were removed to make room for OPCODE_SWR + AWR (windowing)
 		case OPCODE_SUB_RI:
 			// this should work on signed values as well
 			sunyat_regs [dreg] = sunyat_regs [dreg] - imm;
 			set_flags (sunyat_regs [dreg]);
 			break;
+	*/
 		case OPCODE_MUL_RR:
 			// this should work on signed values as well
 			sunyat_regs [dreg] = sunyat_regs [dreg] * sunyat_regs [sreg];
@@ -301,7 +293,7 @@ void sunyat_execute () {
 			set_flags (cmp_result);
 			break;
 		case OPCODE_JMP_M:
-			if (mem >= APP_RAM_SIZE) {
+			if (mem >= SIZE_APP_RAM) {
 				printf (ERR_JMP_RANGE );
 				return;
 			}
@@ -312,7 +304,7 @@ void sunyat_execute () {
 				sunyat_regs [REG_PC] = mem;
 			break;
 		case OPCODE_JNE_M:
-			if (!sunyat_flag_zero)
+			if (!sunyat_flag_zero) 
 				sunyat_regs [REG_PC] = mem;
 			break;
 		case OPCODE_JGR_M:
@@ -327,7 +319,7 @@ void sunyat_execute () {
 				printf (ERR_CALL_OVERFLOW);
 				return;
 			}
-			if (mem >= APP_RAM_SIZE) {
+			if (mem >= SIZE_APP_RAM) {
 				printf (ERR_CALL_RANGE);
 				return;
 			}
@@ -340,7 +332,7 @@ void sunyat_execute () {
 				printf (ERR_CALL_OVERFLOW);
 				return;
 			}
-			if (mem >= APP_RAM_SIZE) {
+			if (mem >= SIZE_APP_RAM) {
 				printf (ERR_CALL_RANGE);
 				return;
 			}
@@ -349,7 +341,7 @@ void sunyat_execute () {
 			sunyat_regs [REG_PC] = mem;
 			break;
 		case OPCODE_RET:
-			if (sunyat_regs [REG_SP] >= APP_RAM_SIZE)
+			if (sunyat_regs [REG_SP] >= SIZE_APP_RAM)
 				return;
 			sunyat_regs [REG_PC] = sunyat_ram [sunyat_regs [REG_SP]];
 			sunyat_regs [REG_SP]++;
@@ -378,13 +370,15 @@ void sunyat_execute () {
 			sunyat_regs [dreg] = sunyat_regs [dreg] ^ imm;
 			set_flags (sunyat_regs [dreg]);
 			break;
+	/*	OPCODE_SUB_RI + OPCODE_NEG_R were removed to make room for OPCODE_SWR + AWR (windowing)
 		case OPCODE_NEG_R:
 			sunyat_regs [dreg] = -(signed char)(sunyat_regs [dreg]);
 			set_flags (sunyat_regs [dreg]);
 			break;
+	*/		
 		case OPCODE_LOAD_RM:
-			if (mem < APP_RAM_SIZE)
-				sunyat_regs [dreg] = sunyat_ram [mem];
+			if (mem < SIZE_APP_RAM)
+				sunyat_regs [dreg] = sunyat_ram [mem];	
 			else if (mem == APP_KEYBOARD)
 				if(!linefeed_buffered)
 				{
@@ -406,8 +400,8 @@ void sunyat_execute () {
 			}
 			break;
 		case OPCODE_LOADP_RR:
-			if (sunyat_regs [sreg] < APP_RAM_SIZE)
-				sunyat_regs [dreg] = sunyat_ram [sunyat_regs [sreg]];
+			if (sunyat_regs [sreg] < SIZE_APP_RAM)
+				sunyat_regs [dreg] = sunyat_ram [sunyat_regs [sreg]];	
 			else if (sunyat_ram [sunyat_regs [sreg]] == APP_KEYBOARD)
 				if(!linefeed_buffered)
 				{
@@ -429,8 +423,8 @@ void sunyat_execute () {
 			}
 			break;
 		case OPCODE_STOR_MR:
-			if (mem < APP_RAM_SIZE)
-				sunyat_ram [mem] = sunyat_regs [dreg]; //yes, dreg is correct for this one
+			if (mem < SIZE_APP_RAM)
+				sunyat_ram [mem] = sunyat_regs [dreg]; //yes, dreg is correct for this one	
 			else if (mem == APP_SCREEN) {
 				printf ("%c", sunyat_regs [dreg]);
 				fflush (stdout);
@@ -441,7 +435,7 @@ void sunyat_execute () {
 			}
 			break;
 		case OPCODE_STORP_RR:
-			if (sunyat_regs [dreg] < APP_RAM_SIZE)
+			if (sunyat_regs [dreg] < SIZE_APP_RAM)
 				sunyat_ram [sunyat_regs [dreg]] = sunyat_regs [sreg];
 			else if (sunyat_regs [dreg] == APP_SCREEN) {
 				printf ("%c", sunyat_regs [sreg]);
@@ -462,20 +456,36 @@ void sunyat_execute () {
 			sunyat_ram [sunyat_regs [REG_SP]] = sunyat_regs [dreg]; //yes, dreg is correct for this one
 			break;
 		case OPCODE_POP_R:
-			if (sunyat_regs [REG_SP] >= APP_RAM_SIZE) {
+			if (sunyat_regs [REG_SP] >= SIZE_APP_RAM) {
 				printf (ERR_POP);
 				return;
 			}
 			sunyat_regs [dreg] = sunyat_ram [sunyat_regs [REG_SP]];
 			sunyat_regs [REG_SP]++;
 			break;
-        case OPCODE_SWR:
-            sunyat_regs [win_point_pos] = imm & ~(~0<<4) ;
-            break ;
+		
+		//Windowing opcodes
+		case OPCODE_SWR:
+			{
+				if (imm>29)
+				{
+					printf(ERR_WINDOW_RANGE);
+					break;
+				}
+				sunyat_regs[REG_WIN] = imm & ~(~0<<5);
+			}
+		case OPCODE_AWR:
+		{
+			sunyat_regs[REG_WIN] = sunyat_regs[REG_WIN + imm & ~(~0<<5)];
+			break;
+		}
+
+		
+
 		default:
 			// This should be impossible since every opcode is accounted for
 			printf (ERR_IMPOSSIBLE_INSTRUCTION);
-			printf ("opcode = %d\n", opcode);
+			printf ("opcode = %d\n", opcode);   
 			return;
 			break;
 		}
@@ -496,7 +506,7 @@ unsigned char get_sreg () {
 }
 
 unsigned char get_mem () {
-	return sunyat_regs [REG_IRL];
+	return sunyat_regs [REG_IRL]; 
 }
 
 signed char get_imm () {
@@ -517,3 +527,4 @@ void set_flags (signed char result) {
 		sunyat_flag_sign = 1;
 	}
 }
+

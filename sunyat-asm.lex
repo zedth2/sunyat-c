@@ -117,13 +117,16 @@ ret	{ pack_token (&T); Parse (parser, TOKEN_RET, T); }
 and	{ pack_token (&T); Parse (parser, TOKEN_AND, T); }
 or	{ pack_token (&T); Parse (parser, TOKEN_OR, T); }
 xor	{ pack_token (&T); Parse (parser, TOKEN_XOR, T); }
-neg	{ pack_token (&T); Parse (parser, TOKEN_NEG, T); }
+//neg	{ pack_token (&T); Parse (parser, TOKEN_NEG, T); } //OPCODE_SUB_RI + OPCODE_NEG_R were removed to make room for OPCODE_SWR + AWR (windowing)
 load	{ pack_token (&T); Parse (parser, TOKEN_LOAD, T); }
 loadp	{ pack_token (&T); Parse (parser, TOKEN_LOADP, T); }
 stor	{ pack_token (&T); Parse (parser, TOKEN_STOR, T); }
 storp	{ pack_token (&T); Parse (parser, TOKEN_STORP, T); }
 push	{ pack_token (&T); Parse (parser, TOKEN_PUSH, T); }
 pop	{ pack_token (&T); Parse (parser, TOKEN_POP, T); }
+
+swr{pack_token (&T); Parse (parser, TOKEN_SWR, T); }
+awr{pack_token (&T); Parse (parser, TOKEN_AWR, T); }
 
 \.(message|msg)[ \t]+.*	{
 	/* message for application */
