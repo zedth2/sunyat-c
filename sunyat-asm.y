@@ -396,6 +396,15 @@ code_line ::= SWR immediate(src).{
 	}
 }
 
+code_line ::= AWR immediate(src).{
+	if (assembler_pass == 2) {
+		high_opcode = OPCODE_AWR_I;
+		high_reg = 0 ; //dst.data;
+		low = (unsigned char)src.data & ~(~0<<5) ;
+		store_instruction ();
+	}
+}
+
 
 code_line ::= SUB REGISTER(dst) REGISTER(src).{
 	if (assembler_pass == 2) {

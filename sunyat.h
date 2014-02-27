@@ -49,6 +49,7 @@
 #define OPCODE_ADD_RI   3
 #define OPCODE_SUB_RR   4
 //#define OPCODE_SUB_RI 5 //OPCODE_SUB_RI + OPCODE_NEG_R were removed to make room for OPCODE_SWR + AWR (windowing)
+#define OPCODE_SWR_I    5
 #define OPCODE_MUL_RR   5
 #define OPCODE_MUL_RI   6
 #define OPCODE_DIV_RR   7
@@ -70,6 +71,7 @@
 #define OPCODE_XOR_RR   22
 #define OPCODE_XOR_RI   23
 //#define OPCODE_NEG_R  25 //OPCODE_SUB_RI + OPCODE_NEG_R were removed to make room for OPCODE_SWR + AWR (windowing)
+#define OPCODE_AWR_I    25
 #define OPCODE_LOAD_RM  24
 #define OPCODE_LOADP_RR 25
 #define OPCODE_STOR_MR  26
