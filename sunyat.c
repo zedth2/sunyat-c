@@ -217,8 +217,8 @@ void sunyat_execute () {
 		 * DECODE
 		 */
 		opcode = get_opcode ();
-		sreg = get_sreg ();
-		dreg = get_dreg ();
+		sreg = get_sreg () + sunyat_regs [REG_WIN]; //This should be all we need for the offset of the window.
+		dreg = get_dreg () + sunyat_regs [REG_WIN];
 		mem = get_mem ();
 		imm = get_imm ();
 
@@ -242,12 +242,12 @@ void sunyat_execute () {
 			sunyat_regs [dreg] = sunyat_regs [dreg] + imm;
 			set_flags (sunyat_regs [dreg]);
 			break;
-		case OPCODE_SUB_RR:
+	/*	case OPCODE_SUB_RR:
 			// this should work on signed values as well
 			sunyat_regs [dreg] = sunyat_regs [dreg] - sunyat_regs [sreg];
 			set_flags (sunyat_regs [dreg]);
 			break;
-    /*	OPCODE_SUB_RI + OPCODE_NEG_R were removed to make room for OPCODE_SWR + AWR (windowing)
+    	OPCODE_SUB_RI + OPCODE_NEG_R were removed to make room for OPCODE_SWR + AWR (windowing)
 		case OPCODE_SUB_RI:
 			// this should work on signed values as well
 			sunyat_regs [dreg] = sunyat_regs [dreg] - imm;
@@ -527,4 +527,3 @@ void set_flags (signed char result) {
 		sunyat_flag_sign = 1;
 	}
 }
-
