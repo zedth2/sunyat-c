@@ -220,6 +220,7 @@ void sunyat_execute () {
 		opcode = get_opcode ();
 		sreg = get_sreg () + sunyat_regs [REG_WIN]; //This should be all we need for the offset of the window.
 		dreg = get_dreg () + sunyat_regs [REG_WIN];
+        //printf("Accessing %d and des to %d \n", sreg, dreg) ;
 		mem = get_mem ();
 		imm = get_imm ();
 
@@ -468,6 +469,7 @@ void sunyat_execute () {
 		//Windowing opcodes
 		case OPCODE_SWR_I:
 			{
+                //printf("CHnaging swr %d \n", imm + REG_GEN_START) ;
 				if (imm > MAX_WIN_INDEX)
 				{
 					printf(ERR_WINDOW_RANGE);
