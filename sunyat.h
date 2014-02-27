@@ -38,6 +38,8 @@
 #define SIZE_WIN 8
 #define SIZE_REG 38
 
+#define NUM_SYS_REG 5 //Number of system registers (0-4) used for referencing GPRs starting at 0.
+
 #define SIZE_APP_ROM    (SIZE_APP_MSG + SIZE_APP_RAM)   //APP_ROM_SIZE (APP_MSG_SIZE + APP_RAM_SIZE)
 #define APP_KEYBOARD    0xFE
 #define APP_SCREEN      0xFF
@@ -49,7 +51,6 @@
 #define OPCODE_ADD_RI   3
 #define OPCODE_SUB_RR   4
 //#define OPCODE_SUB_RI 5 //OPCODE_SUB_RI + OPCODE_NEG_R were removed to make room for OPCODE_SWR + AWR (windowing)
-#define OPCODE_SWR_I    5
 #define OPCODE_MUL_RR   5
 #define OPCODE_MUL_RI   6
 #define OPCODE_DIV_RR   7
@@ -66,12 +67,10 @@
 #define OPCODE_AND_RR   18
 #define OPCODE_AND_RI   19
 #define OPCODE_OR_RR    20
-	
 #define OPCODE_OR_RI    21
 #define OPCODE_XOR_RR   22
 #define OPCODE_XOR_RI   23
 //#define OPCODE_NEG_R  25 //OPCODE_SUB_RI + OPCODE_NEG_R were removed to make room for OPCODE_SWR + AWR (windowing)
-#define OPCODE_AWR_I    25
 #define OPCODE_LOAD_RM  24
 #define OPCODE_LOADP_RR 25
 #define OPCODE_STOR_MR  26
@@ -79,7 +78,7 @@
 #define OPCODE_PUSH_R   28
 #define OPCODE_POP_R    29
 
-#define OPCODE_SWR      30
-#define OPCODE_AWR		31
+#define OPCODE_SWR_I	30
+#define OPCODE_AWR_I	31
 
 #endif /* _SUNYAT_H_ */

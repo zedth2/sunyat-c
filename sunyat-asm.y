@@ -417,7 +417,7 @@ code_line ::= SUB REGISTER(dst) REGISTER(src).{
 
     //OPCODE_SUB_RI + OPCODE_NEG_R were removed to make room for OPCODE_SWR + AWR (windowing)
 	// They were put back in as pseudo-instructions at a later point.
-code_line ::= SUB REGISTER(dst) immediate(src).{
+code_line ::= SUB REGISTER(dst) immediate(src).{ //THIS IS A PSEUDO-INSTRUCTION
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_ADD_RI;
 		high_reg = dst.data;

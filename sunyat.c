@@ -424,7 +424,7 @@ void sunyat_execute () {
 			break;
 		case OPCODE_STOR_MR:
 			if (mem < SIZE_APP_RAM)
-				sunyat_ram [mem] = sunyat_regs [dreg]; //yes, dreg is correct for this one	
+				sunyat_ram [mem] = sunyat_regs [dreg]; //yes, dreg is correct for this one
 			else if (mem == APP_SCREEN) {
 				printf ("%c", sunyat_regs [dreg]);
 				fflush (stdout);
@@ -470,13 +470,16 @@ void sunyat_execute () {
 				if (imm>29)
 				{
 					printf(ERR_WINDOW_RANGE);
-					break;
 				}
-				sunyat_regs[REG_WIN] = imm & ~(~0<<5);
+				sunyat_regs[REG_WIN] = (imm & ~(~0<<5)) + NUM_SYS_REG;
+				break;
 			}
 		case OPCODE_AWR:
 		{
-			sunyat_regs[REG_WIN] = sunyat_regs[REG_WIN + imm & ~(~0<<5)];
+			if ((sunyat_regs[REG_WIN] = sunyat_regs[REG_WIN] + imm & ~(~0<<5))>29
+			{
+				printf(ERR_WINDOW_RANGE);
+			}
 			break;
 		}
 
