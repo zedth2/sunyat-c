@@ -387,11 +387,21 @@ code_line ::= ADD REGISTER(dst) immediate(src).{
 	}
 }
 
+code_line ::= SWR immediate(src).{
+	if (assembler_pass == 2) {
+		high_opcode = OPCODE_SWR_I;
+		high_reg = 0 ; //dst.data;
+		low = (unsigned char)src.data & ~(~0<<5) ;
+		store_instruction ();
+	}
+}
+
+
 code_line ::= SUB REGISTER(dst) REGISTER(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_ADD_RR;
 		high_reg = dst.data;
-		low = -1*(unsigned char)src.data;
+		low = (unsigned char)(-src.data);
 		store_instruction ();
 	}
 }
@@ -402,7 +412,7 @@ code_line ::= SUB REGISTER(dst) immediate(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_ADD_RI;
 		high_reg = dst.data;
-		low = -1*(unsigned char)src.data;
+		low = (unsigned char)(-src.data);
 		store_instruction ();
 	}
 }
