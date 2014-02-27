@@ -40,8 +40,8 @@
 	unsigned char high_reg;
 	unsigned char low;
 
-	unsigned char msg_data [APP_MSG_SIZE];
-	unsigned char ram_data [APP_RAM_SIZE];
+	unsigned char msg_data [SIZE_APP_MSG];
+	unsigned char ram_data [SIZE_APP_RAM];
 	unsigned char address = 0;
 	
 	char *variables [MAX_CNT];
@@ -163,8 +163,8 @@ program ::= lines. {
 				fprintf (stderr, "Error - could not open output file for writing.\n");
 			}
 			else {
-				fwrite (msg_data, sizeof (char), APP_MSG_SIZE, outfile);
-				fwrite (ram_data, sizeof (char), APP_RAM_SIZE, outfile);
+				fwrite (msg_data, sizeof (char), SIZE_APP_MSG, outfile);
+				fwrite (ram_data, sizeof (char), SIZE_APP_RAM, outfile);
 				fclose (outfile);
 			}
 		}
@@ -195,16 +195,16 @@ message_line ::= MESSAGE(msg).	{
 			
 			warning (msg, ".MESSAGE string is empty... ignoring.", NULL);
 		}
-		else if (strlen (msg.token_str) > APP_MSG_SIZE) {
+		else if (strlen (msg.token_str) > SIZE_APP_MSG) {
 			char s[100];
-			sprintf (s, ".MESSAGE string longer than %d characters.", APP_MSG_SIZE);
+			sprintf (s, ".MESSAGE string longer than %d characters.", SIZE_APP_MSG);
 			warning (msg, s, NULL);
-			memcpy (msg_data, msg.token_str, APP_MSG_SIZE);
+			memcpy (msg_data, msg.token_str, SIZE_APP_MSG);
 		}
 		else {
 			int i;
 			memcpy (msg_data, msg.token_str, strlen (msg.token_str));
-			for (i = strlen (msg.token_str); i < APP_MSG_SIZE; i++) {
+			for (i = strlen (msg.token_str); i < SIZE_APP_MSG; i++) {
 				msg_data [i] = '\0';
 			}
 		}
@@ -212,7 +212,7 @@ message_line ::= MESSAGE(msg).	{
 }
 
 address_line ::= ADDR_DIRECTIVE immediate(immed).	{
-	if ((unsigned char)immed.data >= APP_RAM_SIZE) {
+	if ((unsigned char)immed.data >= SIZE_APP_RAM) {
 		if (assembler_pass == 1) {
 			warning (immed, ".ADDRESS must be no grater than 253 (inclusive)... ignoring", NULL);
 		}
@@ -397,6 +397,7 @@ code_line ::= SUB REGISTER(dst) REGISTER(src).{
 }
 
     //OPCODE_SUB_RI + OPCODE_NEG_R were removed to make room for OPCODE_SWR + AWR (windowing)
+	// They were put back in as pseudo-instructions at a later point.
 code_line ::= SUB REGISTER(dst) immediate(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_ADD_RI;
@@ -588,7 +589,8 @@ code_line ::= NOT REGISTER(dst).{
 }
 
 // OPCODE_SUB_RI + OPCODE_NEG_R were removed to make room for OPCODE_SWR + AWR (windowing)
-code_line ::= NEG REGISTER(dst).{
+// They were put back in as pseudo-instructions at a later point.
+code_line ::= NEG REGISTER(dst).{ //THIS IS A PSEUDO-INSTRUCTION
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_MUL_RI;
 		high_reg = dst.data;

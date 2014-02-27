@@ -36,7 +36,7 @@
 #define REG_SP  4
 
 #define SIZE_WIN 8
-#define SIZE_REG 38h
+#define SIZE_REG 38
 
 #define SIZE_APP_ROM    (SIZE_APP_MSG + SIZE_APP_RAM)   //APP_ROM_SIZE (APP_MSG_SIZE + APP_RAM_SIZE)
 #define APP_KEYBOARD    0xFE
