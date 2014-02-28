@@ -48,8 +48,10 @@
 #define NUM_SYS_REG 5 //Number of system registers (0-4) used for referencing GPRs starting at 0.
 
 #define SIZE_APP_ROM    (SIZE_APP_MSG + SIZE_APP_RAM)   //APP_ROM_SIZE (APP_MSG_SIZE + APP_RAM_SIZE)
-#define APP_KEYBOARD    0xFE
-#define APP_SCREEN      0xFF
+//#define APP_KEYBOARD    0xFE
+//#define APP_SCREEN      0xFF
+#define APP_KEYBOARD    0xFF  /* 0 if no key, key code otherwise */
+#define APP_CHARACTER   0xFE  /* write and adjust cursor, read at cursor */
 
 //opcodes 
 #define OPCODE_MOV_RR   0

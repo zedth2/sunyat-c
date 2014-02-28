@@ -46,6 +46,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <ctype.h>
+#include <time.h>
+
+#include <ncurses.h> 
 
 #include "sunyat.h"
 
@@ -55,6 +59,18 @@ const char MSG_STARTUP [] =
 	"\nThe SUNYAT Virtual Machine version 0x0 - (C) 2008, William \"Amos\" Confer\n\nLoading application: %s\n\n";
 const char MSG_BAR [] =
 	"----------------------------------------";
+const char ERR_NCURSES_INIT [] =
+	"\tCould not initialize ncurses\n";
+const char ERR_NCURSES_CBREAK [] =
+	"\tCould not disable character buffering\n";
+const char ERR_NCURSES_NODELAY [] =
+	"\tCould not disable blocking on \"getch\"\n";
+const char ERR_NCURSES_NOECHO [] =
+	"\tCould not disable echo\n";
+const char ERR_NCURSES_KEYPAD [] =
+	"\tCould not enable keypad usage\n";
+const char ERR_NCURSES_CURSOR [] =
+	"\tCould not modify cursor\n";
 
 const char ERR_NO_APP [] =
 	"\tNo application provided...  SUNYAT <filename>\n";
@@ -87,6 +103,11 @@ const char ERR_CALL_RANGE [] =
 const char ERR_WINDOW_RANGE []=
 	"\tWindow position out of range. (Acceptable Values: 0-29)\n";
 //////////////////////////////////////////////////
+#define MIN_TERMINAL_WIDTH  80
+#define MIN_TERMINAL_HEIGHT 24
+#define TAB_SIZE            4
+
+#define STARTUP_PAUSE       3
 
 char app_msg [SIZE_APP_MSG + 1];	/* +1 is to add a guaranteed null terminator */
 
@@ -115,11 +136,18 @@ unsigned char sunyat_regs [SIZE_REG] = {
 int sunyat_flag_zero = 0;
 int sunyat_flag_sign = 0;
 
+int cursor_row = 0;
+int cursor_col = 0;
+
+
 bool linefeed_buffered = false;
 
 long int sunyat_clock_ticks = 0;
 
 //////////////////////////////////////////////////
+int setup_terminal();
+
+void sunyat_execute ();
 
 unsigned char get_opcode ();
 unsigned char get_dreg ();
@@ -129,11 +157,11 @@ signed char get_imm ();
 
 void set_flags (signed char result);
 
-void sunyat_execute ();
 
 //////////////////////////////////////////////////
 
 int main (int argc, char *argv []) {
+	clock_t clock_start = clock();
 	printf (MSG_STARTUP, argv [1]);
 
 	// check for application parameter
@@ -182,13 +210,65 @@ int main (int argc, char *argv []) {
 		memcpy (sunyat_ram, file_buffer + SIZE_APP_MSG, SIZE_APP_RAM);
 
 		// fetch->decode->exceute until returned beyond RAM
-		sunyat_execute ();
+		//sunyat_execute ();
+// pause to let user see application info
+	while ((clock () - clock_start) / CLOCKS_PER_SEC < 3);
 
+	// get the ncurses terminal going
+	if (-1 == setup_terminal ()) {
+		return EXIT_FAILURE;
+	}
 		printf ("\n\nSUNYAT exited after %ld clock cycles\n\n", sunyat_clock_ticks);
 	}
+	// fetch->decode->exceute until returned beyond RAM
+	sunyat_execute ();
+
+	// pause to let user see completed application output
+	clock_start = clock();
+	while ((clock () - clock_start) / CLOCKS_PER_SEC < 3);
+
+	// close the ncurses terminal
+	endwin ();
+
+	printf ("\n\nSUNYAT exited after %llu clock cycles\n\n", sunyat_clock_ticks);
 
 	return EXIT_SUCCESS;
 }
+
+int setup_terminal () {
+	if (NULL == initscr ()) {
+		printf (ERR_NCURSES_INIT);
+		return -1;
+	}
+
+	if (ERR == cbreak ()) {
+		printf (ERR_NCURSES_CBREAK);
+		return -1;		
+	}
+
+	if (ERR == noecho ()) {
+		printf (ERR_NCURSES_NOECHO);
+		return -1;		
+	}
+
+	if (ERR == nodelay (stdscr, true)) {
+		printf (ERR_NCURSES_NODELAY);
+		return -1;		
+	}
+
+	if (ERR == keypad (stdscr, true)) {
+		printf (ERR_NCURSES_KEYPAD);
+		return -1;		
+	}
+
+	if (ERR == curs_set (1)) {
+		printf (ERR_NCURSES_CURSOR);
+		return -1;		
+	}
+
+	return 0;
+}
+
 
 void sunyat_execute () {
 	for (;;) {
@@ -198,6 +278,31 @@ void sunyat_execute () {
 		unsigned char mem;
 		signed char imm;
 		unsigned char cmp_result;
+
+		int current_width;
+		int current_height;
+
+		getmaxyx (stdscr, current_height, current_width);
+
+		if (current_width < MIN_TERMINAL_WIDTH || current_height < MIN_TERMINAL_HEIGHT) {
+			int x;
+			int y;
+			for (y = 0; y < current_height; y++) {
+				for (x = 0; x < current_width; x++) {
+					mvprintw (y, x, "@");
+				}			
+			}
+			int cx = current_width  / 2;
+			int cy = current_height / 2;
+
+			mvprintw(cy-1, cx-10, "                    ");
+			mvprintw(  cy, cx-10, "  Window too small  ");
+			mvprintw(cy+1, cx-10, " resize to >= 80x24 ");
+			mvprintw(cy+2, cx-10, "                    ");
+			refresh();
+			continue;
+		}
+
 
 		sunyat_clock_ticks++;
 
@@ -384,11 +489,20 @@ void sunyat_execute () {
 			else if (mem == APP_KEYBOARD)
 				if(!linefeed_buffered)
 				{
-					scanf ("%c", & sunyat_regs [dreg]);
-					if(sunyat_regs [dreg] == '\n')
+					sunyat_regs [dreg] = getch ();
+					switch ((int) sunyat_regs [dreg])
 					{
+						case KEY_ENTER:
 						sunyat_regs [dreg] = (unsigned char) 0xD;
 						linefeed_buffered = true;
+						break;
+
+						case ERR:
+						sunyat_regs [dreg] = (unsigned char) 0;
+						break;
+
+						default:
+						break;
 					}
 				}
 				else
@@ -407,11 +521,20 @@ void sunyat_execute () {
 			else if (sunyat_ram [sunyat_regs [sreg]] == APP_KEYBOARD)
 				if(!linefeed_buffered)
 				{
-					scanf ("%c", & sunyat_regs [dreg]);
-					if(sunyat_regs [dreg] == '\n')
+					sunyat_regs [dreg] = getch ();
+					switch ((int) sunyat_regs [dreg])
 					{
+						case KEY_ENTER:
 						sunyat_regs [dreg] = (unsigned char) 0xD;
 						linefeed_buffered = true;
+						break;
+
+						case ERR:
+						sunyat_regs [dreg] = (unsigned char) 0;
+						break;
+
+						default:
+						break;
 					}
 				}
 				else
@@ -427,9 +550,37 @@ void sunyat_execute () {
 		case OPCODE_STOR_MR:
 			if (mem < SIZE_APP_RAM)
 				sunyat_ram [mem] = sunyat_regs [dreg]; //yes, dreg is correct for this one
-			else if (mem == APP_SCREEN) {
-				printf ("%c", sunyat_regs [dreg]);
-				fflush (stdout);
+			else if (mem == APP_CHARACTER) {
+				char c = sunyat_regs [dreg];
+				switch (c) {
+				case 0x9: //horizontal tab
+					cursor_col += TAB_SIZE - (cursor_col % TAB_SIZE);
+					if (cursor_col >= MIN_TERMINAL_WIDTH) {
+						cursor_col = 0;
+						cursor_row = (cursor_row + 1) % MIN_TERMINAL_HEIGHT;
+					}
+					break;
+				case 0xD: // carriage return
+					cursor_col = 0;
+					break;
+				case 0xA: // line feed
+					cursor_row = (cursor_row + 1) % MIN_TERMINAL_HEIGHT;
+					break;	
+				default:
+					if (isprint (c)) {
+						printw ("%c", c);
+						cursor_col++;
+						if (cursor_col >= MIN_TERMINAL_WIDTH) {
+							cursor_col = 0;
+							cursor_row = (cursor_row + 1) % MIN_TERMINAL_HEIGHT;
+						}
+					}
+					else {
+						printw ("<0x%02X>", c);
+					}
+				}
+				mvprintw (cursor_row, cursor_col, "");
+				refresh ();
 			}
 			else {
 				printf (ERR_STOR);
@@ -439,14 +590,38 @@ void sunyat_execute () {
 		case OPCODE_STORP_RR:
 			if (sunyat_regs [dreg] < SIZE_APP_RAM)
 				sunyat_ram [sunyat_regs [dreg]] = sunyat_regs [sreg];
-			else if (sunyat_regs [dreg] == APP_SCREEN) {
-				printf ("%c", sunyat_regs [sreg]);
-				fflush (stdout);
-			}
-			else {
-				printf (ERR_STOR);
-				return;
-			}
+			else if (sunyat_regs [dreg] == APP_CHARACTER) {
+				char c = sunyat_regs [dreg];
+				switch (c) {
+				case 0x9: //horizontal tab
+					cursor_col += TAB_SIZE - (cursor_col % TAB_SIZE);
+					if (cursor_col >= MIN_TERMINAL_WIDTH) {
+						cursor_col = 0;
+						cursor_row = (cursor_row + 1) % MIN_TERMINAL_HEIGHT;
+					}
+					break;
+				case 0xD: // carriage return
+					cursor_col = 0;
+					break;
+				case 0xA: // line feed
+					cursor_row = (cursor_row + 1) % MIN_TERMINAL_HEIGHT;
+					break;	
+				default:
+					if (isprint (c)) {
+						printw ("%c", c);
+						cursor_col++;
+						if (cursor_col >= MIN_TERMINAL_WIDTH) {
+							cursor_col = 0;
+							cursor_row = (cursor_row + 1) % MIN_TERMINAL_HEIGHT;
+						}
+					}
+					else {
+						printw ("<0x%02X>", c);
+					}
+					refresh ();
+				}
+				mvprintw (cursor_row, cursor_col, "");
+				refresh ();
 			break;
 		case OPCODE_PUSH_R:
 			if (sunyat_regs [REG_SP] <= 0)
@@ -498,7 +673,7 @@ void sunyat_execute () {
 
 	}
 }
-
+}
 unsigned char get_opcode () {
 	return sunyat_regs [REG_IRH] >> 3; // top 5 bits are opcode
 }

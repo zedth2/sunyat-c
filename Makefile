@@ -27,7 +27,7 @@ all:	sunyat sunyat-asm example
 # sunyat
 #----------------------------------------
 sunyat:	sunyat.c sunyat.h build_number.h
-	gcc -o sunyat sunyat.c
+	gcc -o sunyat sunyat.c  -lncurses
 
 #----------------------------------------
 # sunyat-asm
@@ -66,4 +66,3 @@ example.rom: sunyat-asm example.asm build_number.h
 #----------------------------------------
 clean:
 	rm -f sunyat sunyat-asm lemon lex.yy.c sunyat-asm.c sunyat-asm.h sunyat-asm.out example.rom build_number
-
