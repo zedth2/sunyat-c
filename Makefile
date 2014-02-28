@@ -21,7 +21,9 @@
 #    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
 #    DEALINGS IN THE SOFTWARE.
 
-all:	sunyat sunyat-asm windowtest
+all:	sunyat sunyat-asm 
+
+#windowtest
 
 #----------------------------------------
 # sunyat
@@ -53,16 +55,19 @@ next_build_number:
 
 
 #----------------------------------------
-# windowtest
+# Run on make
 #----------------------------------------
-windowtest: sunyat windowtest.rom build_number.h
-	./sunyat windowtest.rom
 
-windowtest.rom: sunyat-asm windowtest.asm build_number.h
-	./sunyat-asm windowtest.asm	
+#windowtest: sunyat windowtest.rom build_number.h
+#	./sunyat windowtest.rom
+#
+#windowtest.rom: sunyat-asm windowtest.asm build_number.h
+#	./sunyat-asm windowtest.asm	
+
 
 #----------------------------------------
 # clean
 #----------------------------------------
 clean:
-	rm -f sunyat sunyat-asm lemon lex.yy.c sunyat-asm.c sunyat-asm.h sunyat-asm.out windowtest.rom build_number
+	rm -f sunyat sunyat-asm lemon lex.yy.c sunyat-asm.c sunyat-asm.h sunyat-asm.out build_number
+#windowtest.rom

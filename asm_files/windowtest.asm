@@ -5,18 +5,39 @@
 .constant	CR	0xD
 .constant	LF	0xA
 
+;.variable	key
+
 	jmp	!main
 
 !main
-
-;WINDOW 05 - 12-------------------------------------------------------
-	mov R0 'S'
-	mov R1 't'
-	mov R2 'a'
-	mov R3 'r'
-	mov R4 't'
-
+	call !print_registers
+	
 !main_end
+
+;!get_data
+;!do_collect
+;	call	!read_letter
+;	mov	R0	R1
+;	awr	1
+;!do_collect_while
+;	cmp R1 '.'
+;	jeq	!do_collect
+;!do_collect_end
+;!get_data_end
+
+
+;!read_letter	; (RL)
+;	push	R1
+;!do_RL
+;	load	R1	KEYB
+;!do_RL_while
+;	cmp	R1	'z'
+;	jgr	!do_RL
+;!do_RL_end
+;	stor	key	R1
+;	pop	R1
+;	ret
+;!read_letter_end
 
 
 !print_registers
