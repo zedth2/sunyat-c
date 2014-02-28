@@ -126,11 +126,10 @@ unsigned char sunyat_ram [SIZE_APP_RAM];
 unsigned char sunyat_regs [SIZE_REG] = {
 	0, 0, 0, 5,                             /* REG_PC, REG_IRH, REG_IRL, REG_SP */
 	SIZE_APP_RAM,                            /* stack grows down from top of RAM */
-	'1', '0', '2', '0', '2', '0', '0', '7', /* GPRS no longer default to Amos' wedding date */
-	'1', '0', '2', '0', '2', '0', '0', '7', /* GPRS no longer default to Amos' wedding date */
-	'1', '0', '2', '0', '2', '0', '0', '7', /* GPRS no longer default to Amos' wedding date */
-	'1', '0', '2', '0', '2', '0', '0', '7', /* GPRS no longer default to Amos' wedding date */
-    //'1', '0', '2', '0', '2', '0', '0', '7' /* GPRS no longer default to Amos' wedding date */
+	'0', '0', '0', '0', '0', '0', '0', '0', /* GPRS no longer default to Amos' wedding date */
+	'0', '0', '0', '0', '0', '0', '0', '0', /* GPRS no longer default to Amos' wedding date */
+	'0', '0', '0', '0', '0', '0', '0', '0', /* GPRS no longer default to Amos' wedding date */
+	'0', '0', '0', '0', '0', '0', '0', '0', /* GPRS no longer default to Amos' wedding date */
 };
 
 int sunyat_flag_zero = 0;
