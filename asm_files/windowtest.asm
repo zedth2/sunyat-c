@@ -1,6 +1,6 @@
 	
-.constant	SCREEN	0xFF
-.constant	KEYB	0xFE
+.constant	SCREEN	0xFE
+.constant	KEYB	0xFF
 
 .constant	CR	0xD
 .constant	LF	0xA
@@ -10,33 +10,55 @@
 !main
 
 ;WINDOW 05 - 12-------------------------------------------------------
-	awr 3
-;WINDOW 08 - 15-------------------------------------------------R8=111
-	mov	R0	7
-	awr	8
-;WINDOW 16 - 23------------------------------------------------R15=111
-	mov	R0	7
-	awr	8
-;WINDOW 24 - 31------------------------------------------------R24=111
-	mov R0	7
-	swr	3
+	mov R0 'S'
+	mov R1 't'
+	mov R2 'a'
+	mov R3 'r'
+	mov R4 't'
+
+!main_end
+
+
+!print_registers
+	swr 0
 ;WINDOW 05 - 12-------------------------------------------------------
+	stor SCREEN R0 ;0
+	stor SCREEN R1 ;1
+	stor SCREEN R2 ;2
+	stor SCREEN R3 ;3
+	stor SCREEN R4 ;4
+	stor SCREEN R5 ;5
+	stor SCREEN R6 ;6
+	stor SCREEN R7 ;7
+	awr 8
+;WINDOW 13 - 20-------------------------------------------------------
 	stor SCREEN R0 ;8
-	awr 1
-	stor SCREEN R0 ;9
-	awr 1
-	stor SCREEN R0 ;10
-	awr 1
-	stor SCREEN R0 ;11
-	awr 1
-	stor SCREEN R0 ;12
-	awr 1
-	stor SCREEN R0 ;13
-	awr 1
-	stor SCREEN R0 ;14
-	awr 1
-	stor SCREEN R0 ;15
-	awr 1
+	stor SCREEN R1 ;9
+	stor SCREEN R2 ;10
+	stor SCREEN R3 ;11
+	stor SCREEN R4 ;12
+	stor SCREEN R5 ;13
+	stor SCREEN R6 ;14
+	stor SCREEN R7 ;15
+	awr 8
+;WINDOW 21 - 28-------------------------------------------------------
 	stor SCREEN R0 ;16
+	stor SCREEN R1 ;17
+	stor SCREEN R2 ;18
+	stor SCREEN R3 ;19
+	stor SCREEN R4 ;20
+	stor SCREEN R5 ;21
+	stor SCREEN R6 ;22
+	stor SCREEN R7 ;23
+	awr 8
+;WINDOW 29 - 36-------------------------------------------------------
+	stor SCREEN R0 ;24
+	stor SCREEN R1 ;25
+	stor SCREEN R2 ;26
+	stor SCREEN R3 ;27
+	stor SCREEN R4 ;28
+	stor SCREEN R5 ;29
+	stor SCREEN R6 ;30
+	stor SCREEN R7 ;31
 	
-	!main_end
+!print_registers_end
