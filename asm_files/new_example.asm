@@ -1,25 +1,25 @@
 ;-----------------------------------------------
 ; Name        : example.asm
 ; Author      : William "Amos" Confer
-;
+; 
 ; License     : Copyright (c) 2008--2014 William "Amos" Confer
-;
-;    Permission is hereby granted, free of charge, to any person obtaining a
+;               
+;    Permission is hereby granted, free of charge, to any person obtaining a 
 ;    copy of this software and associated documentation files (the "Software"),
 ;    to deal in the Software without restriction, including without limitation
-;    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+;    the rights to use, copy, modify, merge, publish, distribute, sublicense, 
 ;    and/or sell copies of the Software, and to permit persons to whom the
 ;    Software is furnished to do so, subject to the following conditions:
 ;
 ;    The above copyright notice and this permission notice shall be included in
-;    all copies or substantial portions of the Software.;
+;    all copies or substantial portions of the Software.;  
 ;
 ;    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 ;    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-;    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+;    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
 ;    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-;    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-;    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+;    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+;    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
 ;    DEALINGS IN THE SOFTWARE.
 ;
 ; This application prints "Hello, world" and prompts for two lowercase letters.
@@ -32,8 +32,7 @@
 
 .message	"Hello, world" and nifty alphabet
 
-.constant	KEYB	0xFF
-.constant	SCREEN	0xFE
+.constant	TERM	0xFF
 
 .constant	CR	0xD
 .constant	LF	0xA
@@ -111,7 +110,7 @@
 	call	!print_string
 	mov	R7	!crlf
 	call	!print_string
-
+	
 	mov	R7	!one
 	call	!print_string
 	mov	R7	!prompt
@@ -119,7 +118,7 @@
 
 	call	!read_letter
 	load	R0	key
-	stor	SCREEN	R0
+	stor	TERM	R0
 	mov	R7	!crlf
 	call	!print_string
 
@@ -130,7 +129,7 @@
 
 	call	!read_letter
 	load	R1	key
-	stor	SCREEN	R1
+	stor	TERM	R1
 	mov	R7	!crlf
 	call	!print_string
 
@@ -138,7 +137,7 @@
 	call !print_string
 
 	mov	R2	'a'
-!ascii
+!ascii		
 	cmp	R2	R0
 	jne	!lower_R0
 	mov	R7	R2
@@ -151,8 +150,8 @@
 	call	!draw_uppercase
 	jmp	!ascii_test
 
-!lower_R1
-	stor	SCREEN	R2
+!lower_R1	
+	stor	TERM	R2	
 
 !ascii_test
 	add	R2	1
@@ -165,18 +164,18 @@
 !main_end
 
 ;------------------------------------------------------------------------------
-; print the character string pointed to by R7 (register 7) until the NULL
+; print the character string pointed to by R7 (register 7) until the NULL 
 ; character is found.
 ;------------------------------------------------------------------------------
 !print_string	; (PS)
-	push	R6
+	push	R6	
 	push	R7
 	;while (mem[R7] != 0) { print(mem[R7]); R7++ }
-!while_PS
+!while_PS	
 	loadp	R6	R7
 	cmp	R6	0
 	jeq	!while_PS_end
-	stor	SCREEN	R6
+	stor	TERM	R6
 	add	R7	1
 	jmp	!while_PS
 !while_PS_end
@@ -187,13 +186,13 @@
 
 
 ;------------------------------------------------------------------------------
-; swallow keystrokes until a lowercase letter is found.  Returns key in
+; swallow keystrokes until a lowercase letter is found.  Returns key in 
 ; the variable 'key'.
 ;------------------------------------------------------------------------------
 !read_letter	; (RL)
 	push	R0
 !do_RL
-	load	R0	KEYB
+	load	R0	TERM
 !do_RL_while
 	cmp	R0	'a'
 	jls	!do_RL
@@ -212,15 +211,16 @@
 !draw_uppercase
 	push	R6
 	push	R7
-
+		
 	mov	R6	' '
-	stor	SCREEN	R6
+	stor	TERM	R6
 	sub	R7	'a'
 	add	R7	'A'
-	stor	SCREEN	R7
-	stor	SCREEN	R6
+	stor	TERM	R7
+	stor	TERM	R6
 
 	pop	R7
 	pop	R6
 	ret
 !draw_uppercase_end
+

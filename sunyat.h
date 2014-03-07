@@ -26,6 +26,13 @@
 #ifndef _SUNYAT_H_
 #define _SUNYAT_H_
 
+/*
+ * On read:  0 if no key, key code otherwise
+ * On write: character output w/ cursor adjust
+ */
+#define IO_TERMINAL     0xFF
+
+
 #define SIZE_APP_MSG    70  //APP_MSG_SIZE
 #define SIZE_APP_RAM    254 //APP_RAM_SIZE
 
@@ -50,10 +57,10 @@
 #define SIZE_APP_ROM    (SIZE_APP_MSG + SIZE_APP_RAM)   //APP_ROM_SIZE (APP_MSG_SIZE + APP_RAM_SIZE)
 //#define APP_KEYBOARD    0xFE
 //#define APP_SCREEN      0xFF
-#define APP_KEYBOARD    0xFF  /* 0 if no key, key code otherwise */
-#define APP_CHARACTER   0xFE  /* write and adjust cursor, read at cursor */
+//#define APP_KEYBOARD    0xFF  /* 0 if no key, key code otherwise */
+//#define APP_CHARACTER   0xFE  /* write and adjust cursor, read at cursor */
 
-//opcodes 
+//opcodes
 #define OPCODE_MOV_RR   0
 #define OPCODE_MOV_RI   1
 #define OPCODE_ADD_RR   2

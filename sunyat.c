@@ -49,7 +49,16 @@
 #include <ctype.h>
 #include <time.h>
 
-#include <ncurses.h> 
+#include <curses.h>
+
+#ifndef true
+#define true TRUE
+#endif /* true */
+
+#ifndef false
+#define false FALSE
+#endif /* false */
+
 
 #include "sunyat.h"
 
@@ -59,6 +68,7 @@ const char MSG_STARTUP [] =
 	"\nThe SUNYAT Virtual Machine version 0x0 - (C) 2008, William \"Amos\" Confer\n\nLoading application: %s\n\n";
 const char MSG_BAR [] =
 	"----------------------------------------";
+
 const char ERR_NCURSES_INIT [] =
 	"\tCould not initialize ncurses\n";
 const char ERR_NCURSES_CBREAK [] =
@@ -80,6 +90,7 @@ const char ERR_BYTE_SIZE [] =
 	"\tApplication is not the correct byte size.\n";
 const char ERR_FILE_NOT_OPEN [] =
 	"\tApplication file could not be opened.\n";
+
 const char ERR_INVALID_PC [] =
 	"\tProgram counter is invalid\n";
 const char ERR_IMPOSSIBLE_INSTRUCTION [] =
@@ -102,10 +113,16 @@ const char ERR_CALL_RANGE [] =
 	"\tCALL instruction targets an out of range address\n";
 const char ERR_WINDOW_RANGE []=
 	"\tWindow position out of range. (Acceptable Values: 0-29)\n";
+
 //////////////////////////////////////////////////
-#define MIN_TERMINAL_WIDTH  80
-#define MIN_TERMINAL_HEIGHT 24
-#define TAB_SIZE            4
+
+//#define MIN_TERMINAL_WIDTH  80
+//#define MIN_TERMINAL_HEIGHT 24
+//#define TAB_SIZE            4
+
+#define TERMINAL_WIDTH  80
+#define TERMINAL_HEIGHT 24
+#define TAB_SIZE         4
 
 #define STARTUP_PAUSE       3
 
@@ -125,11 +142,11 @@ unsigned char sunyat_ram [SIZE_APP_RAM];
 
 unsigned char sunyat_regs [SIZE_REG] = {
 	0, 0, 0, 5,                             /* REG_PC, REG_IRH, REG_IRL, REG_SP */
-	SIZE_APP_RAM,                            /* stack grows down from top of RAM */
-	'0', '0', '0', '0', '0', '0', '0', '0', /* GPRS no longer default to Amos' wedding date */
-	'0', '0', '0', '0', '0', '0', '0', '0', /* GPRS no longer default to Amos' wedding date */
-	'0', '0', '0', '0', '0', '0', '0', '0', /* GPRS no longer default to Amos' wedding date */
-	'0', '0', '0', '0', '0', '0', '0', '0', /* GPRS no longer default to Amos' wedding date */
+	SIZE_APP_RAM,                           /* stack grows down from top of RAM */
+	'0', '1', '2', '3', '4', '5', '6', '7', /* GPRS no longer default to Amos' wedding date */
+	'8', '9', '0', '1', '2', '3', '4', '5', /* GPRS no longer default to Amos' wedding date */
+	'6', '7', '8', '9', '0', '1', '2', '3', /* GPRS no longer default to Amos' wedding date */
+	'4', '5', '6', '7', '8', '9', '0', '1', /* GPRS no longer default to Amos' wedding date */
 };
 
 int sunyat_flag_zero = 0;
@@ -138,13 +155,17 @@ int sunyat_flag_sign = 0;
 int cursor_row = 0;
 int cursor_col = 0;
 
+unsigned char terminal[TERMINAL_HEIGHT][TERMINAL_WIDTH + 1];
 
 bool linefeed_buffered = false;
 
 long int sunyat_clock_ticks = 0;
 
 //////////////////////////////////////////////////
-int setup_terminal();
+//int setup_terminal();
+int setup_ncurses_terminal();
+void terminal_init();
+void terminal_restore();
 
 void sunyat_execute ();
 
@@ -161,37 +182,45 @@ void set_flags (signed char result);
 
 int main (int argc, char *argv []) {
 	clock_t clock_start = clock();
-	printf (MSG_STARTUP, argv [1]);
-
+	//printf (MSG_STARTUP, argv [1]);
+//	printf (MSG_STARTUP_BEGIN);
+//	printf ("%u.%u", VERSION_MAJOR, VERSION_MINOR);
+//	if (strlen (VERSION_MODIFIER) > 0) {
+//		printf ("_%s", VERSION_MODIFIER);
+//	}
+//	printf (" Build %u", BUILD_NUMBER);
+	// check for application parameter
 	// check for application parameter
 	if (argc != 2) 	{
 		printf (ERR_BAD_USAGE);
-		return 0;
+		return EXIT_FAILURE;
 	}
-	else {
-		// test application size
-		unsigned char file_buffer [SIZE_APP_ROM];
-		FILE *infile = NULL;
-		if ((infile = fopen (argv [1], "rb")) != NULL) {
-			// is it at least SIZE_APP_ROM big ?
-			if (SIZE_APP_ROM != fread (file_buffer, sizeof (unsigned char), SIZE_APP_ROM, infile)) {
-				// not big enough
-				printf (ERR_BYTE_SIZE);
-				return 0;
-			}
-			else {
-				// make sure we're at the EOF
-				if (fgetc (infile) != EOF) {
-					printf (ERR_BYTE_SIZE);
-					return 0;
-				}
-			}
+
+//	printf (MSG_STARTUP_END, argv [1]);
+
+	// test application size
+	unsigned char file_buffer [SIZE_APP_ROM];
+	FILE *infile = NULL;
+	if ((infile = fopen (argv [1], "rb")) != NULL) {
+		// is it at least SIZE_APP_ROM big ?
+		if (SIZE_APP_ROM != fread (file_buffer, sizeof (unsigned char), SIZE_APP_ROM, infile)) {
+			// not big enough
+			printf (ERR_BYTE_SIZE);
+			return EXIT_FAILURE;
 		}
 		else {
-			// file could not be opened
-			printf (ERR_FILE_NOT_OPEN);
-			return 0;
+			// make sure we're at the EOF
+			if (fgetc (infile) != EOF) {
+				printf (ERR_BYTE_SIZE);
+				return EXIT_FAILURE;
+			}
 		}
+	}
+	else {
+		// file could not be opened
+		printf (ERR_FILE_NOT_OPEN);
+		return EXIT_FAILURE;
+	}
 
 		/*
 		 * The application image looks good. Let's load it up and run.
@@ -214,11 +243,12 @@ int main (int argc, char *argv []) {
 	while ((clock () - clock_start) / CLOCKS_PER_SEC < 3);
 
 	// get the ncurses terminal going
-	if (-1 == setup_terminal ()) {
+	if (-1 == setup_ncurses_terminal ()) {
 		return EXIT_FAILURE;
 	}
-		printf ("\n\nSUNYAT exited after %ld clock cycles\n\n", sunyat_clock_ticks);
-	}
+//		printf ("\n\nSUNYAT exited after %ld clock cycles\n\n", sunyat_clock_ticks);
+	terminal_init();
+//	}
 	// fetch->decode->exceute until returned beyond RAM
 	sunyat_execute ();
 
@@ -229,12 +259,12 @@ int main (int argc, char *argv []) {
 	// close the ncurses terminal
 	endwin ();
 
-	printf ("\n\nSUNYAT exited after %llu clock cycles\n\n", sunyat_clock_ticks);
+	printf ("\n\nSUNYAT exited after %lu clock cycles\n\n", sunyat_clock_ticks);
 
 	return EXIT_SUCCESS;
 }
 
-int setup_terminal () {
+int setup_ncurses_terminal () {
 	if (NULL == initscr ()) {
 		printf (ERR_NCURSES_INIT);
 		return -1;
@@ -242,34 +272,61 @@ int setup_terminal () {
 
 	if (ERR == cbreak ()) {
 		printf (ERR_NCURSES_CBREAK);
-		return -1;		
+		return -1;
 	}
 
 	if (ERR == noecho ()) {
 		printf (ERR_NCURSES_NOECHO);
-		return -1;		
+		return -1;
 	}
 
 	if (ERR == nodelay (stdscr, true)) {
 		printf (ERR_NCURSES_NODELAY);
-		return -1;		
+		return -1;
 	}
 
 	if (ERR == keypad (stdscr, true)) {
 		printf (ERR_NCURSES_KEYPAD);
-		return -1;		
+		return -1;
 	}
 
 	if (ERR == curs_set (1)) {
 		printf (ERR_NCURSES_CURSOR);
-		return -1;		
+		return -1;
 	}
 
 	return 0;
 }
 
 
+
+void terminal_init() {
+	int y;
+	int x;
+
+	for (y = 0; y < TERMINAL_HEIGHT; y++) {
+		for (x = 0; x < TERMINAL_WIDTH; x++) {
+			terminal [y][x] = ' ';
+		}
+		terminal [y][x] = '\0';
+	}
+}
+
+void terminal_restore() {
+	int y;
+
+	erase ();
+
+	for (y = 0; y < TERMINAL_HEIGHT; y++) {
+		mvprintw( y, 0, (const char *)(terminal [y]));
+	}
+
+	move (cursor_row, cursor_col);
+}
+
 void sunyat_execute () {
+	bool terminal_too_small_prev_cycle = false;
+
 	for (;;) {
 		unsigned char opcode;
 		unsigned char sreg;
@@ -281,15 +338,27 @@ void sunyat_execute () {
 		int current_width;
 		int current_height;
 
+		move (cursor_row, cursor_col);
+
 		getmaxyx (stdscr, current_height, current_width);
 
-		if (current_width < MIN_TERMINAL_WIDTH || current_height < MIN_TERMINAL_HEIGHT) {
+//		if (current_width < MIN_TERMINAL_WIDTH || current_height < MIN_TERMINAL_HEIGHT) {
+		if (current_width < TERMINAL_WIDTH || current_height < TERMINAL_HEIGHT) {
 			int x;
 			int y;
+
+			/*
+			 * What's important is it is true when this cycle is
+			 * the previous cycle next cycle :-P
+			 */
+			terminal_too_small_prev_cycle = true;
+
 			for (y = 0; y < current_height; y++) {
+				move (y, 0);
 				for (x = 0; x < current_width; x++) {
-					mvprintw (y, x, "@");
-				}			
+					addch ('@');
+//					mvprintw (y, x, "@");
+				}
 			}
 			int cx = current_width  / 2;
 			int cy = current_height / 2;
@@ -302,6 +371,11 @@ void sunyat_execute () {
 			continue;
 		}
 
+		if (terminal_too_small_prev_cycle) {
+			terminal_restore ();
+			terminal_too_small_prev_cycle = false;
+			refresh ();
+		}
 
 		sunyat_clock_ticks++;
 
@@ -483,10 +557,10 @@ void sunyat_execute () {
 			break;
 	*/
 		case OPCODE_LOAD_RM:
-			if (mem < SIZE_APP_RAM)
+            if (mem < SIZE_APP_RAM)
 				sunyat_regs [dreg] = sunyat_ram [mem];
-			else if (mem == APP_KEYBOARD)
-				if(!linefeed_buffered)
+			else if (mem == IO_TERMINAL)
+				if (!linefeed_buffered)
 				{
 					sunyat_regs [dreg] = getch ();
 					switch ((int) sunyat_regs [dreg])
@@ -514,10 +588,10 @@ void sunyat_execute () {
 				return;
 			}
 			break;
-		case OPCODE_LOADP_RR:
+        case OPCODE_LOADP_RR:
 			if (sunyat_regs [sreg] < SIZE_APP_RAM)
 				sunyat_regs [dreg] = sunyat_ram [sunyat_regs [sreg]];
-			else if (sunyat_ram [sunyat_regs [sreg]] == APP_KEYBOARD)
+			else if (sunyat_ram [sunyat_regs [sreg]] == IO_TERMINAL)
 				if(!linefeed_buffered)
 				{
 					sunyat_regs [dreg] = getch ();
@@ -549,33 +623,37 @@ void sunyat_execute () {
 		case OPCODE_STOR_MR:
 			if (mem < SIZE_APP_RAM)
 				sunyat_ram [mem] = sunyat_regs [dreg]; //yes, dreg is correct for this one
-			else if (mem == APP_CHARACTER) {
+			else if (mem == IO_TERMINAL) {
 				char c = sunyat_regs [dreg];
 				switch (c) {
 				case 0x9: //horizontal tab
 					cursor_col += TAB_SIZE - (cursor_col % TAB_SIZE);
-					if (cursor_col >= MIN_TERMINAL_WIDTH) {
+					if (cursor_col >= TERMINAL_WIDTH) {
 						cursor_col = 0;
-						cursor_row = (cursor_row + 1) % MIN_TERMINAL_HEIGHT;
+						cursor_row = (cursor_row + 1) % TERMINAL_HEIGHT;
 					}
 					break;
 				case 0xD: // carriage return
 					cursor_col = 0;
 					break;
 				case 0xA: // line feed
-					cursor_row = (cursor_row + 1) % MIN_TERMINAL_HEIGHT;
-					break;	
+					cursor_row = (cursor_row + 1) % TERMINAL_HEIGHT;
+					break;
 				default:
 					if (isprint (c)) {
 						printw ("%c", c);
+						terminal[cursor_row][cursor_col] = c;
+
 						cursor_col++;
-						if (cursor_col >= MIN_TERMINAL_WIDTH) {
+						if (cursor_col >= TERMINAL_WIDTH) {
 							cursor_col = 0;
-							cursor_row = (cursor_row + 1) % MIN_TERMINAL_HEIGHT;
+							cursor_row = (cursor_row + 1) % TERMINAL_HEIGHT;
 						}
 					}
 					else {
 						printw ("<0x%02X>", c);
+						terminal[cursor_row][cursor_col] = ' ';
+
 					}
 				}
 				mvprintw (cursor_row, cursor_col, "");
@@ -589,38 +667,42 @@ void sunyat_execute () {
 		case OPCODE_STORP_RR:
 			if (sunyat_regs [dreg] < SIZE_APP_RAM)
 				sunyat_ram [sunyat_regs [dreg]] = sunyat_regs [sreg];
-			else if (sunyat_regs [dreg] == APP_CHARACTER) {
+			else if (sunyat_regs [dreg] == IO_TERMINAL) {
 				char c = sunyat_regs [dreg];
 				switch (c) {
 				case 0x9: //horizontal tab
 					cursor_col += TAB_SIZE - (cursor_col % TAB_SIZE);
-					if (cursor_col >= MIN_TERMINAL_WIDTH) {
+					if (cursor_col >= TERMINAL_WIDTH) {
 						cursor_col = 0;
-						cursor_row = (cursor_row + 1) % MIN_TERMINAL_HEIGHT;
+						cursor_row = (cursor_row + 1) % TERMINAL_HEIGHT;
 					}
 					break;
 				case 0xD: // carriage return
 					cursor_col = 0;
 					break;
 				case 0xA: // line feed
-					cursor_row = (cursor_row + 1) % MIN_TERMINAL_HEIGHT;
-					break;	
+					cursor_row = (cursor_row + 1) % TERMINAL_HEIGHT;
+					break;
 				default:
 					if (isprint (c)) {
 						printw ("%c", c);
+						terminal[cursor_row][cursor_col] = c;
+
 						cursor_col++;
-						if (cursor_col >= MIN_TERMINAL_WIDTH) {
+						if (cursor_col >= TERMINAL_WIDTH) {
 							cursor_col = 0;
-							cursor_row = (cursor_row + 1) % MIN_TERMINAL_HEIGHT;
+							cursor_row = (cursor_row + 1) % TERMINAL_HEIGHT;
 						}
 					}
 					else {
 						printw ("<0x%02X>", c);
+						terminal[cursor_row][cursor_col] = ' ';
 					}
 					refresh ();
 				}
 				mvprintw (cursor_row, cursor_col, "");
 				refresh ();
+			}
 			break;
 		case OPCODE_PUSH_R:
 			if (sunyat_regs [REG_SP] <= 0)
@@ -672,7 +754,7 @@ void sunyat_execute () {
 
 	}
 }
-}
+
 unsigned char get_opcode () {
 	return sunyat_regs [REG_IRH] >> 3; // top 5 bits are opcode
 }

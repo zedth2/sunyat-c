@@ -29,13 +29,13 @@ all:	sunyat sunyat-asm
 # sunyat
 #----------------------------------------
 sunyat:	sunyat.c sunyat.h build_number.h
-	gcc -o sunyat sunyat.c  -lncurses
+	gcc -g -o sunyat sunyat.c  -lncurses
 
 #----------------------------------------
 # sunyat-asm
 #----------------------------------------
 sunyat-asm:	lemon lex.yy.c sunyat-asm.c token.h sunyat.h build_number.h
-	gcc -o sunyat-asm lex.yy.c sunyat-asm.c
+	gcc -g -o sunyat-asm lex.yy.c sunyat-asm.c
 
 lemon:	lemon.c
 	gcc -o lemon lemon.c
