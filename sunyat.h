@@ -94,7 +94,7 @@
 #define OPCODE_PUSH_R   28
 #define OPCODE_POP_R    29
 
-#define OPCODE_SWR_I	30
-#define OPCODE_AWR_I	31
+#define OPCODE_SWR_I	30 //Can be replaced with SYSCALL 5bitopcode, 3bit Call#, 8 bits of whatever (Wright)
+#define OPCODE_AWR_I	31 //Replacing with second SYSCALL (read)
 
 #endif /* _SUNYAT_H_ */

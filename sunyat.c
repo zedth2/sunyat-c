@@ -81,7 +81,6 @@ const char ERR_NCURSES_KEYPAD [] =
 	"\tCould not enable keypad usage\n";
 const char ERR_NCURSES_CURSOR [] =
 	"\tCould not modify cursor\n";
-
 const char ERR_NO_APP [] =
 	"\tNo application provided...  SUNYAT <filename>\n";
 const char ERR_BAD_USAGE [] =
@@ -725,7 +724,7 @@ void sunyat_execute () {
 		//Windowing opcodes
 		case OPCODE_SWR_I:
 			{
-                //printf("CHnaging swr %d \n", imm + REG_GEN_START) ;
+                //printf("Changing swr %d \n", imm + REG_GEN_START) ;
 				if (imm > MAX_WIN_INDEX)
 				{
 					printf(ERR_WINDOW_RANGE);

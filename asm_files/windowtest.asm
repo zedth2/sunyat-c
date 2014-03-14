@@ -1,45 +1,102 @@
 	
+.message	Sure hope this doesn't crash.
+
 .constant	SCREEN	0xFE
 .constant	KEYB	0xFF
 
 .constant	CR	0xD
 .constant	LF	0xA
 
-;.variable	key
+
+!crlf
+.variable	crlf0	CR
+.variable	crlf1	LF
+.variable	crlf2	0
+
+!prompt
+.variable	prompt0 'E'
+.variable	prompt1	'n'
+.variable	prompt2	't'
+.variable	prompt3	'e'
+.variable	prompt4	'r'
+.variable	prompt5	' '
+.variable	prompt6	'a'
+.variable	prompt7	' '
+.variable	prompt8	't'
+.variable	prompt9	'h'
+.variable	prompt10	'i'
+.variable	prompt11	'n'
+.variable	prompt12	'g'
+.variable	prompt13	CR
+.variable	prompt14	LF
+.variable	prompt15	0
+
+.variable	key
 
 	jmp	!main
 
 !main
-	call !print_registers
+	call	!get_data
+	call	!print_registers
 	
+	ret
 !main_end
 
-;!get_data
-;!do_collect
-;	call	!read_letter
-;	mov	R0	R1
-;	awr	1
-;!do_collect_while
-;	cmp R1 '.'
-;	jeq	!do_collect
-;!do_collect_end
-;!get_data_end
+
+;--------------------------------------------------------------
+;Runs through registers, recieving input from read_letter and
+;sticking it into them sequentially. Ends with "."
+;--------------------------------------------------------------
+!get_data
+mov	R2	!prompt
+call	!print_string
+	!do_collect
+		call	!read_letter
+		mov	R0	R1
+		awr	1
+	!do_collect_while
+		cmp R0 '.'
+		jeq	!do_collect
+	!do_collect_end
+!get_data_end
+
+!read_letter	; (RL)
+	push	R3
+!do_RL
+	load	R3	KEYB
+!do_RL_while
+	cmp	R3	'z'
+	jgr	!do_RL
+!do_RL_end
+	stor	key	R3
+	pop	R3
+	ret
+!read_letter_end
+
+;------------------------------------------------------------------------------
+; print the character string pointed to by R2 (register 2) until the NULL 
+; character is found.
+;------------------------------------------------------------------------------
+!print_string	; (PS)
+	push	R2
+	push	R3
+!while_PS
+	loadp	R2	R3
+	cmp	R2	0
+	jeq	!while_PS_end
+	stor	SCREEN	R2
+	add	R3	1
+	jmp	!while_PS
+!while_PS_end
+	pop	R3
+	pop	R2
+!print_string_end
 
 
-;!read_letter	; (RL)
-;	push	R1
-;!do_RL
-;	load	R1	KEYB
-;!do_RL_while
-;	cmp	R1	'z'
-;	jgr	!do_RL
-;!do_RL_end
-;	stor	key	R1
-;	pop	R1
-;	ret
-;!read_letter_end
-
-
+;-------------------------------------
+;prints out all of the registers.
+;
+;-------------------------------------
 !print_registers
 	swr 0
 ;WINDOW 05 - 12-------------------------------------------------------

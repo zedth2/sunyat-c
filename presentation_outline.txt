@@ -1,0 +1,79 @@
+Presentation
+
+
+Computer architecture:
+	registers (draw an 8-bit register)
+		-computers use binary (draw out a few numbers in the register)
+		-size of register = #bit of machine
+			(Bits are 1s or 0s, bytes are 8-bits)
+		-SUNYAT has 8 GP registers (Draw 8 registers [R0-R7]
+
+
+	Other memory
+		-works the same as registers
+		-may be slower to access
+
+
+	processor (draw a brain)
+		-instruction set
+			-different strategies applied to different purposes
+			-RISC - based on the insite that simplified instructions provide higher performance if that simplicity enables faster execution of each instruction.
+		-ALU (Arithmetic logic unit)
+
+
+How instruction sets work:
+	-Explain System Registers (Instruction Register)
+	-Words (8-bit)
+	-SUNYAT uses 2 8-bit words (Draw the 2 8-bit registers)
+	-depending on the instruction we use, the words may be different
+	-each instruction assigned a number, we call that the "OpCode"
+	-OpCode is always in the same place (Label OpCode)
+	-example instruction (mov or add)
+		Explain how it works in laymans terms
+		Draw it, step-by-step, in the registers
+
+
+Relation between Number of Instructions and Addressable Memory:
+	-OpCode length is determined by the number of instructions we have (32 instructions = 5 bits)
+	-Increasing number of OpCodes "eats into" your space for Register Addresses and Vice-versa (more opcodes = less registers)
+
+
+Importance of having more registers:
+	-Software is written to manage lots of variables very quickly
+	-It is important to be able to have access to many different variables at a time
+
+
+Register Windowing:
+	Explanation
+		-Method of increasing number of registers without having to sacrifice (many) instructions
+		-We know that we can address or "Look at" 8 registers at a time. (DRAW WINDOW) (we call this our window)
+		-We want more than 8 registers (draw more registers under R0-R7)
+		-Register windowing is a way of moving our "window" around so that we can read and write to other registers
+
+
+	Implementation
+		-Get rid of a couple OpCodes to make room for two kinds of Window Movers (SWR + AWR)
+		-Got rid of SUB_RI (subtract immediate) and NEG_R (negate register) because we can synthesize those instructions with single other instructions
+		-Added a "Window" system register (DRAW WINDOW SYSTEM_REGISTER)
+		-Every time we change the number in that register, we change "window position"
+		-This way we can address as many registers as we want (Assuming the window register can hold it, and SWR can address it. AWR can go on forever.)
+
+
+	Issues
+		Blindness:
+		-Programmer needs to keep track of more things: window position, things they've already put in registers, etc 
+		-System registers (like the window position) are not addressable, so we can't see them - can't see what position we're in
+
+		Data Destruction:
+		-Moving data multiple windows away - "ripping up" data
+
+
+	Solution
+		-Global registers - half the WINDOW size to 4, but have 4 other registers that are ALWAYS addressable.
+			Solves "Data Destruction"
+
+		-Expose system registers by replacing SWR and AWR with SYSCALLW (explain SYSCALL)
+			Able to write to any one of the system registers (might be dangerous, but this is for educational purposes)
+
+		-SYSCALLR does the same thing but READS data.
+			Helps "Blindness"
