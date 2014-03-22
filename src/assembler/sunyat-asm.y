@@ -29,7 +29,7 @@
 	#include <assert.h>
 
 	#include "token.h"
-	#include "sunyat.h"
+	#include "../sunyat.h"
 
 	#define MAX_CNT 256
 

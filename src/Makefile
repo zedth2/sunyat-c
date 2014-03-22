@@ -28,30 +28,31 @@ all:	sunyat sunyat-asm
 #----------------------------------------
 # sunyat
 #----------------------------------------
-sunyat:	src/sunyat.c src/sunyat.h src/build_number.h
-	gcc -g -o bin/sunyat src/sunyat.c  -lncurses
+sunyat:	sunyat.c sunyat.h build_number.h
+	gcc -g -o ../bin/sunyat sunyat.c  -lncurses
 
 #----------------------------------------
 # sunyat-asm
 #----------------------------------------
-sunyat-asm:	lemon tools/lemon/lex.yy.c src/assembler/sunyat-asm.c src/assembler/token.h src/assembler/sunyat.h src/build_number.h
-	gcc -g -o bin/sunyat-asm tools/lemon/lex.yy.c src/assembler/sunyat-asm.c
+sunyat-asm:	lemon sunyat-asm.c lex.yy.c build_number.h assembler/token.h sunyat.h
+	gcc -g -o ../bin/sunyat-asm assembler/lex.yy.c assembler/sunyat-asm.c
 
-lemon:	lemon.c
-	gcc -o lemon tools/lemon/lemon.c
+lemon:
+	gcc -o ../bin/lemon ../tools/lemon/lemon.c
 
-lex.yy.c:	src/assembler/sunyat-asm.lex
-	flex src/assembler/sunyat-asm.lex
+lex.yy.c:	assembler/sunyat-asm.lex
+	flex assembler/sunyat-asm.lex
+	mv lex.yy.c assembler/
 
 sunyat-asm.h:
-sunyat-asm.c:	src/assembler/sunyat-asm.y src/assembler/sunyat-asm.h lemon
-	./lemon src/assembler/sunyat-asm.y
+sunyat-asm.c:	assembler/sunyat-asm.y sunyat-asm.h lemon
+	../bin/lemon T=../tools/lemon/lempar.c assembler/sunyat-asm.y
 
 build_number.h:	next_build_number
 
 next_build_number:
-	gcc -o build_number build_number.c
-	./build_number
+	gcc -o ../bin/build_number build_number.c
+	../bin/build_number
 
 
 #----------------------------------------
@@ -69,5 +70,5 @@ next_build_number:
 # clean
 #----------------------------------------
 clean:
-	rm -f sunyat sunyat-asm lemon lex.yy.c sunyat-asm.c sunyat-asm.h sunyat-asm.out build_number
+	rm -f ../bin/build_number ../bin/lemon ../bin/sunyat ../bin/sunyat-asm assembler/lex.yy.c assembler/sunyat-asm.c assembler/sunyat-asm.h assembler/sunyat-asm.out
 #windowtest.rom

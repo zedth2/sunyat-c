@@ -2,11 +2,11 @@
  * Name        : build_number.c
  * Author      : William "Amos" Confer
  * License     : Copyright (c) 2014 William "Amos" Confer
- *              
- *    Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ *    Permission is hereby granted, free of charge, to any person obtaining a
  *    copy of this software and associated documentation files (the "Software"),
  *    to deal in the Software without restriction, including without limitation
- *    the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ *    the rights to use, copy, modify, merge, publish, distribute, sublicense,
  *    and/or sell copies of the Software, and to permit persons to whom the
  *    Software is furnished to do so, subject to the following conditions:
  *
@@ -15,10 +15,10 @@
  *
  *    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
+ *    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
  *    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- *    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ *    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ *    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  *    DEALINGS IN THE SOFTWARE.
  */
 
@@ -30,7 +30,7 @@ const unsigned int VERSION_MAJOR        = 0;
 const unsigned int VERSION_MINOR        = 8;
 const char         VERSION_MODIFIER[]   = ""; /* e.g., "alpha", or "RC1" */
 
-const unsigned int DEFAULT_BUILD_NUMBER = 1;              
+const unsigned int DEFAULT_BUILD_NUMBER = 1;
 
 #define HEAD_LINE_CNT 54
 
@@ -92,13 +92,13 @@ const char head_str[HEAD_LINE_CNT][200] = {
 };
 
 
-const char major_str[]        = 
+const char major_str[]        =
 	"const unsigned int VERSION_MAJOR      = %u;\n";
-const char minor_str[]        = 
+const char minor_str[]        =
 	"const unsigned int VERSION_MINOR      = %u;\n";
-const char modifier_str[]     = 
+const char modifier_str[]     =
 	"const char         VERSION_MODIFIER[] = \"%s\"; /* e.g., \"alpha\", or \"RC1\" */\n";
-const char build_number_str[] = 
+const char build_number_str[] =
 	"const unsigned int BUILD_NUMBER       = %u;\n";
 
 
@@ -121,7 +121,7 @@ unsigned int build_number;
 int generate_header() {
 	int i;
 
-	if(NULL == (build_file = fopen(filename, "w"))) {		
+	if(NULL == (build_file = fopen(filename, "w"))) {
 		fprintf(stderr, "Could not open %s for writing\n", filename);
 		return EXIT_FAILURE;
 	}
@@ -132,17 +132,17 @@ int generate_header() {
 
 	fprintf(build_file, "\n");
 
-	fprintf(build_file, major_str, VERSION_MAJOR);		
-	fprintf(build_file, minor_str, VERSION_MINOR);		
-	fprintf(build_file, modifier_str, VERSION_MODIFIER);		
+	fprintf(build_file, major_str, VERSION_MAJOR);
+	fprintf(build_file, minor_str, VERSION_MINOR);
+	fprintf(build_file, modifier_str, VERSION_MODIFIER);
 
-	fprintf(build_file, build_number_str, build_number);		
+	fprintf(build_file, build_number_str, build_number);
 
 	fprintf(build_file, "\n");
 
 	for(i = 0; i < FOOT_LINE_CNT; i++) {
 		fprintf(build_file, "%s\n", foot_str[i]);
-	}	
+	}
 
 	fclose(build_file);
 
@@ -159,10 +159,10 @@ int generate_header() {
 }
 
 int main(int argc, char *argv[]) {
-	
-	build_number = DEFAULT_BUILD_NUMBER;
 
-	if(NULL != (build_file = fopen(filename, "r"))) {		
+	build_number = DEFAULT_BUILD_NUMBER;
+    if(argc > 1) filename = argv[1] ;
+	if(NULL != (build_file = fopen(filename, "r"))) {
 		const int expected_col_num  = 40;
 		const int expected_line_num = 59;
 
@@ -179,7 +179,7 @@ int main(int argc, char *argv[]) {
 		}
 
 		/* get the old build number */
-		if((NULL == fgets(str, 200, build_file)) || 
+		if((NULL == fgets(str, 200, build_file)) ||
 		   (0 >= sscanf(str + expected_col_num, "%u", &build_number))) {
 			fprintf(stderr, "Couldn't read build number line of %s\n", filename);
 			fclose(build_file);
@@ -193,11 +193,3 @@ int main(int argc, char *argv[]) {
 
 	return generate_header();
 }
-
-
-
-
-
-
-
-
