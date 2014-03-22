@@ -122,6 +122,10 @@ const char ERR_WINDOW_RANGE []=
 //Get rid of this shit too ⇓⇓⇓⇓⇓
 char app_msg [SIZE_APP_MSG + 1];	/* +1 is to add a guaranteed null terminator */
 
+/**
+ *  Brief:
+ *      This is the array being all the ram for the SUNYAT.
+ */
 uint8_t sunyat_ram [SIZE_APP_RAM];
 
 /* //This is already defined and commented in the header so we can probably get rid of it here
@@ -134,6 +138,10 @@ uint8_t sunyat_ram [SIZE_APP_RAM];
  * 5-37:	33 General Purpose registers
  */
 
+/**
+ *  Brief:
+ *      This is the array where the data for alll the registers are stored.
+ */
 uint8_t sunyat_regs [SIZE_REG] = {
 	0, 0, 0, 5,                             /* REG_PC, REG_IRH, REG_IRL, REG_SP */
 	SIZE_APP_RAM,                           /* stack grows down from top of RAM */
@@ -158,19 +166,19 @@ long int sunyat_clock_ticks = 0;
 //////////////////////////////////////////////////
 //int setup_terminal();
 //I feel like these should be in the header.
-int setup_ncurses_terminal();
-void terminal_init();
-void terminal_restore();
+static int setup_ncurses_terminal();
+static void terminal_init();
+static void terminal_restore();
 
-void sunyat_execute ();
+static void sunyat_execute ();
 
-uint8_t get_opcode ();
-uint8_t get_dreg ();
-uint8_t get_sreg ();
-uint8_t get_mem ();
-int8_t get_imm ();
+static uint8_t get_opcode ();
+static uint8_t get_dreg ();
+static uint8_t get_sreg ();
+static uint8_t get_mem ();
+static int8_t get_imm ();
 
-void set_flags (int8_t result);
+static void set_flags (int8_t result);
 
 
 //////////////////////////////////////////////////
@@ -184,7 +192,7 @@ int main (int argc, char *argv []) {
 
 	if (argc != 2) 	{
 		printf (ERR_BAD_USAGE);
-		return EXIT_FAILURE;
+		return EXT_ERR_NO_FILE_ARG;
 	}
 
 
@@ -196,20 +204,20 @@ int main (int argc, char *argv []) {
 		if (SIZE_APP_ROM != fread (file_buffer, sizeof (uint8_t), SIZE_APP_ROM, infile)) {
 			// not big enough
 			printf (ERR_BYTE_SIZE);
-			return EXIT_FAILURE;
+			return EXT_ERR_ROM_BIG;
 		}
 		else {
 			// make sure we're at the EOF
 			if (fgetc (infile) != EOF) {
 				printf (ERR_BYTE_SIZE);
-				return EXIT_FAILURE;
+				return EXT_ERR_BYTE_SIZE;
 			}
 		}
 	}
 	else {
 		// file could not be opened
 		printf (ERR_FILE_NOT_OPEN);
-		return EXIT_FAILURE;
+		return EXT_ERR_FILE_NOT_OPEN;
 	}
 
 		/*
@@ -232,7 +240,7 @@ int main (int argc, char *argv []) {
 
 	// get the ncurses terminal going
 	if (-1 == setup_ncurses_terminal ()) {
-		return EXIT_FAILURE;
+		return EXT_ERR_NCURSES;
 	}
 
 	terminal_init();
@@ -252,7 +260,7 @@ int main (int argc, char *argv []) {
 	return EXIT_SUCCESS;
 }
 
-int setup_ncurses_terminal () {
+static int setup_ncurses_terminal () {
 	if (NULL == initscr ()) {
 		printf (ERR_NCURSES_INIT);
 		return -1;
@@ -288,7 +296,7 @@ int setup_ncurses_terminal () {
 
 
 
-void terminal_init() {
+static void terminal_init() {
 	int y;
 	int x;
 
@@ -300,7 +308,7 @@ void terminal_init() {
 	}
 }
 
-void terminal_restore() {
+static void terminal_restore() {
 	int y;
 
 	erase ();
@@ -312,7 +320,7 @@ void terminal_restore() {
 	move (cursor_row, cursor_col);
 }
 
-void sunyat_execute () {
+static void sunyat_execute () {
 	bool terminal_too_small_prev_cycle = false;
 
 	for (;;) {
@@ -723,27 +731,27 @@ void sunyat_execute () {
 	}
 }
 
-uint8_t get_opcode () {
+static uint8_t get_opcode () {
 	return sunyat_regs [REG_IRH] >> 3; // top 5 bits are opcode
 }
 
-uint8_t get_dreg () {
+static uint8_t get_dreg () {
 	return sunyat_regs [REG_IRH] & 0x07; // bottom 3 bits are dreg
 }
 
-uint8_t get_sreg () {
+static uint8_t get_sreg () {
 	return sunyat_regs [REG_IRL] & 0x07; // bottom 3 bits are sreg
 }
 
-uint8_t get_mem () {
+static uint8_t get_mem () {
 	return sunyat_regs [REG_IRL];
 }
 
-int8_t get_imm () {
+static int8_t get_imm () {
 	return (int8_t)(sunyat_regs [REG_IRL]);
 }
 
-void set_flags (int8_t result) {
+static void set_flags (int8_t result) {
 	if (result == 0) {
 		sunyat_flag_zero = 1;
 		sunyat_flag_sign = 0;

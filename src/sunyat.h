@@ -183,4 +183,38 @@
 #define OPCODE_SWR_I	30
 #define OPCODE_AWR_I	31
 
+
+//Exit Code Errors
+
+/**
+ *  Brief:
+ *      This will get thrown if the system wasn't given any rom file, or
+ *          such, to load in.
+ */
+#define EXT_ERR_NO_FILE_ARG       1
+
+/**
+ *  Brief:
+ *      This will get thrown if the ROM provided is to large.
+ */
+#define EXT_ERR_ROM_BIG           2
+
+/**
+ *  Brief: //Look at sunyat.c:213
+ *      This will get thrown if after reading t
+ */
+#define EXT_ERR_BYTE_SIZE         3
+
+/**
+ *  Brief:
+ *      The provided file could not be open.
+ */
+#define EXT_ERR_FILE_NOT_OPEN     4
+
+/**
+ *  Brief:
+ *      Will be thrown when theres an error in ncurses.
+ */
+#define EXT_ERR_NCURSES           5 //This should be expand to cover all ncurses errors.
+
 #endif /* _SUNYAT_H_ */
