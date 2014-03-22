@@ -33,32 +33,103 @@
 #define IO_TERMINAL     0xFF
 
 
-#define SIZE_APP_MSG    70  //APP_MSG_SIZE
-#define SIZE_APP_RAM    254 //APP_RAM_SIZE
+
+#define SIZE_APP_MSG    70 //Probably pointless
+
+/**
+ * Brief:
+ *      This will be the size of the ram.
+ */
+#define SIZE_APP_RAM    0xFF
+
+/**
+ *  Brief:
+ *      This will be the max size allowed for any load rom file.
+ */
+#define SIZE_APP_ROM    SIZE_APP_RAM   //APP_ROM_SIZE (APP_MSG_SIZE + APP_RAM_SIZE)
+
 
 //System Registers
+/**
+ *  Brief:
+ *      This register will contain the current program counter.
+ */
 #define REG_PC  0
+
+/**
+ *  Brief:
+ *      This is the register containing the 8 high bits of the currently
+ *          loaded instruction.
+ */
 #define REG_IRH 1
+
+/**
+ * Brief:
+ *      This is the register containing the 8 low bits of the currently
+ *          loaded instruction.
+ */
 #define REG_IRL 2
+
+/**
+ *  Brief:
+ *      This register will contain the current starting position of the
+ *          register window.
+ */
 #define REG_WIN 3
+
+/**
+ *  Brief:
+ *      FILL IN
+ */
 #define REG_SP  4
 
-//General Purpose Registars
-#define REG_GEN_START NUM_SYS_REG
-#define REG_GEN_END   SIZE_REG - 1
-
-#define SIZE_WIN 8
-#define MAX_WIN_INDEX SIZE_REG - SIZE_WIN
-
-#define SIZE_REG 38
-
+/**
+ *  Brief:
+ *      This is the number of system registers.
+ *          It will be used to figure out where the general purpose registers
+ *          start.
+ */
 #define NUM_SYS_REG 5 //Number of system registers (0-4) used for referencing GPRs starting at 0.
 
-#define SIZE_APP_ROM    (SIZE_APP_MSG + SIZE_APP_RAM)   //APP_ROM_SIZE (APP_MSG_SIZE + APP_RAM_SIZE)
-//#define APP_KEYBOARD    0xFE
-//#define APP_SCREEN      0xFF
-//#define APP_KEYBOARD    0xFF  /* 0 if no key, key code otherwise */
-//#define APP_CHARACTER   0xFE  /* write and adjust cursor, read at cursor */
+
+//General Purpose Registars
+/**
+ *  Brief:
+ *      This is the total number of registers. It should be the total number
+ *          of system registers plus the number of general purpose registers.
+ */
+#define SIZE_REG (NUM_SYS_REG + 32)
+
+/**
+ *  Brief:
+ *      This is the starting point of the general purpose registers.
+ */
+#define REG_GEN_START NUM_SYS_REG
+
+/**
+ *  Brief:
+ *      This is the ending index of the general purpose registers.
+ */
+#define REG_GEN_END   SIZE_REG - 1
+
+/**
+ *  Brief:
+ *      This is the size of the register window.
+ */
+#define SIZE_WIN 8
+
+/**
+ *  Brief:
+ *      This is the greatest index that the start of the register window
+ *          can be.
+ */
+#define MAX_WIN_INDEX SIZE_REG - SIZE_WIN
+
+
+
+
+
+
 
 //opcodes
 #define OPCODE_MOV_RR   0
@@ -66,7 +137,6 @@
 #define OPCODE_ADD_RR   2
 #define OPCODE_ADD_RI   3
 #define OPCODE_SUB_RR   4
-//#define OPCODE_SUB_RI 5 //OPCODE_SUB_RI + OPCODE_NEG_R were removed to make room for OPCODE_SWR + AWR (windowing)
 #define OPCODE_MUL_RR   5
 #define OPCODE_MUL_RI   6
 #define OPCODE_DIV_RR   7
@@ -86,7 +156,6 @@
 #define OPCODE_OR_RI    21
 #define OPCODE_XOR_RR   22
 #define OPCODE_XOR_RI   23
-//#define OPCODE_NEG_R  25 //OPCODE_SUB_RI + OPCODE_NEG_R were removed to make room for OPCODE_SWR + AWR (windowing)
 #define OPCODE_LOAD_RM  24
 #define OPCODE_LOADP_RR 25
 #define OPCODE_STOR_MR  26

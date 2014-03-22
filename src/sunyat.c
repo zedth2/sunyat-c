@@ -169,9 +169,9 @@ uint8_t get_opcode ();
 uint8_t get_dreg ();
 uint8_t get_sreg ();
 uint8_t get_mem ();
-signed char get_imm ();
+int8_t get_imm ();
 
-void set_flags (signed char result);
+void set_flags (int8_t result);
 
 
 //////////////////////////////////////////////////
@@ -317,7 +317,7 @@ void sunyat_execute () {
 		uint8_t sreg;
 		uint8_t dreg;
 		uint8_t mem;
-		signed char imm;
+		int8_t imm;
 		uint8_t cmp_result;
 
 		int current_width;
@@ -327,7 +327,6 @@ void sunyat_execute () {
 
 		getmaxyx (stdscr, current_height, current_width);
 
-//		if (current_width < MIN_TERMINAL_WIDTH || current_height < MIN_TERMINAL_HEIGHT) {
 		if (current_width < TERMINAL_WIDTH || current_height < TERMINAL_HEIGHT) {
 			int x;
 			int y;
@@ -342,7 +341,6 @@ void sunyat_execute () {
 				move (y, 0);
 				for (x = 0; x < current_width; x++) {
 					addch ('@');
-//					mvprintw (y, x, "@");
 				}
 			}
 			int cx = current_width  / 2;
@@ -738,11 +736,11 @@ uint8_t get_mem () {
 	return sunyat_regs [REG_IRL];
 }
 
-signed char get_imm () {
-	return (signed char)(sunyat_regs [REG_IRL]);
+int8_t get_imm () {
+	return (int8_t)(sunyat_regs [REG_IRL]);
 }
 
-void set_flags (signed char result) {
+void set_flags (int8_t result) {
 	if (result == 0) {
 		sunyat_flag_zero = 1;
 		sunyat_flag_sign = 0;
