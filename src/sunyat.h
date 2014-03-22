@@ -125,8 +125,25 @@
  */
 #define MAX_WIN_INDEX SIZE_REG - SIZE_WIN
 
+/**
+ *  Brief:
+ *      This is the minimal width the terminal can be. Once it becomes
+ *          less than this an error message pops up.
+ */
+#define TERMINAL_WIDTH  80
 
+/**
+ *  Brief:
+ *      This is the minimal height the terminal can be. Once it becomes
+ *          less than this an error message pops up.
+ */
+#define TERMINAL_HEIGHT 24
 
+/**
+ *  Brief:
+ *      The size of the tab character to be used in ncures.
+ */
+#define TAB_SIZE         4
 
 
 
@@ -163,7 +180,7 @@
 #define OPCODE_PUSH_R   28
 #define OPCODE_POP_R    29
 
-#define OPCODE_SWR_I	30 //Can be replaced with SYSCALL 5bitopcode, 3bit Call#, 8 bits of whatever (Wright)
-#define OPCODE_AWR_I	31 //Replacing with second SYSCALL (read)
+#define OPCODE_SWR_I	30
+#define OPCODE_AWR_I	31
 
 #endif /* _SUNYAT_H_ */

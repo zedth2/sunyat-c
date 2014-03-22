@@ -116,17 +116,15 @@ const char ERR_WINDOW_RANGE []=
 
 //////////////////////////////////////////////////
 
-#define TERMINAL_WIDTH  80
-#define TERMINAL_HEIGHT 24
-#define TAB_SIZE         4
 
-#define STARTUP_PAUSE       3
+#define STARTUP_PAUSE       3 //Fucking get rid of this.
 
+//Get rid of this shit too ⇓⇓⇓⇓⇓
 char app_msg [SIZE_APP_MSG + 1];	/* +1 is to add a guaranteed null terminator */
 
 uint8_t sunyat_ram [SIZE_APP_RAM];
 
-/*
+/* //This is already defined and commented in the header so we can probably get rid of it here
  * register file for the sunyat-1.
  * 0:		REG_PC
  * 1:		REG_IRH
@@ -159,6 +157,7 @@ long int sunyat_clock_ticks = 0;
 
 //////////////////////////////////////////////////
 //int setup_terminal();
+//I feel like these should be in the header.
 int setup_ncurses_terminal();
 void terminal_init();
 void terminal_restore();
@@ -176,6 +175,10 @@ void set_flags (int8_t result);
 
 //////////////////////////////////////////////////
 
+/* I want to rip main out of this file and drop it in another file and then
+ * let sunyat just be one big file with just a function we can call.
+ * Which would also put us in the position of making all but one function static.
+ */
 int main (int argc, char *argv []) {
 	clock_t clock_start = clock();
 
