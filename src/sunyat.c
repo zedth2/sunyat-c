@@ -115,10 +115,6 @@ const char ERR_WINDOW_RANGE []=
 
 //////////////////////////////////////////////////
 
-//#define MIN_TERMINAL_WIDTH  80
-//#define MIN_TERMINAL_HEIGHT 24
-//#define TAB_SIZE            4
-
 #define TERMINAL_WIDTH  80
 #define TERMINAL_HEIGHT 24
 #define TAB_SIZE         4
@@ -236,8 +232,6 @@ int main (int argc, char *argv []) {
 		// load RAM from the ROM image
 		memcpy (sunyat_ram, file_buffer + SIZE_APP_MSG, SIZE_APP_RAM);
 
-		// fetch->decode->exceute until returned beyond RAM
-		//sunyat_execute ();
 // pause to let user see application info
 	while ((clock () - clock_start) / CLOCKS_PER_SEC < 3);
 
@@ -245,9 +239,9 @@ int main (int argc, char *argv []) {
 	if (-1 == setup_ncurses_terminal ()) {
 		return EXIT_FAILURE;
 	}
-//		printf ("\n\nSUNYAT exited after %ld clock cycles\n\n", sunyat_clock_ticks);
+
 	terminal_init();
-//	}
+
 	// fetch->decode->exceute until returned beyond RAM
 	sunyat_execute ();
 
@@ -421,18 +415,6 @@ void sunyat_execute () {
 			sunyat_regs [dreg] = sunyat_regs [dreg] + imm;
 			set_flags (sunyat_regs [dreg]);
 			break;
-	/*	case OPCODE_SUB_RR:
-			// this should work on signed values as well
-			sunyat_regs [dreg] = sunyat_regs [dreg] - sunyat_regs [sreg];
-			set_flags (sunyat_regs [dreg]);
-			break;
-    	OPCODE_SUB_RI + OPCODE_NEG_R were removed to make room for OPCODE_SWR + AWR (windowing)
-		case OPCODE_SUB_RI:
-			// this should work on signed values as well
-			sunyat_regs [dreg] = sunyat_regs [dreg] - imm;
-			set_flags (sunyat_regs [dreg]);
-			break;
-	*/
 		case OPCODE_MUL_RR:
 			// this should work on signed values as well
 			sunyat_regs [dreg] = sunyat_regs [dreg] * sunyat_regs [sreg];
@@ -549,12 +531,6 @@ void sunyat_execute () {
 			sunyat_regs [dreg] = sunyat_regs [dreg] ^ imm;
 			set_flags (sunyat_regs [dreg]);
 			break;
-	/*	OPCODE_SUB_RI + OPCODE_NEG_R were removed to make room for OPCODE_SWR + AWR (windowing)
-		case OPCODE_NEG_R:
-			sunyat_regs [dreg] = -(signed char)(sunyat_regs [dreg]);
-			set_flags (sunyat_regs [dreg]);
-			break;
-	*/
 		case OPCODE_LOAD_RM:
             if (mem < SIZE_APP_RAM)
 				sunyat_regs [dreg] = sunyat_ram [mem];
