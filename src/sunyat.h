@@ -151,39 +151,341 @@ int start_sunyat(char *rom);
 
 
 //opcodes
-#define OPCODE_MOV_RR   0
-#define OPCODE_MOV_RI   1
-#define OPCODE_ADD_RR   2
-#define OPCODE_ADD_RI   3
-#define OPCODE_SUB_RR   4
-#define OPCODE_MUL_RR   5
-#define OPCODE_MUL_RI   6
-#define OPCODE_DIV_RR   7
-#define OPCODE_DIV_RI   8
-#define OPCODE_CMP_RR   9
-#define OPCODE_CMP_RI   10
-#define OPCODE_JMP_M    11
-#define OPCODE_JEQ_M    12
-#define OPCODE_JNE_M    13
-#define OPCODE_JGR_M    14
-#define OPCODE_JLS_M    15
-#define OPCODE_CALL_M   16
-#define OPCODE_RET      17
-#define OPCODE_AND_RR   18
-#define OPCODE_AND_RI   19
-#define OPCODE_OR_RR    20
-#define OPCODE_OR_RI    21
-#define OPCODE_XOR_RR   22
-#define OPCODE_XOR_RI   23
-#define OPCODE_LOAD_RM  24
-#define OPCODE_LOADP_RR 25
-#define OPCODE_STOR_MR  26
-#define OPCODE_STORP_RR 27
-#define OPCODE_PUSH_R   28
-#define OPCODE_POP_R    29
 
+/*OPCODE 0: MOV (Register to Register)-----------------------------------
+ *  Use:	MOV Reg_A Reg_B
+ *  Brief:	Loads the immediate value into reg_A
+ *
+ *	Affected Flags: None
+ */
+#define OPCODE_MOV_RR   0
+//-----------------------------------------------------------------------
+
+/*OPCODE 1: MOV (Immediate To Register)----------------------------------
+ *  Use:	MOV Reg_A Reg_B
+ *  Brief:	Copies the value in reg_B into reg_A
+ *
+ *	Affected Flags: None
+ */
+#define OPCODE_MOV_RI   1
+//-----------------------------------------------------------------------
+
+/*OPCODE 2: ADD (Register to Register)-----------------------------------
+ *  Use:	ADD Reg_A Reg_B
+ *  Brief:	Adds reg_B to reg_A, storing the result in reg_A
+ *
+ *	Affected Flags: Zero and Sign
+ */
+#define OPCODE_ADD_RR   2
+//-----------------------------------------------------------------------
+
+/*OPCODE 3: MOV (Immediate To Register)----------------------------------
+ *  Use:	ADD Reg_A Imm
+ *  Brief:	Adds immediate to reg_A, storing the result in reg_A
+ *
+ *	Affected Flags: Zero and Sign
+ */
+#define OPCODE_ADD_RI   3
+//-----------------------------------------------------------------------
+
+/*OPCODE 4: SUB (Register to Register)-----------------------------------
+ *  Use:	SUB Reg_A Reg_B
+ *  Brief:	Subtracts reg_B from reg_A, storing the result in reg_A
+ *
+ *	Affected Flags: Zero and Sign
+ */
+#define OPCODE_SUB_RR   4
+//-----------------------------------------------------------------------
+
+/*OPCODE 5: MUL (Register to Register)-----------------------------------
+ *  Use:	MUL Reg_A Reg_B
+ *  Brief:	Multiply reg_B and reg_A, storing the result in reg_A
+ *
+ *	Affected Flags: Zero and Sign
+ */
+#define OPCODE_MUL_RR   5
+//-----------------------------------------------------------------------
+
+/*OPCODE 6: MUL (Immediate to Register)----------------------------------
+ *  Use:	MUL Reg_A Imm
+ *  Brief:	Multiply reg_B and Imm, storing the result in reg_A
+ *
+ *	Affected Flags: Zero and Sign
+ */
+#define OPCODE_MUL_RI   6
+//-----------------------------------------------------------------------
+
+/*OPCODE 7: DIV (Register to Register)-----------------------------------
+ *  Use:	DIV Reg_A Reg_B
+ *  Brief:	Divides Reg_A by Reg_B, storing the result in reg_A
+ *
+ *	Affected Flags: Zero and Sign
+ */
+#define OPCODE_DIV_RR   7
+//-----------------------------------------------------------------------
+
+/*OPCODE 8: DIV (Immediate to Register)----------------------------------
+ *  Use:	DIV Reg_A Imm
+ *  Brief:	Divides Reg_A by Imm, storing the result in reg_A
+ *
+ *	Affected Flags: Zero and Sign
+ */
+#define OPCODE_DIV_RI   8
+//-----------------------------------------------------------------------
+
+/*OPCODE 9: CMP (Register to Register)-----------------------------------
+ *  Use:	CMP Reg_A Reg_B
+ *  Brief:	Compares the two register values via subtraction but does not
+ *			store the result. However, the flags are set based on the result
+ *			of the subtraction.
+ *
+ *	Affected Flags: Zero and Sign
+ */
+#define OPCODE_CMP_RR   9
+//-----------------------------------------------------------------------
+
+/*OPCODE 10: CMP (Immediate to Register)---------------------------------
+ *  Use:	CMP Reg_A Imm
+ *  Brief:	Compares the register value and immediate via subtraction
+ *			but does not store the result. However, the flags are set based
+ *			on the result of the subtraction.
+ *
+ *	Affected Flags: Zero and Sign
+ */
+#define OPCODE_CMP_RI   10
+//-----------------------------------------------------------------------
+
+/*OPCODE 11: JMP --------------------------------------------------------
+ *  Use:	JMP !address
+ *  Brief:	Jump (branch) unconditionally to the code beginning at
+ *			address. Sets the PC to address. The address will typically be
+ *			provided as a label, but can be written as an immediate, as
+ *			well.
+ *
+ *	Affected Flags: None
+ */
+#define OPCODE_JMP_M    11
+//-----------------------------------------------------------------------
+
+/*OPCODE 12: JEQ --------------------------------------------------------
+ *  Use:	JEQ !address
+ *  Brief:	Jump (branch) to the code beginning at address if the previous
+ *			CMP found an equality or if an ALU instruction's result was
+ *			zero... in either case the Zero flag would be high. Sets the PC
+ *			to address. The address will typically be provided as a label,
+ *			but can be written as an immediate, as well.
+ *
+ *	Affected Flags: None
+ */
+#define OPCODE_JEQ_M    12
+//-----------------------------------------------------------------------
+
+/*OPCODE 13: JNE --------------------------------------------------------
+ *  Use:	JNE !address
+ *  Brief:	Jump (branch) to the code beginning at address if the previous
+ *			CMP found an inequality or if an ALU instruction's result was
+ *			not zero... in either case the Zero flag would be low. Sets the
+ *			PC to address. The address will typically be provided as a
+ *			label, but can be written as an immediate, as well.
+ *
+ *	Affected Flags: None
+ */
+#define OPCODE_JNE_M    13
+//-----------------------------------------------------------------------
+
+/*OPCODE 14: JGR --------------------------------------------------------
+ *  Use:	JGR !address
+ *  Brief:	Jump (branch) to the code beginning at address if the previous
+ *			CMP found the left operand to be greater than the right or if an
+ *			ALU instruction's result was positive but not zero... in either
+ *			case the Zero flag would be low and the Sign flag low. Sets the
+ *			PC to address. The address will typically be provided as a
+ *			label, but can be written as an immediate, as well.
+ *
+ *	Affected Flags: None
+ */
+#define OPCODE_JGR_M    14
+//-----------------------------------------------------------------------
+
+/*OPCODE 15: JGR --------------------------------------------------------
+ *  Use:	JLS !address
+ *  Brief:	Jump (branch) to the code beginning at address if the previous
+ *			CMP found the left operand to be less than the right or if an
+ *			ALU instruction's result was negative... in either case the Sign
+ *			flag would be high. Sets the PC to address. The address will
+ *			typically be provided as a label, but can be written as an
+ *			immediate, as well.
+ *
+ *	Affected Flags: None
+ */
+#define OPCODE_JLS_M    15
+//-----------------------------------------------------------------------
+
+/*OPCODE 16: CALL -------------------------------------------------------
+ *  Use:	CALL !address
+ *  Brief:	Call function beginning at address. This pushes the address
+ *			after the CALLing line of code to the system stack, and then
+ *			sets the PC to address. The address will typically be provided
+ *			as a label, but can be written as an immediate, as well.
+ *
+ *	Affected Flags: None
+ */
+#define OPCODE_CALL_M   16
+//-----------------------------------------------------------------------
+
+/*OPCODE 17: RET --------------------------------------------------------
+ *  Use:	RET
+ *  Brief:	Returns from a function call. This pops the top of the system
+ *			stack into the PC... presuming this was the address pushed to
+ *			the stack by a previous CALL. RETurning when the stack is
+ *			empty is the signal to halt the VM and print the total number
+ *			of clock cycles executed by the application.
+ *
+ *	Affected Flags: None
+ */
+#define OPCODE_RET      17
+//-----------------------------------------------------------------------
+
+/*OPCODE 18: AND (Register to Register) ---------------------------------
+ *  Use:	AND Reg_A Reg_B
+ *  Brief:	Perform a bitwise AND on reg_A and reg_B, storing the result in
+ *			reg_A
+ *
+ *	Affected Flags: Zero and Sign
+ */
+#define OPCODE_AND_RR   18
+//-----------------------------------------------------------------------
+
+/*OPCODE 19: AND (Immediate to Register) --------------------------------
+ *  Use:	AND Reg_A Imm
+ *  Brief:	Perform a bitwise AND on reg_A and Imm, storing the result in
+ *			reg_A
+ *
+ *	Affected Flags: Zero and Sign
+ */
+#define OPCODE_AND_RI   19
+//-----------------------------------------------------------------------
+
+/*OPCODE 20: OR (Register to Register) ----------------------------------
+ *  Use:	OR Reg_A Reg_B
+ *  Brief:	Perform a bitwise OR on reg_A and reg_B, storing the result in
+ *			reg_A
+ *
+ *	Affected Flags: Zero and Sign
+ */
+#define OPCODE_OR_RR    20
+//-----------------------------------------------------------------------
+
+/*OPCODE 21: OR (Immediate to Register) ---------------------------------
+ *  Use:	OR Reg_A Imm
+ *  Brief:	Perform a bitwise OR on reg_A and Imm, storing the result in
+ *			reg_A
+ *
+ *	Affected Flags: Zero and Sign
+ */
+#define OPCODE_OR_RI    21
+//-----------------------------------------------------------------------
+
+/*OPCODE 22: XOR (Register to Register) ---------------------------------
+ *  Use:	XOR Reg_A Reg_B
+ *  Brief:	Perform a bitwise XOR on reg_A and Imm, storing the result in
+ *			reg_A
+ *
+ *	Affected Flags: Zero and Sign
+ */
+#define OPCODE_XOR_RR   22
+//-----------------------------------------------------------------------
+
+/*OPCODE 23: XOR (Immediate to Register) --------------------------------
+ *  Use:	XOR Reg_A Imm
+ *  Brief:	Perform a bitwise XOR on reg_A and Imm, storing the result in
+ *			reg_A
+ *
+ *	Affected Flags: Zero and Sign
+ */
+#define OPCODE_XOR_RI   23
+//-----------------------------------------------------------------------
+
+/*OPCODE 24: LOAD -------------------------------------------------------
+ *  Use:	LOAD Reg_A !Address
+ *  Brief:	Loads (copies) a value from the given memory address into
+ *			reg_A.
+ *
+ *	Affected Flags: None
+ */
+#define OPCODE_LOAD_RM  24
+//-----------------------------------------------------------------------
+
+/*OPCODE 25: LOADP ------------------------------------------------------
+ *  Use:	LOADP Reg_A Reg_B
+ *  Brief:	Loads (copies) a value from the memory address in reg_B into
+ *	a reg_A.
+ *
+ *	Affected Flags: None
+ */
+#define OPCODE_LOADP_RR 25
+//-----------------------------------------------------------------------
+
+/*OPCODE 26: STOR -------------------------------------------------------
+ *  Use:	STOR !Address Reg_A
+ *  Brief:	Stores (copies) the value from reg_A to the given memory
+ *			address.
+ *
+ *	Affected Flags: None
+ */
+#define OPCODE_STOR_MR  26
+//-----------------------------------------------------------------------
+
+/*OPCODE 27: STORP ------------------------------------------------------
+ *  Use:	STORP Reg_A Reg_B
+ *  Brief:	Stores (copies) a value from reg_B into the memory address in
+ *			reg_A.
+ *
+ *	Affected Flags: None
+ */
+#define OPCODE_STORP_RR 27
+//-----------------------------------------------------------------------
+
+/*OPCODE 28: PUSH -------------------------------------------------------
+ *  Use:	PUSH Reg_A
+ *  Brief:	Pushes (copies) the value in reg_A to the top of the system
+ *			stack. This is accomplished by first decrementing SP and then
+ *			storing the at the new address in SP.
+ *
+ *	Affected Flags: None
+ */
+#define OPCODE_PUSH_R   28
+//-----------------------------------------------------------------------
+
+/*OPCODE 29: POP --------------------------------------------------------
+ *  Use:	POP Reg_A
+ *  Brief:	Pops (copies) the value at the top of the system stack into
+ *			reg_A. This is accomplished by first copying the value at the
+ *			address in SP and then incrementing SP.
+ *
+ *	Affected Flags: None
+ */
+#define OPCODE_POP_R    29
+//-----------------------------------------------------------------------
+
+/*OPCODE 30: SWR --------------------------------------------------------
+ *  Use:	SWR Imm
+ *  Brief:	Copies value of Imm into the "Window" System Register. For Register Windowing.
+ *
+ *	Affected Flags: None
+ */
 #define OPCODE_SWR_I	30
+//-----------------------------------------------------------------------
+
+/*OPCODE 31: AWR --------------------------------------------------------
+ *  Use:	AWR Imm
+ *  Brief:	Increments the "Window" System Register by Imm. For Register Windowing.
+ *
+ *	Affected Flags: None
+ */
 #define OPCODE_AWR_I	31
+//-----------------------------------------------------------------------
+
 
 
 //Exit Code Errors
