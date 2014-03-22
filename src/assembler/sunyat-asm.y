@@ -27,6 +27,7 @@
 	#include <stdlib.h>
 	#include <string.h>
 	#include <assert.h>
+    #include <stdint.h>
 
 	#include "token.h"
 	#include "../sunyat.h"
@@ -36,24 +37,24 @@
 	extern int assembler_pass;	/* sunyat-asm.lex */
 	extern char* filename;	/* sunyat-asm.lex */
 
-	unsigned char high_opcode;
-	unsigned char high_reg;
-	unsigned char low;
+	uint8_t high_opcode;
+	uint8_t high_reg;
+	uint8_t low;
 
-	unsigned char msg_data [SIZE_APP_MSG];
-	unsigned char ram_data [SIZE_APP_RAM];
-	unsigned char address = 0;
+	uint8_t msg_data [SIZE_APP_MSG];
+	uint8_t ram_data [SIZE_APP_RAM];
+	uint8_t address = 0;
 
 	char *variables [MAX_CNT];
-	unsigned char variable_addrs [MAX_CNT];
+	uint8_t variable_addrs [MAX_CNT];
 	int variable_cnt = 0;
 
 	char *labels [MAX_CNT];
-	unsigned char label_addrs [MAX_CNT];
+	uint8_t label_addrs [MAX_CNT];
 	int label_cnt = 0;
 
 	char *constants [MAX_CNT];
-	unsigned char constant_values [MAX_CNT];
+	uint8_t constant_values [MAX_CNT];
 	int constant_cnt = 0;
 
 	int errors_found = 0;
@@ -212,7 +213,7 @@ message_line ::= MESSAGE(msg).	{
 }
 
 address_line ::= ADDR_DIRECTIVE immediate(immed).	{
-	if ((unsigned char)immed.data >= SIZE_APP_RAM) {
+	if ((uint8_t)immed.data >= SIZE_APP_RAM) {
 		if (assembler_pass == 1) {
 			warning (immed, ".ADDRESS must be no grater than 253 (inclusive)... ignoring", NULL);
 		}
@@ -355,7 +356,7 @@ code_line ::= MOV REGISTER(dst) REGISTER(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_MOV_RR;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;
+		low = (uint8_t)src.data;
 		store_instruction ();
 	}
 }
@@ -364,7 +365,7 @@ code_line ::= MOV REGISTER(dst) immediate(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_MOV_RI;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;
+		low = (uint8_t)src.data;
 		store_instruction ();
 	}
 }
@@ -373,7 +374,7 @@ code_line ::= ADD REGISTER(dst) REGISTER(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_ADD_RR;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;
+		low = (uint8_t)src.data;
 		store_instruction ();
 	}
 }
@@ -382,7 +383,7 @@ code_line ::= ADD REGISTER(dst) immediate(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_ADD_RI;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;
+		low = (uint8_t)src.data;
 		store_instruction ();
 	}
 }
@@ -394,7 +395,7 @@ code_line ::= SWR immediate(src).{
 		if (src.data > MAX_WIN_INDEX) {
             error (src, "Your set of the beginning window was to large.", src.token_str) ;
         }
-        low = (unsigned char)src.data ;
+        low = (uint8_t)src.data ;
 		store_instruction ();
 	}
 }
@@ -403,7 +404,7 @@ code_line ::= AWR immediate(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_AWR_I;
 		high_reg = 0 ; //dst.data;
-		low = (unsigned char)src.data & ~(~0<<5) ;
+		low = (uint8_t)src.data & ~(~0<<5) ;
 		store_instruction ();
 	}
 }
@@ -413,7 +414,7 @@ code_line ::= SUB REGISTER(dst) REGISTER(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_ADD_RR;
 		high_reg = dst.data;
-		low = (unsigned char)(-src.data);
+		low = (uint8_t)(-src.data);
 		store_instruction ();
 	}
 }
@@ -424,7 +425,7 @@ code_line ::= SUB REGISTER(dst) immediate(src).{ //THIS IS A PSEUDO-INSTRUCTION
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_ADD_RI;
 		high_reg = dst.data;
-		low = (unsigned char)(-src.data);
+		low = (uint8_t)(-src.data);
 		store_instruction ();
 	}
 }
@@ -433,7 +434,7 @@ code_line ::= MUL REGISTER(dst) REGISTER(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_MUL_RR;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;
+		low = (uint8_t)src.data;
 		store_instruction ();
 	}
 }
@@ -442,7 +443,7 @@ code_line ::= MUL REGISTER(dst) immediate(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_MUL_RI;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;
+		low = (uint8_t)src.data;
 		store_instruction ();
 	}
 }
@@ -451,7 +452,7 @@ code_line ::= DIV REGISTER(dst) REGISTER(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_DIV_RR;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;
+		low = (uint8_t)src.data;
 		store_instruction ();
 	}
 }
@@ -460,7 +461,7 @@ code_line ::= DIV REGISTER(dst) immediate(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_DIV_RI;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;
+		low = (uint8_t)src.data;
 		store_instruction ();
 	}
 }
@@ -469,7 +470,7 @@ code_line ::= CMP REGISTER(dst) REGISTER(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_CMP_RR;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;
+		low = (uint8_t)src.data;
 		store_instruction ();
 	}
 }
@@ -478,7 +479,7 @@ code_line ::= CMP REGISTER(dst) immediate(src). {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_CMP_RI;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;
+		low = (uint8_t)src.data;
 		store_instruction ();
 	}
 }
@@ -496,7 +497,7 @@ code_line ::= JEQ memory(addr). {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_JEQ_M;
 		high_reg = 0;
-		low = (unsigned char)addr.data;
+		low = (uint8_t)addr.data;
 		store_instruction ();
 	}
 }
@@ -505,7 +506,7 @@ code_line ::= JNE memory(addr). {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_JNE_M;
 		high_reg = 0;
-		low = (unsigned char)addr.data;
+		low = (uint8_t)addr.data;
 		store_instruction ();
 	}
 }
@@ -514,7 +515,7 @@ code_line ::= JGR memory(addr). {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_JGR_M;
 		high_reg = 0;
-		low = (unsigned char)addr.data;
+		low = (uint8_t)addr.data;
 		store_instruction ();
 	}
 }
@@ -523,7 +524,7 @@ code_line ::= JLS memory(addr). {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_JLS_M;
 		high_reg = 0;
-		low = (unsigned char)addr.data;
+		low = (uint8_t)addr.data;
 		store_instruction ();
 	}
 }
@@ -532,7 +533,7 @@ code_line ::= CALL memory(addr). {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_CALL_M;
 		high_reg = 0;
-		low = (unsigned char)addr.data;
+		low = (uint8_t)addr.data;
 		store_instruction ();
 	}
 }
@@ -550,7 +551,7 @@ code_line ::= AND REGISTER(dst) REGISTER(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_AND_RR;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;
+		low = (uint8_t)src.data;
 		store_instruction ();
 	}
 }
@@ -559,7 +560,7 @@ code_line ::= AND REGISTER(dst) immediate(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_AND_RI;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;
+		low = (uint8_t)src.data;
 		store_instruction ();
 	}
 }
@@ -568,7 +569,7 @@ code_line ::= OR REGISTER(dst) REGISTER(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_OR_RR;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;
+		low = (uint8_t)src.data;
 		store_instruction ();
 	}
 }
@@ -577,7 +578,7 @@ code_line ::= OR REGISTER(dst) immediate(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_OR_RI;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;
+		low = (uint8_t)src.data;
 		store_instruction ();
 	}
 }
@@ -586,7 +587,7 @@ code_line ::= XOR REGISTER(dst) REGISTER(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_XOR_RR;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;
+		low = (uint8_t)src.data;
 		store_instruction ();
 	}
 }
@@ -595,7 +596,7 @@ code_line ::= XOR REGISTER(dst) immediate(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_XOR_RI;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;
+		low = (uint8_t)src.data;
 		store_instruction ();
 	}
 }
@@ -625,7 +626,7 @@ code_line ::= LOAD REGISTER(dst) memory(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_LOAD_RM;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;
+		low = (uint8_t)src.data;
 		store_instruction ();
 	}
 }
@@ -634,7 +635,7 @@ code_line ::= LOADP REGISTER(dst) REGISTER(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_LOADP_RR;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;
+		low = (uint8_t)src.data;
 		store_instruction ();
 	}
 }
@@ -643,7 +644,7 @@ code_line ::= STOR memory(dst) REGISTER(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_STOR_MR;
 		high_reg = src.data; /* src and dst are reverse in the encoding */
-		low = (unsigned char)dst.data;
+		low = (uint8_t)dst.data;
 		store_instruction ();
 	}
 }
@@ -652,7 +653,7 @@ code_line ::= STORP REGISTER(dst) REGISTER(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_STORP_RR;
 		high_reg = dst.data;
-		low = (unsigned char)src.data;
+		low = (uint8_t)src.data;
 		store_instruction ();
 	}
 }

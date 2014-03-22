@@ -5,32 +5,33 @@
 /*
  * Name        : sunyat-asm.lex
  * Author      : William "Amos" Confer
- * 
+ *
  * License     : Copyright (c) 2008--2014 William "Amos" Confer
- *              
- *    Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ *    Permission is hereby granted, free of charge, to any person obtaining a
  *    copy of this software and associated documentation files (the "Software"),
  *    to deal in the Software without restriction, including without limitation
- *    the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ *    the rights to use, copy, modify, merge, publish, distribute, sublicense,
  *    and/or sell copies of the Software, and to permit persons to whom the
  *    Software is furnished to do so, subject to the following conditions:
  *
  *    The above copyright notice and this permission notice shall be included in
- *    all copies or substantial portions of the Software.;  
+ *    all copies or substantial portions of the Software.;
  *
  *    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
+ *    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
  *    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- *    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ *    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ *    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  *    DEALINGS IN THE SOFTWARE.
  */
- 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdint.h>
 
 #include "token.h"
 #include "sunyat-asm.h"
@@ -45,10 +46,10 @@ Token T;
 char *tmp_str;
 
 /* Requires two passes... (1) to build symbol, address, and value tables for
- * variables, constants and labels, and (2) to generate output ROM file if 
+ * variables, constants and labels, and (2) to generate output ROM file if
  * stage (1) passes without error.
  */
-int assembler_pass; 
+int assembler_pass;
 int line_num;
 int char_pos;
 
@@ -248,17 +249,17 @@ awr { pack_token (&T); Parse (parser, TOKEN_AWR, T); }
 
 int main (int argc, char **argv) {
 	extern int errors_found;        /* sunyat-asm.y */
-	extern unsigned char address;   /* sunyat-asm.y */
+	extern uint8_t address;   /* sunyat-asm.y */
 	extern char *variables[];
 	extern char *constants[];
 	extern char *labels[];
-	extern unsigned char variable_addrs [];
-	extern unsigned char constant_values [];
-	extern unsigned char label_addrs [];
+	extern uint8_t variable_addrs [];
+	extern uint8_t constant_values [];
+	extern uint8_t label_addrs [];
 	extern int variable_cnt;
 	extern int constant_cnt;
 	extern int label_cnt;
-	
+
 	int i;
 
 	argv++; argc--;
@@ -274,7 +275,7 @@ int main (int argc, char **argv) {
 			exit (1);
 		}
 		/* strcpy(filename + strlen (filename) - 3, "rom"); */
-		strcpy (filename, argv [0]);		
+		strcpy (filename, argv [0]);
 		strcpy (strrchr (filename, '.'), ".rom");
 		yyin = fopen (argv [0], "r");
 		if (yyin != NULL) {
@@ -305,7 +306,7 @@ int main (int argc, char **argv) {
 			ParseFree (parser, free);
 			fclose (yyin);
 		}
-		free (filename);		
+		free (filename);
 	}
 	else {
 		fprintf (stderr, "no input file given\n");

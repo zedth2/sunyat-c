@@ -48,6 +48,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <time.h>
+#include <stdint.h>
 
 #include <curses.h>
 
@@ -123,7 +124,7 @@ const char ERR_WINDOW_RANGE []=
 
 char app_msg [SIZE_APP_MSG + 1];	/* +1 is to add a guaranteed null terminator */
 
-unsigned char sunyat_ram [SIZE_APP_RAM];
+uint8_t sunyat_ram [SIZE_APP_RAM];
 
 /*
  * register file for the sunyat-1.
@@ -135,7 +136,7 @@ unsigned char sunyat_ram [SIZE_APP_RAM];
  * 5-37:	33 General Purpose registers
  */
 
-unsigned char sunyat_regs [SIZE_REG] = {
+uint8_t sunyat_regs [SIZE_REG] = {
 	0, 0, 0, 5,                             /* REG_PC, REG_IRH, REG_IRL, REG_SP */
 	SIZE_APP_RAM,                           /* stack grows down from top of RAM */
 	'0', '1', '2', '3', '4', '5', '6', '7', /* GPRS no longer default to Amos' wedding date */
@@ -150,7 +151,7 @@ int sunyat_flag_sign = 0;
 int cursor_row = 0;
 int cursor_col = 0;
 
-unsigned char terminal[TERMINAL_HEIGHT][TERMINAL_WIDTH + 1];
+uint8_t terminal[TERMINAL_HEIGHT][TERMINAL_WIDTH + 1];
 
 bool linefeed_buffered = false;
 
@@ -164,10 +165,10 @@ void terminal_restore();
 
 void sunyat_execute ();
 
-unsigned char get_opcode ();
-unsigned char get_dreg ();
-unsigned char get_sreg ();
-unsigned char get_mem ();
+uint8_t get_opcode ();
+uint8_t get_dreg ();
+uint8_t get_sreg ();
+uint8_t get_mem ();
 signed char get_imm ();
 
 void set_flags (signed char result);
@@ -177,28 +178,19 @@ void set_flags (signed char result);
 
 int main (int argc, char *argv []) {
 	clock_t clock_start = clock();
-	//printf (MSG_STARTUP, argv [1]);
-//	printf (MSG_STARTUP_BEGIN);
-//	printf ("%u.%u", VERSION_MAJOR, VERSION_MINOR);
-//	if (strlen (VERSION_MODIFIER) > 0) {
-//		printf ("_%s", VERSION_MODIFIER);
-//	}
-//	printf (" Build %u", BUILD_NUMBER);
-	// check for application parameter
-	// check for application parameter
+
 	if (argc != 2) 	{
 		printf (ERR_BAD_USAGE);
 		return EXIT_FAILURE;
 	}
 
-//	printf (MSG_STARTUP_END, argv [1]);
 
 	// test application size
-	unsigned char file_buffer [SIZE_APP_ROM];
+	uint8_t file_buffer [SIZE_APP_ROM];
 	FILE *infile = NULL;
 	if ((infile = fopen (argv [1], "rb")) != NULL) {
 		// is it at least SIZE_APP_ROM big ?
-		if (SIZE_APP_ROM != fread (file_buffer, sizeof (unsigned char), SIZE_APP_ROM, infile)) {
+		if (SIZE_APP_ROM != fread (file_buffer, sizeof (uint8_t), SIZE_APP_ROM, infile)) {
 			// not big enough
 			printf (ERR_BYTE_SIZE);
 			return EXIT_FAILURE;
@@ -321,12 +313,12 @@ void sunyat_execute () {
 	bool terminal_too_small_prev_cycle = false;
 
 	for (;;) {
-		unsigned char opcode;
-		unsigned char sreg;
-		unsigned char dreg;
-		unsigned char mem;
+		uint8_t opcode;
+		uint8_t sreg;
+		uint8_t dreg;
+		uint8_t mem;
 		signed char imm;
-		unsigned char cmp_result;
+		uint8_t cmp_result;
 
 		int current_width;
 		int current_height;
@@ -541,12 +533,12 @@ void sunyat_execute () {
 					switch ((int) sunyat_regs [dreg])
 					{
 						case KEY_ENTER:
-						sunyat_regs [dreg] = (unsigned char) 0xD;
+						sunyat_regs [dreg] = (uint8_t) 0xD;
 						linefeed_buffered = true;
 						break;
 
 						case ERR:
-						sunyat_regs [dreg] = (unsigned char) 0;
+						sunyat_regs [dreg] = (uint8_t) 0;
 						break;
 
 						default:
@@ -555,7 +547,7 @@ void sunyat_execute () {
 				}
 				else
 				{
-					sunyat_regs [dreg] = (unsigned char) 0xA;
+					sunyat_regs [dreg] = (uint8_t) 0xA;
 					linefeed_buffered = false;
 				}
 			else {
@@ -573,12 +565,12 @@ void sunyat_execute () {
 					switch ((int) sunyat_regs [dreg])
 					{
 						case KEY_ENTER:
-						sunyat_regs [dreg] = (unsigned char) 0xD;
+						sunyat_regs [dreg] = (uint8_t) 0xD;
 						linefeed_buffered = true;
 						break;
 
 						case ERR:
-						sunyat_regs [dreg] = (unsigned char) 0;
+						sunyat_regs [dreg] = (uint8_t) 0;
 						break;
 
 						default:
@@ -587,7 +579,7 @@ void sunyat_execute () {
 				}
 				else
 				{
-					sunyat_regs [dreg] = (unsigned char) 0xA;
+					sunyat_regs [dreg] = (uint8_t) 0xA;
 					linefeed_buffered = false;
 				}
 			else {
@@ -730,19 +722,19 @@ void sunyat_execute () {
 	}
 }
 
-unsigned char get_opcode () {
+uint8_t get_opcode () {
 	return sunyat_regs [REG_IRH] >> 3; // top 5 bits are opcode
 }
 
-unsigned char get_dreg () {
+uint8_t get_dreg () {
 	return sunyat_regs [REG_IRH] & 0x07; // bottom 3 bits are dreg
 }
 
-unsigned char get_sreg () {
+uint8_t get_sreg () {
 	return sunyat_regs [REG_IRL] & 0x07; // bottom 3 bits are sreg
 }
 
-unsigned char get_mem () {
+uint8_t get_mem () {
 	return sunyat_regs [REG_IRL];
 }
 
