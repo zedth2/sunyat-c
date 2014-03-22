@@ -26,6 +26,8 @@
 #ifndef _SUNYAT_H_
 #define _SUNYAT_H_
 
+int start_sunyat(char *rom);
+
 /*
  * On read:  0 if no key, key code otherwise
  * On write: character output w/ cursor adjust
@@ -46,7 +48,7 @@
  *  Brief:
  *      This will be the max size allowed for any load rom file.
  */
-#define SIZE_APP_ROM    SIZE_APP_RAM   //APP_ROM_SIZE (APP_MSG_SIZE + APP_RAM_SIZE)
+#define SIZE_APP_ROM    SIZE_APP_RAM + SIZE_APP_MSG   //APP_ROM_SIZE (APP_MSG_SIZE + APP_RAM_SIZE)
 
 
 //System Registers

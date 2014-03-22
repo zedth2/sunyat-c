@@ -28,8 +28,8 @@ all:	sunyat sunyat-asm
 #----------------------------------------
 # sunyat
 #----------------------------------------
-sunyat:	sunyat.c sunyat.h build_number.h
-	gcc -g -o ../bin/sunyat sunyat.c  -lncurses
+sunyat:	main.c sunyat.c sunyat.h build_number.h
+	gcc -g -o ../bin/sunyat main.c sunyat.c  -lncurses
 
 #----------------------------------------
 # sunyat-asm

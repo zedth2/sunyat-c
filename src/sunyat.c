@@ -183,24 +183,15 @@ static void set_flags (int8_t result);
 
 //////////////////////////////////////////////////
 
-/* I want to rip main out of this file and drop it in another file and then
- * let sunyat just be one big file with just a function we can call.
- * Which would also put us in the position of making all but one function static.
- */
-int main (int argc, char *argv []) {
-	clock_t clock_start = clock();
+int start_sunyat(char *rom){
+    clock_t clock_start = clock();
 
-	if (argc != 2) 	{
-		printf (ERR_BAD_USAGE);
-		return EXT_ERR_NO_FILE_ARG;
-	}
-
-
-	// test application size
+    // test application size
 	uint8_t file_buffer [SIZE_APP_ROM];
 	FILE *infile = NULL;
-	if ((infile = fopen (argv [1], "rb")) != NULL) {
+	if ((infile = fopen (rom, "rb")) != NULL) {
 		// is it at least SIZE_APP_ROM big ?
+
 		if (SIZE_APP_ROM != fread (file_buffer, sizeof (uint8_t), SIZE_APP_ROM, infile)) {
 			// not big enough
 			printf (ERR_BYTE_SIZE);
@@ -257,8 +248,9 @@ int main (int argc, char *argv []) {
 
 	printf ("\n\nSUNYAT exited after %lu clock cycles\n\n", sunyat_clock_ticks);
 
-	return EXIT_SUCCESS;
+    return EXIT_SUCCESS ;
 }
+
 
 static int setup_ncurses_terminal () {
 	if (NULL == initscr ()) {
