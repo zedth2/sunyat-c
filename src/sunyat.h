@@ -127,25 +127,6 @@ int start_sunyat(char *rom);
  */
 #define MAX_WIN_INDEX SIZE_REG - SIZE_WIN
 
-/**
- *  Brief:
- *      This is the minimal width the terminal can be. Once it becomes
- *          less than this an error message pops up.
- */
-#define TERMINAL_WIDTH  80
-
-/**
- *  Brief:
- *      This is the minimal height the terminal can be. Once it becomes
- *          less than this an error message pops up.
- */
-#define TERMINAL_HEIGHT 24
-
-/**
- *  Brief:
- *      The size of the tab character to be used in ncures.
- */
-#define TAB_SIZE         4
 
 
 

@@ -62,26 +62,22 @@
 
 
 #include "sunyat.h"
+#include "sat_scr.h"
 
 //////////////////////////////////////////////////
+
+//extern const char ERR_NCURSES_INIT [];
+//extern const char ERR_NCURSES_CBREAK [];
+//extern const char ERR_NCURSES_NODELAY [];
+//extern const char ERR_NCURSES_NOECHO [];
+//extern const char ERR_NCURSES_KEYPAD [];
+//extern const char ERR_NCURSES_CURSOR [];
 
 const char MSG_STARTUP [] =
 	"\nThe SUNYAT Virtual Machine version 0x0 - (C) 2008, William \"Amos\" Confer\n\nLoading application: %s\n\n";
 const char MSG_BAR [] =
 	"----------------------------------------";
 
-const char ERR_NCURSES_INIT [] =
-	"\tCould not initialize ncurses\n";
-const char ERR_NCURSES_CBREAK [] =
-	"\tCould not disable character buffering\n";
-const char ERR_NCURSES_NODELAY [] =
-	"\tCould not disable blocking on \"getch\"\n";
-const char ERR_NCURSES_NOECHO [] =
-	"\tCould not disable echo\n";
-const char ERR_NCURSES_KEYPAD [] =
-	"\tCould not enable keypad usage\n";
-const char ERR_NCURSES_CURSOR [] =
-	"\tCould not modify cursor\n";
 const char ERR_NO_APP [] =
 	"\tNo application provided...  SUNYAT <filename>\n";
 const char ERR_BAD_USAGE [] =
@@ -154,10 +150,10 @@ uint8_t sunyat_regs [SIZE_REG] = {
 int sunyat_flag_zero = 0;
 int sunyat_flag_sign = 0;
 
-int cursor_row = 0;
-int cursor_col = 0;
+extern int cursor_row ;
+extern int cursor_col ;
 
-uint8_t terminal[TERMINAL_HEIGHT][TERMINAL_WIDTH + 1];
+extern uint8_t terminal[TERMINAL_HEIGHT][TERMINAL_WIDTH + 1];
 
 bool linefeed_buffered = false;
 
@@ -166,9 +162,6 @@ long int sunyat_clock_ticks = 0;
 //////////////////////////////////////////////////
 //int setup_terminal();
 //I feel like these should be in the header.
-static int setup_ncurses_terminal();
-static void terminal_init();
-static void terminal_restore();
 
 static void sunyat_execute ();
 
@@ -251,66 +244,6 @@ int start_sunyat(char *rom){
     return EXIT_SUCCESS ;
 }
 
-
-static int setup_ncurses_terminal () {
-	if (NULL == initscr ()) {
-		printf (ERR_NCURSES_INIT);
-		return -1;
-	}
-
-	if (ERR == cbreak ()) {
-		printf (ERR_NCURSES_CBREAK);
-		return -1;
-	}
-
-	if (ERR == noecho ()) {
-		printf (ERR_NCURSES_NOECHO);
-		return -1;
-	}
-
-	if (ERR == nodelay (stdscr, true)) {
-		printf (ERR_NCURSES_NODELAY);
-		return -1;
-	}
-
-	if (ERR == keypad (stdscr, true)) {
-		printf (ERR_NCURSES_KEYPAD);
-		return -1;
-	}
-
-	if (ERR == curs_set (1)) {
-		printf (ERR_NCURSES_CURSOR);
-		return -1;
-	}
-
-	return 0;
-}
-
-
-
-static void terminal_init() {
-	int y;
-	int x;
-
-	for (y = 0; y < TERMINAL_HEIGHT; y++) {
-		for (x = 0; x < TERMINAL_WIDTH; x++) {
-			terminal [y][x] = ' ';
-		}
-		terminal [y][x] = '\0';
-	}
-}
-
-static void terminal_restore() {
-	int y;
-
-	erase ();
-
-	for (y = 0; y < TERMINAL_HEIGHT; y++) {
-		mvprintw( y, 0, (const char *)(terminal [y]));
-	}
-
-	move (cursor_row, cursor_col);
-}
 
 static void sunyat_execute () {
 	bool terminal_too_small_prev_cycle = false;
