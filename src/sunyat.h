@@ -454,7 +454,7 @@ int start_sunyat(char *rom);
  *
  *	Affected Flags: None
  */
-#define OPCODE_PUSH_R   28
+//#define OPCODE_PUSH_R   28
 //-----------------------------------------------------------------------
 
 /*OPCODE 29: POP --------------------------------------------------------
@@ -465,8 +465,20 @@ int start_sunyat(char *rom);
  *
  *	Affected Flags: None
  */
-#define OPCODE_POP_R    29
+//#define OPCODE_POP_R    29
 //-----------------------------------------------------------------------
+
+
+/**OPCODE 28
+ *  USE:    NONE
+ *  Brief:  This replaces push and pop, if the low bits are zero then
+ *          it's a push, if not pop.
+ *
+ *	Affected Flags: ???
+ */
+#define OPCODE_STACKER_R 28
+
+
 
 /*OPCODE 30: SWR --------------------------------------------------------
  *  Use:	SWR Imm

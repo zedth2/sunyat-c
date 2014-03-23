@@ -660,7 +660,7 @@ code_line ::= STORP REGISTER(dst) REGISTER(src).{
 
 code_line ::= PUSH REGISTER(dst). {
 	if (assembler_pass == 2) {
-		high_opcode = OPCODE_PUSH_R;
+		high_opcode = OPCODE_STACKER_R;
 		high_reg = dst.data;
 		low = 0;
 		store_instruction ();
@@ -669,9 +669,9 @@ code_line ::= PUSH REGISTER(dst). {
 
 code_line ::= POP REGISTER(dst). {
 	if (assembler_pass == 2) {
-		high_opcode = OPCODE_POP_R;
+		high_opcode = OPCODE_STACKER_R;
 		high_reg = dst.data;
-		low = 0;
+		low = 1;
 		store_instruction ();
 	}
 }

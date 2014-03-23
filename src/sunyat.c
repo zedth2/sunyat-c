@@ -672,7 +672,7 @@ static void sunyat_execute () {
 				refresh ();
 			}
 			break;
-		case OPCODE_PUSH_R:
+		/*case OPCODE_PUSH_R:
 			if (sunyat_regs [REG_SP] <= 0)
 			{
 				printf (ERR_PUSH);
@@ -688,8 +688,25 @@ static void sunyat_execute () {
 			}
 			sunyat_regs [dreg] = sunyat_ram [sunyat_regs [REG_SP]];
 			sunyat_regs [REG_SP]++;
-			break;
-
+			break;*/
+        case OPCODE_STACKER_R:
+            if (0 == imm) { //Push
+                if (sunyat_regs [REG_SP] <= 0)
+                {
+                    printf (ERR_PUSH);
+                    return;
+                }
+                sunyat_regs [REG_SP]--;
+                sunyat_ram [sunyat_regs [REG_SP]] = sunyat_regs [dreg]; //yes, dreg is correct for this one
+            } else { //Pop
+                if (sunyat_regs [REG_SP] >= SIZE_APP_RAM) {
+                    printf (ERR_POP);
+                    return;
+                }
+                sunyat_regs [dreg] = sunyat_ram [sunyat_regs [REG_SP]];
+                sunyat_regs [REG_SP]++;
+            }
+            break ;
 		//Windowing opcodes
 		case OPCODE_SWR_I:
 			{
