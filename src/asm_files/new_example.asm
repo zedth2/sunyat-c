@@ -168,19 +168,19 @@
 ; character is found.
 ;------------------------------------------------------------------------------
 !print_string	; (PS)
-	push	R6	
-	push	R7
-	;while (mem[R7] != 0) { print(mem[R7]); R7++ }
+	push	R6	;backup R6 for use during function
+	push	R7	;push R7 (string memory location) into the stack
+	;while (mem[R7] != 0) { print(mem[R7]); R7++ } (print chars to screen until '0' is found)
 !while_PS	
-	loadp	R6	R7
+	loadp	R6	R7 ;copies value of R7's memory address and puts it in R6 (for comparison)
 	cmp	R6	0
 	jeq	!while_PS_end
-	stor	TERM	R6
+	stor	TERM	R6 ;print to screen
 	add	R7	1
 	jmp	!while_PS
 !while_PS_end
 	pop	R7
-	pop	R6
+	pop	R6 ;Get original R6 back from the stack
 	ret
 !print_string_end
 
@@ -190,7 +190,7 @@
 ; the variable 'key'.
 ;------------------------------------------------------------------------------
 !read_letter	; (RL)
-	push	R0
+	push	R0	;backup R0 (in the stack)
 !do_RL
 	load	R0	TERM
 !do_RL_while

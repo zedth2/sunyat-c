@@ -467,7 +467,7 @@ int start_sunyat(char *rom);
  *
  *	Affected Flags: None
  */
-#define OPCODE_SWR_I	30
+#define OPCODE_SWR_I	29 
 //-----------------------------------------------------------------------
 
 /*OPCODE 31: AWR --------------------------------------------------------
@@ -476,7 +476,7 @@ int start_sunyat(char *rom);
  *
  *	Affected Flags: None
  */
-#define OPCODE_AWR_I	31
+#define OPCODE_AWR_I	30
 //-----------------------------------------------------------------------
 
 
