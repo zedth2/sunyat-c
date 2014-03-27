@@ -1,7 +1,7 @@
 ;------------------------------------
 ;The SUNYAT Shell
 ;
-;String Delimiter: '%'
+;String Delimiter: 0x00
 ;------------------------------------
 
 .message	SUNYAT Shell Prototype
@@ -13,7 +13,7 @@
 !crlf
 	.variable	crlf0	CR
 	.variable	crlf1	LF
-	.variable	crlf2	'%'
+	.variable	crlf2	0x00
 
 !prompt
 	.variable prompt0 '['
@@ -27,7 +27,7 @@
 	.variable prompt8 'A'
 	.variable prompt9 'T'
 	.variable prompt10 ']'
-	.variable prompt11 '%'
+	.variable prompt11 0x00
 
 !command_buffer
 	.variable cmd0 ' '
@@ -81,18 +81,14 @@
 	call !print ;print the prompt
 	call !build_command ;get a 'command'
 	call !print_line
-	;Echo user input-------------------------
-	;	mov R0 !command_buffer
-	;	call !print
-	;	call !print_line
-	;----------------------------------------
 	call !get_cmd ;Figure out if the user input a real command
 	jmp !main ;back to the top
 	!exit_shell
 	ret
 !main_end
 
-;-!build_command---------------------------------------------------------------------------------
+;-!build_command----------------------------------------------------------------------------------
+; Builds a 'command' string, stored in 'command buffer'
 ;-Reads chars from terminal (ends when it catches a LF from ENTER)
 ;-Makes sure they're readable
 ;-Drops them into !command_buffer
@@ -100,30 +96,30 @@
 ;-Stores the LF for delimiting later, but does not print it.
 ;------------------------------------------------------------------------------------------------
 !build_command ;BC
-	push R0 ;backup R0
-	push R1 ;backup R1
-	mov R0 !command_buffer ;R0 becomes string pointer
-	!do_BC ;Collects characters and stores them into command_buffer
-		!get_char ;GC - WAITS FOR KEYSTROKES and makes sure they are acceptable values
-			load R1 TERM ;user inputs character, store it in R1
-			!do_GC_while ;makes sure that the entered key is acceptable
-				cmp R1 0x07
-				jls !get_char ;jump to get_char if entry is Readable (less than 'bell')
+	push R0
+	push R1
+	mov R0 !command_buffer ;get pointer
+	!bc_while
+		!get_character ;gc
+			load R1 TERM ;user input
+			!gc_while ;check the char (valid ascii)
+				cmp R1 0x00
+				jls !get_character ;char !< NULL
 				cmp R1 0x7F
-				jgr	!get_char ;jump to get_char if entry is Readable (greater than DEL)
-			!do_GC_end
-		!get_char_end
-			cmp R1 LF
-			jeq !do_BC_end ;if they pressed "ENTER", don't store it. End function.
-			storp R0 R1 ;Drop R1 into location R0. Hopefully within the command_buffer
-			add R0 1 ;increment the command_buffer pointer (R0)
-			stor TERM R1 ;print character
-			jmp !do_BC ;keep getting characters
-	!do_BC_end
-	mov R1 '%'
-	storp R0 R1 ;drop a delimiter
-	pop R1 ;return value
-	pop	R0 ;return value
+				jgr	!get_character ;char !> DEL
+			!gc_while_end
+		!get_character_end
+		cmp R1 LF
+		jeq !bc_while_end ;hit "enter" - we're done here.
+		storp R0 R1 
+		add R0 1 ;increment pointer
+		stor TERM R1 
+		jmp !bc_while
+	!bc_while_end
+	mov R1 0x00
+	storp R0 R1 ;Drop the delimiter (NULL)
+	pop R1
+	pop	R0
 	ret
 !build_command_end
 ;------------------------------------------------------------------------------------------------
@@ -143,7 +139,7 @@
 
 	mov R0 !command_buffer ;R0: userCmd pointer
 	loadp R1 R0 ;R1:  userCmd char
-	cmp R1 '%'
+	cmp R1 0x00
 	jeq !end_of_commands ;make sure command isn't empty
 	;cmp R1 ' '
 	;jeq !end_of_commands ;make sure command doesn't start with a space (arg delimiter)
@@ -185,7 +181,7 @@
 	!analyze_while
 		loadp R1 R0
 		loadp R3 R2
-		cmp R1 '%' ;Hit delimiter, run code.
+		cmp R1 0x00 ;Hit delimiter, run code.
 		jeq !analyze_return
 	;cmp R1 ' ' ;Hit arg delimiter, get args
 	;jeq !analyze_return
@@ -201,17 +197,17 @@
 
 ;-!print-----------------------------------------------------------------------------------------
 ;-Prints chars individually from a memory location moved into R0
-;-Stops when it finds a '%'
+;-Stops when it finds a 0x00
 ;
-;-Does not print the '%'
+;-Does not print the 0x00
 ;------------------------------------------------------------------------------------------------
 !print
 	push R0 ;backup R1
 	push R1 ;backup R0
 	!while_PP
 		loadp R1 R0 ;Load character at address R0 into R1. R0 is an array pointer.
-		cmp R1 '%'
-		jeq !while_PP_end ;If the character is '%' stop printing.
+		cmp R1 0x00
+		jeq !while_PP_end ;If the character is 0x00 stop printing.
 		stor TERM R1 ;print character
 		add R0 1 ;Increment array pointer
 		jmp !while_PP ;keep printing
