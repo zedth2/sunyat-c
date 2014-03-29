@@ -450,7 +450,7 @@ int start_sunyat(char *rom);
 //-----------------------------------------------------------------------
 
 
-/**OPCODE 28
+/**OPCODE 28 
  *  USE:    NONE
  *  Brief:  This replaces push and pop, if the low bits are zero then
  *          it's a push, if not pop.
@@ -461,7 +461,7 @@ int start_sunyat(char *rom);
 
 
 
-/*OPCODE 30: SWR --------------------------------------------------------
+/*OPCODE 29: SWR --------------------------------------------------------
  *  Use:	SWR Imm
  *  Brief:	Copies value of Imm into the "Window" System Register. For Register Windowing.
  *
@@ -470,7 +470,7 @@ int start_sunyat(char *rom);
 #define OPCODE_SWR_I	29 
 //-----------------------------------------------------------------------
 
-/*OPCODE 31: AWR --------------------------------------------------------
+/*OPCODE 30: AWR --------------------------------------------------------
  *  Use:	AWR Imm
  *  Brief:	Increments the "Window" System Register by Imm. For Register Windowing.
  *
@@ -479,6 +479,22 @@ int start_sunyat(char *rom);
 #define OPCODE_AWR_I	30
 //-----------------------------------------------------------------------
 
+/*OPCODE 31: AUX --------------------------------------------------------
+ *  Use:	AUX Imm
+ *  
+ *	0: Save State
+ *	1: 
+ *	2
+ *	3
+ *	4
+ *	5
+ *	6
+ *	7
+ *	
+ *	Affected Flags: None
+ */
+#define OPCODE_AUX_I	31
+//-----------------------------------------------------------------------
 
 
 //Exit Code Errors

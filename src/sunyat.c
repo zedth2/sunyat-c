@@ -659,9 +659,51 @@ static void sunyat_execute () {
 			}
 			break;
 		}
+		//Auxiliary
+/*		case OPCODE_AUX_I:
+		{
+			if (imm < 0 || imm > 7)
+				{
+					printf(ERR_WINDOW_RANGE);
+				}
+			switch (imm)
+			{
+				case 0: //savestate
+				{
+					FILE * pFile;
+  					char buffer[] = { 'x' , 'y' , 'z' };
+  					pFile = fopen ("myfile.bin", "wb");
+  					fwrite (buffer , sizeof(buffer[0]), sizeof(buffer), pFile);
+  					fclose (pFile);
+  				}
 
+/*
+				break;
+				case 1:
+				//other shit
+				break;
+				case 2:
+				//other shit
+				break;
+				case 3:
+				//other shit
+				break;
+				case 4:
+				//other shit
+				break;
+				case 5:
+				//other shit
+				break;
+				case 6:
+				//other shit
+				break;
+				case 7:
+				//other shit
+				break;
 
-
+			}	
+		}
+*/
 		default:
 			// This should be impossible since every opcode is accounted for
 			printf (ERR_IMPOSSIBLE_INSTRUCTION);

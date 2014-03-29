@@ -675,6 +675,20 @@ code_line ::= POP REGISTER(dst). {
 		store_instruction ();
 	}
 }
+//Auxiliary-----------------------------------------------------------------------
+code_line ::= AUX immediate(src).{
+	if (assembler_pass == 2) {
+		high_opcode = OPCODE_AUX_I;
+		high_reg = 0 ; //dst.data;
+		if (src.data < 0 || src.data > 7) {
+            error (src, "0-7 are acceptable values.", src.token_str) ;
+        }
+        low = (uint8_t)src.data ;
+		store_instruction ();
+	}
+}
+//Auxiliary-----------------------------------------------------------------------
+
 
 memory(val) ::= IDENTIFIER(id). {
 	if (assembler_pass == 2) {
