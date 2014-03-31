@@ -1,4 +1,13 @@
-
+/**
+ * Author: Zachary Harvey
+ * Brief:
+ *      This will setup the ncurses windows.
+ *
+ *
+ *
+ *
+ *
+ */
 #include <ncurses.h>
 #include "sat_scr.h"
 

@@ -52,6 +52,9 @@
 
 #include <curses.h>
 
+#include "sunyat.h"
+#include "sat_scr.h"
+
 #ifndef true
 #define true TRUE
 #endif /* true */
@@ -60,18 +63,30 @@
 #define false FALSE
 #endif /* false */
 
-
-#include "sunyat.h"
-#include "sat_scr.h"
+#define STARTUP_PAUSE       3 //Fucking get rid of this.
 
 //////////////////////////////////////////////////
+//Internal Function Prototypes
+static void sunyat_execute (WINDOW *win);
+static uint8_t get_opcode ();
+static uint8_t get_dreg ();
+static uint8_t get_sreg ();
+static uint8_t get_mem ();
+static int8_t get_imm ();
+static void set_flags (int8_t result);
+////////////////////////////////////////////////
+extern int cursor_row ; //This is defined in sat_scr.{h,c}
+extern int cursor_col ; //This is defined in sat_scr.{h,c}
+extern uint8_t terminal[TERMINAL_HEIGHT][TERMINAL_WIDTH + 1]; //This is defined in sat_scr.{h,c}
+bool linefeed_buffered = false;
 
-//extern const char ERR_NCURSES_INIT [];
-//extern const char ERR_NCURSES_CBREAK [];
-//extern const char ERR_NCURSES_NODELAY [];
-//extern const char ERR_NCURSES_NOECHO [];
-//extern const char ERR_NCURSES_KEYPAD [];
-//extern const char ERR_NCURSES_CURSOR [];
+//Get rid of this shit too ⇓⇓⇓⇓⇓
+char app_msg [SIZE_APP_MSG + 1];	/* +1 is to add a guaranteed null terminator */
+
+static int sunyat_flag_zero = 0;
+static int sunyat_flag_sign = 0;
+
+long int sunyat_clock_ticks = 0;
 
 const char MSG_STARTUP [] =
 	"\nThe SUNYAT Virtual Machine version 0x0 - (C) 2008, William \"Amos\" Confer\n\nLoading application: %s\n\n";
@@ -110,13 +125,6 @@ const char ERR_CALL_RANGE [] =
 const char ERR_WINDOW_RANGE []=
 	"\tWindow position out of range. (Acceptable Values: 0-29)\n";
 
-//////////////////////////////////////////////////
-
-
-#define STARTUP_PAUSE       3 //Fucking get rid of this.
-
-//Get rid of this shit too ⇓⇓⇓⇓⇓
-char app_msg [SIZE_APP_MSG + 1];	/* +1 is to add a guaranteed null terminator */
 
 /**
  *  Brief:
@@ -124,8 +132,9 @@ char app_msg [SIZE_APP_MSG + 1];	/* +1 is to add a guaranteed null terminator */
  */
 uint8_t sunyat_ram [SIZE_APP_RAM];
 
-/* //This is already defined and commented in the header so we can probably get rid of it here
- * register file for the sunyat-1.
+/**
+ *  Brief:
+ *      This is the array where the data for alll the registers are stored.
  * 0:		REG_PC
  * 1:		REG_IRH
  * 2:		REG_IRL
@@ -133,56 +142,43 @@ uint8_t sunyat_ram [SIZE_APP_RAM];
  * 4:		REG_SP
  * 5-37:	33 General Purpose registers
  */
-
-/**
- *  Brief:
- *      This is the array where the data for alll the registers are stored.
- */
 uint8_t sunyat_regs [SIZE_REG] = {
-	0, 0, 0, 5,                             /* REG_PC, REG_IRH, REG_IRL, REG_SP */
-	SIZE_APP_RAM,                           /* stack grows down from top of RAM */
+	0, 0, 0, 5,                             /* REG_PC, REG_IRH, REG_IRL, REG_WIN */
+	SIZE_APP_RAM,                           /* REG_SP stack grows down from top of RAM */
 	'0', '1', '2', '3', '4', '5', '6', '7', /* GPRS no longer default to Amos' wedding date */
 	'8', '9', '0', '1', '2', '3', '4', '5', /* GPRS no longer default to Amos' wedding date */
 	'6', '7', '8', '9', '0', '1', '2', '3', /* GPRS no longer default to Amos' wedding date */
 	'4', '5', '6', '7', '8', '9', '0', '1', /* GPRS no longer default to Amos' wedding date */
 };
 
-int sunyat_flag_zero = 0;
-int sunyat_flag_sign = 0;
 
-extern int cursor_row ;
-extern int cursor_col ;
+/**
+ *  Brief:
+ *      This will read in a binary file loading the first SIZE_APP_RAM
+ *          into sunyat_ram then load the next grouping into the registers.
+ *
+ *  Parameters:
+ *      state : The path to the save state to load.
+ *
+ */
+static void load_state(char *state) {
 
-extern uint8_t terminal[TERMINAL_HEIGHT][TERMINAL_WIDTH + 1];
+}
 
-bool linefeed_buffered = false;
+/**
+ *  Brief:
+ *      This will load in rom as a file. It will then drop SIZE_APP_RAM
+ *          into the SUNY AT RAM.
+ *
+ *  Parameters:
+ *      rom : The path to the rom to load.
+ */
+static int load_rom(char *rom) {
+    uint8_t file_buffer [SIZE_APP_ROM];
 
-long int sunyat_clock_ticks = 0;
-
-//////////////////////////////////////////////////
-//int setup_terminal();
-//I feel like these should be in the header.
-
-static void sunyat_execute ();
-
-static uint8_t get_opcode ();
-static uint8_t get_dreg ();
-static uint8_t get_sreg ();
-static uint8_t get_mem ();
-static int8_t get_imm ();
-
-static void set_flags (int8_t result);
-
-
-//////////////////////////////////////////////////
-
-int start_sunyat(char *rom){
-    clock_t clock_start = clock();
-
-    // test application size
-	uint8_t file_buffer [SIZE_APP_ROM];
 	FILE *infile = NULL;
-	if ((infile = fopen (rom, "rb")) != NULL) {
+
+    if ((infile = fopen (rom, "rb")) != NULL) {
 		// is it at least SIZE_APP_ROM big ?
 
 		if (SIZE_APP_ROM != fread (file_buffer, sizeof (uint8_t), SIZE_APP_ROM, infile)) {
@@ -204,22 +200,38 @@ int start_sunyat(char *rom){
 		return EXT_ERR_FILE_NOT_OPEN;
 	}
 
-		/*
-		 * The application image looks good. Let's load it up and run.
-		 */
+    /*
+     * The application image looks good. Let's load it up and run.
+     */
 
-		//close the file... we're done with it now
-		fclose (infile);
+    //close the file... we're done with it now
+    fclose (infile);
 
-		// print the application identification message
-		memcpy (app_msg, file_buffer, SIZE_APP_MSG);
-		app_msg [SIZE_APP_MSG] = '\0';	// make sure the ID message is terminated
-		printf ("%s\n%s\n%s\n\n", MSG_BAR, app_msg, MSG_BAR);
+    // print the application identification message
+    memcpy (app_msg, file_buffer, SIZE_APP_MSG);
+    app_msg [SIZE_APP_MSG] = '\0';	// make sure the ID message is terminated
+    printf ("%s\n%s\n%s\n\n", MSG_BAR, app_msg, MSG_BAR);
 
-		// load RAM from the ROM image
-		memcpy (sunyat_ram, file_buffer + SIZE_APP_MSG, SIZE_APP_RAM);
+    // load RAM from the ROM image
+    memcpy (sunyat_ram, file_buffer + SIZE_APP_MSG, SIZE_APP_RAM);
 
-// pause to let user see application info
+
+    return EXIT_SUCCESS ;
+}
+
+int start_sunyat(char *rom, bool state, bool debug) {
+    clock_t clock_start = clock();
+    WINDOW *my_win ;
+
+    int ReVal = EXIT_SUCCESS ;
+    if (false == state) {
+        if (EXIT_SUCCESS != (ReVal = load_rom(rom))) return ReVal ;
+    } else {
+        //Load save state.
+    }
+
+
+    // pause to let user see application info
 	while ((clock () - clock_start) / CLOCKS_PER_SEC < 3);
 
 	// get the ncurses terminal going
@@ -227,10 +239,20 @@ int start_sunyat(char *rom){
 		return EXT_ERR_NCURSES;
 	}
 
-	terminal_init();
+printf("CLOCK %d \n", clock()) ;
 
+	terminal_init();
+printf("FUIHD\n") ;
 	// fetch->decode->exceute until returned beyond RAM
-	sunyat_execute ();
+	if (false == debug) {
+        sunyat_execute (stdscr);
+    } else {
+        printf("NOT IMPLEMENTED\n") ;
+        exit(100) ;
+        //my_win = //some debug setup function.
+    }
+
+
 
 	// pause to let user see completed application output
 	clock_start = clock();
@@ -244,10 +266,17 @@ int start_sunyat(char *rom){
     return EXIT_SUCCESS ;
 }
 
-
-static void sunyat_execute () {
+/**
+ *  Brief:
+ *      This is the main execution of SUNY AT.
+ *      Any ROM or registers should be pre-filled
+ *      before calling this function.
+ *
+ *  Parameters:
+ *      win : NCurses window to use as the screen.
+ */
+static void sunyat_execute (WINDOW *win) {
 	bool terminal_too_small_prev_cycle = false;
-
 	for (;;) {
 		uint8_t opcode;
 		uint8_t sreg;
@@ -261,7 +290,7 @@ static void sunyat_execute () {
 
 		move (cursor_row, cursor_col);
 
-		getmaxyx (stdscr, current_height, current_width);
+		getmaxyx (win, current_height, current_width);
 
 		if (current_width < TERMINAL_WIDTH || current_height < TERMINAL_HEIGHT) {
 			int x;
@@ -282,18 +311,18 @@ static void sunyat_execute () {
 			int cx = current_width  / 2;
 			int cy = current_height / 2;
 
-			mvprintw(cy-1, cx-10, "                    ");
-			mvprintw(  cy, cx-10, "  Window too small  ");
-			mvprintw(cy+1, cx-10, " resize to >= 80x24 ");
-			mvprintw(cy+2, cx-10, "                    ");
-			refresh();
+			mvwprintw(win, cy-1, cx-10, "                    ");
+			mvwprintw(win,   cy, cx-10, "  Window too small  ");
+			mvwprintw(win, cy+1, cx-10, " resize to >= 80x24 ");
+			mvwprintw(win, cy+2, cx-10, "                    ");
+			wrefresh(win);
 			continue;
 		}
 
 		if (terminal_too_small_prev_cycle) {
 			terminal_restore ();
 			terminal_too_small_prev_cycle = false;
-			refresh ();
+			wrefresh (win);
 		}
 
 		sunyat_clock_ticks++;
@@ -460,7 +489,8 @@ static void sunyat_execute () {
 		case OPCODE_LOAD_RM:
             if (mem < SIZE_APP_RAM)
 				sunyat_regs [dreg] = sunyat_ram [mem];
-			else if (mem == IO_TERMINAL)
+			else if (mem == IO_TERMINAL){
+                //fprintf(outtie, "FUC_RM %d %X \n", sunyat_regs [dreg] , sunyat_regs [dreg] ) ;
 				if (!linefeed_buffered)
 				{
 					sunyat_regs [dreg] = getch ();
@@ -484,6 +514,8 @@ static void sunyat_execute () {
 					sunyat_regs [dreg] = (uint8_t) 0xA;
 					linefeed_buffered = false;
 				}
+                //fprintf(outtie, "FUC_RM %d %X \n", sunyat_regs [dreg] , sunyat_regs [dreg] ) ;
+            }
 			else {
 				printf (ERR_LOAD);
 				return;
@@ -492,10 +524,11 @@ static void sunyat_execute () {
         case OPCODE_LOADP_RR:
 			if (sunyat_regs [sreg] < SIZE_APP_RAM)
 				sunyat_regs [dreg] = sunyat_ram [sunyat_regs [sreg]];
-			else if (sunyat_ram [sunyat_regs [sreg]] == IO_TERMINAL)
+			else if (sunyat_ram [sunyat_regs [sreg]] == IO_TERMINAL) {
 				if(!linefeed_buffered)
 				{
 					sunyat_regs [dreg] = getch ();
+                    //fprintf(outtie, "FUCK_RR %d %X \n", sunyat_regs [dreg] , sunyat_regs [dreg] ) ;
 					switch ((int) sunyat_regs [dreg])
 					{
 						case KEY_ENTER:
@@ -516,6 +549,8 @@ static void sunyat_execute () {
 					sunyat_regs [dreg] = (uint8_t) 0xA;
 					linefeed_buffered = false;
 				}
+                //fprintf(outtie, "FUC_RR %d %X \n", sunyat_regs [dreg] , sunyat_regs [dreg] ) ;
+            }
 			else {
 				printf (ERR_LOAD);
 				return;
@@ -542,7 +577,7 @@ static void sunyat_execute () {
 					break;
 				default:
 					if (isprint (c)) {
-						printw ("%c", c);
+						wprintw (win, "%c", c);
 						terminal[cursor_row][cursor_col] = c;
 
 						cursor_col++;
@@ -552,13 +587,13 @@ static void sunyat_execute () {
 						}
 					}
 					else {
-						printw ("<0x%02X>", c);
+						wprintw (win, "<0x%02X>", c);
 						terminal[cursor_row][cursor_col] = ' ';
 
 					}
 				}
-				mvprintw (cursor_row, cursor_col, "");
-				refresh ();
+				mvwprintw (win, cursor_row, cursor_col, "");
+				wrefresh (win);
 			}
 			else {
 				printf (ERR_STOR);
@@ -586,7 +621,7 @@ static void sunyat_execute () {
 					break;
 				default:
 					if (isprint (c)) {
-						printw ("%c", c);
+						wprintw (win, "%c", c);
 						terminal[cursor_row][cursor_col] = c;
 
 						cursor_col++;
@@ -596,13 +631,13 @@ static void sunyat_execute () {
 						}
 					}
 					else {
-						printw ("<0x%02X>", c);
+						wprintw (win, "<0x%02X>", c);
 						terminal[cursor_row][cursor_col] = ' ';
 					}
 					refresh ();
 				}
-				mvprintw (cursor_row, cursor_col, "");
-				refresh ();
+				mvwprintw (win, cursor_row, cursor_col, "");
+				wrefresh (win);
 			}
 			break;
 		/*case OPCODE_PUSH_R:
@@ -701,7 +736,7 @@ static void sunyat_execute () {
 				//other shit
 				break;
 
-			}	
+			}
 		}
 */
 		default:
@@ -713,6 +748,7 @@ static void sunyat_execute () {
 		}
 
 	}
+
 }
 
 static uint8_t get_opcode () {

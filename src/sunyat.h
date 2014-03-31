@@ -26,7 +26,8 @@
 #ifndef _SUNYAT_H_
 #define _SUNYAT_H_
 
-int start_sunyat(char *rom);
+#include <ncurses.h>
+#include <stdint.h>
 
 /*
  * On read:  0 if no key, key code otherwise
@@ -450,7 +451,7 @@ int start_sunyat(char *rom);
 //-----------------------------------------------------------------------
 
 
-/**OPCODE 28 
+/**OPCODE 28
  *  USE:    NONE
  *  Brief:  This replaces push and pop, if the low bits are zero then
  *          it's a push, if not pop.
@@ -467,7 +468,7 @@ int start_sunyat(char *rom);
  *
  *	Affected Flags: None
  */
-#define OPCODE_SWR_I	29 
+#define OPCODE_SWR_I	29
 //-----------------------------------------------------------------------
 
 /*OPCODE 30: AWR --------------------------------------------------------
@@ -481,16 +482,16 @@ int start_sunyat(char *rom);
 
 /*OPCODE 31: AUX --------------------------------------------------------
  *  Use:	AUX Imm
- *  
+ *
  *	0: Save State
- *	1: 
+ *	1:
  *	2
  *	3
  *	4
  *	5
  *	6
  *	7
- *	
+ *
  *	Affected Flags: None
  */
 #define OPCODE_AUX_I	31
@@ -529,5 +530,9 @@ int start_sunyat(char *rom);
  *      Will be thrown when theres an error in ncurses.
  */
 #define EXT_ERR_NCURSES           5 //This should be expand to cover all ncurses errors.
+
+int start_sunyat(char *rom, bool state, bool debug) ;
+
+
 
 #endif /* _SUNYAT_H_ */

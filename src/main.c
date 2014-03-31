@@ -11,5 +11,5 @@ int main (int argc, char *argv []) {
 		return EXT_ERR_NO_FILE_ARG;
 	}
 
-    return start_sunyat(argv[1]) ;
+    return start_sunyat(argv[1], 0, 0) ;
 }
