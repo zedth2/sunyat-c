@@ -694,23 +694,26 @@ static void sunyat_execute (WINDOW *win) {
 			}
 			break;
 		}
-		//Auxiliary
-/*		case OPCODE_AUX_I:
+				//Auxiliary
+		case OPCODE_AUX_I:
 		{
 			if (imm < 0 || imm > 7)
 				{
-					printf(ERR_WINDOW_RANGE);
+					printf("0-7 only!\n");
 				}
-			switch (imm)
-			{
-				case 0: //savestate
-				{
+			//switch (imm)
+			//{
+			//	case 0: //savestate
+				//{
+					//build savestate
+					int i=0;
 					FILE * pFile;
-  					char buffer[] = { 'x' , 'y' , 'z' };
-  					pFile = fopen ("myfile.bin", "wb");
-  					fwrite (buffer , sizeof(buffer[0]), sizeof(buffer), pFile);
+  					pFile = fopen ("savestate.rom", "wb");
+  					fwrite (sunyat_ram , sizeof(sunyat_ram[0]), sizeof(sunyat_ram), pFile);
+  					fwrite (sunyat_regs , sizeof(sunyat_regs[0]), sizeof(sunyat_regs), pFile);
   					fclose (pFile);
   				}
+  				//}
 
 /*
 				break;
@@ -736,7 +739,7 @@ static void sunyat_execute (WINDOW *win) {
 				//other shit
 				break;
 
-			}
+			}	
 		}
 */
 		default:

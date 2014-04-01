@@ -45,11 +45,6 @@
 	.variable cmd12 ' '
 
 ;COMMAND DEFS-------------------------------
-!cmd_win
-	.variable regs0 'w'
-	.variable regs1 'i'
-	.variable regs2 'n'
-
 !cmd_awr
 	.variable awr0 'a'
 	.variable awr1 'w'
@@ -61,6 +56,12 @@
 	.variable reset2 's'
 	.variable reset3 'e'
 	.variable reset4 't'
+
+!cmd_save
+	.variable save0 's'
+	.variable save1 'a'
+	.variable save2 'v'
+	.variable save3 'e'
 
 !cmd_exit
 	.variable exit0 'e'
@@ -145,10 +146,6 @@
 	;jeq !end_of_commands ;make sure command doesn't start with a space (arg delimiter)
 	
 	;List of known commands --------------------------------------------------------------------
-		mov R2 !cmd_win ;REGS
-		call !analyze
-		jeq !cmd_win_exec
-
 		mov R2 !cmd_awr ;AWR
 		call !analyze
 		jeq !cmd_awr_exec
@@ -156,6 +153,10 @@
 		mov R2 !cmd_reset ;RESET
 		call !analyze
 		jeq !cmd_reset_exec
+
+		mov R2 !cmd_save ;SAVE
+		call !analyze
+		jeq !cmd_save_exec
 
 		mov R2 !cmd_exit ;EXIT
 		call !analyze
@@ -231,28 +232,6 @@
 ;------------------------------------------------------------------------------------------------
 
 ;-command-executions-----------------------------------------------------------------------------
-	;WIN - print registers
-	!cmd_win_exec
-;pop things
-		stor TERM R0
-		call !print_line
-		stor TERM R1
-		call !print_line
-		stor TERM R2
-		call !print_line
-		stor TERM R3
-		call !print_line
-		stor TERM R4
-		call !print_line
-		stor TERM R5
-		call !print_line
-		stor TERM R6
-		call !print_line
-		stor TERM R7
-		call !print_line
-		jmp !end_of_commands
-	!cmd_win_exec_end
-
 	;AWR - Shift window by 1
 	!cmd_awr_exec
 ;pop things
@@ -266,6 +245,13 @@
 		swr 3
 		jmp !end_of_commands
 	!cmd_reset_exec_end
+
+	;SAVE
+	!cmd_save_exec
+;pop things
+		aux 0
+		jmp !end_of_commands
+	!cmd_save_exec_end
 
 	;EXIT - Exit the SUNYAT
 	!cmd_exit_exec
