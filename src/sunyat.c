@@ -239,10 +239,10 @@ int start_sunyat(char *rom, bool state, bool debug) {
 		return EXT_ERR_NCURSES;
 	}
 
-printf("CLOCK %d \n", clock()) ;
+
 
 	terminal_init();
-printf("FUIHD\n") ;
+
 	// fetch->decode->exceute until returned beyond RAM
 	if (false == debug) {
         sunyat_execute (stdscr);
@@ -708,10 +708,13 @@ static void sunyat_execute (WINDOW *win) {
 					//build savestate
 					int i=0;
 					FILE * pFile;
-  					pFile = fopen ("savestate.rom", "wb");
+  					pFile = fopen ("savestate_fuck.rom", "wb");
+                    char *fuck = "FUCK YOU" ;
   					fwrite (sunyat_ram , sizeof(sunyat_ram[0]), sizeof(sunyat_ram), pFile);
+                    fwrite (fuck, sizeof(char), sizeof(fuck), pFile) ;
   					fwrite (sunyat_regs , sizeof(sunyat_regs[0]), sizeof(sunyat_regs), pFile);
   					fclose (pFile);
+                    printf("HERE\n") ;
   				}
   				//}
 
@@ -739,7 +742,7 @@ static void sunyat_execute (WINDOW *win) {
 				//other shit
 				break;
 
-			}	
+			}
 		}
 */
 		default:

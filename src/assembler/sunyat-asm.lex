@@ -127,6 +127,7 @@ push	{ pack_token (&T); Parse (parser, TOKEN_PUSH, T); }
 pop	{ pack_token (&T); Parse (parser, TOKEN_POP, T); }
 swr { pack_token (&T); Parse (parser, TOKEN_SWR, T); }
 awr { pack_token (&T); Parse (parser, TOKEN_AWR, T); }
+aux { pack_token (&T); Parse (parser, TOKEN_AUX, T); }
 
 \.(message|msg)[ \t]+.*	{
 	/* message for application */
