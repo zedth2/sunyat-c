@@ -54,6 +54,7 @@
 
 #include "sunyat.h"
 #include "sat_scr.h"
+#include "debuger.h"
 
 #ifndef true
 #define true TRUE
@@ -227,7 +228,7 @@ static int load_rom(char *rom)
 					return EXT_ERR_BYTE_SIZE;
 				}
 			}
-		
+
 		fclose (infile);
 		memcpy (app_msg, file_buffer, SIZE_APP_MSG);
 		app_msg [SIZE_APP_MSG] = '\0';
@@ -244,16 +245,35 @@ static int load_rom(char *rom)
 	return EXIT_SUCCESS ;
 }
 
-int start_sunyat(char *rom, bool state, bool debug) {
+int debug = 0 ;
+/**
+ *  Brief:
+ *      This will start the sunyat's execution.
+ *
+ *  Parameters:
+ *      rom : char*
+ *          The file to load, should be either a save state or a rom file.
+ *
+ *      state : bool
+ *          If this is true then the system thinks the file path
+ *          given is a save state. If not than it's assumed it's a rom file.
+ *
+ *      debug : bool
+ *          If this is true then the system is started up in the builtin
+ *          debugger.
+ *
+ *  Returns : int
+ *      If not zero than there was some kind of error.
+ */
+int start_sunyat(char *rom, bool lState, bool lDebug) {
     clock_t clock_start = clock();
     WINDOW *my_win ;
+
     int ReVal = EXIT_SUCCESS ;
-    
-    if (false == state)
+    if (false == lState)
     {
         if (EXIT_SUCCESS != (ReVal = load_rom(rom))) return ReVal ;
     }
-    
     else
     {
         if (EXIT_SUCCESS != (ReVal = load_state(rom))) return ReVal;
@@ -272,14 +292,29 @@ int start_sunyat(char *rom, bool state, bool debug) {
 	terminal_init();
 
 	// fetch->decode->exceute until returned beyond RAM
-	if (false == debug) {
-        sunyat_execute (stdscr);
+	if (!lDebug) {
+        my_win = stdscr ;
     } else {
-        printf("NOT IMPLEMENTED\n") ;
-        exit(100) ;
+        if (-1 == debug_setup()) {
+            printf("Debugger setup failed.\n") ;
+            return 100 ;
+        }
+
+        if (NULL == (my_win = main_win_debug())) {
+            printf("The debuggers main window failed.\n") ;
+            return 100 ;
+        }
+        debug = 1 ;
+        //printf("NOT IMPLEMENTED\n") ;
+        //return 100 ;
         //my_win = //some debug setup function.
     }
 
+    if( NULL == my_win ){
+        printf("WINDOW IS NULL\n") ;
+        return 100 ;
+    }
+    sunyat_execute (my_win);
 
 
 	// pause to let user see completed application output
@@ -305,6 +340,8 @@ int start_sunyat(char *rom, bool state, bool debug) {
  */
 static void sunyat_execute (WINDOW *win) {
 	bool terminal_too_small_prev_cycle = false;
+    FILE *outtie = fopen("/home/zac/Documents/School/CS528/syat_wr/src/outtie.txt", "w") ;
+    int pause = 0 ;
 	for (;;) {
 		uint8_t opcode;
 		uint8_t sreg;
@@ -522,6 +559,7 @@ static void sunyat_execute (WINDOW *win) {
 				if (!linefeed_buffered)
 				{
 					sunyat_regs [dreg] = getch ();
+                    fprintf(outtie, "FUC_RM %d %X \n", sunyat_regs [dreg] , sunyat_regs [dreg] ) ;
 					switch ((int) sunyat_regs [dreg])
 					{
 						case KEY_ENTER:
@@ -532,6 +570,12 @@ static void sunyat_execute (WINDOW *win) {
 						case ERR:
 						sunyat_regs [dreg] = (uint8_t) 0;
 						break;
+
+                        case 0x1B:
+                        pause = 1 ;
+                        printf("SETTING PAUSE\n") ;
+                        //sunyat_regs [dreg] = old ;
+                        break ;
 
 						default:
 						break;
@@ -555,8 +599,10 @@ static void sunyat_execute (WINDOW *win) {
 			else if (sunyat_ram [sunyat_regs [sreg]] == IO_TERMINAL) {
 				if(!linefeed_buffered)
 				{
+                    //uint8_t old = sunyat_regs [dreg] ;
 					sunyat_regs [dreg] = getch ();
                     //fprintf(outtie, "FUCK_RR %d %X \n", sunyat_regs [dreg] , sunyat_regs [dreg] ) ;
+                    fprintf(outtie, "FUC_RM %d %X \n", sunyat_regs [dreg] , sunyat_regs [dreg] ) ;
 					switch ((int) sunyat_regs [dreg])
 					{
 						case KEY_ENTER:
@@ -567,6 +613,12 @@ static void sunyat_execute (WINDOW *win) {
 						case ERR:
 						sunyat_regs [dreg] = (uint8_t) 0;
 						break;
+
+                        case 0x1B:
+                        printf("SETTING PAUSE\n") ;
+                        pause = 1 ;
+                        //sunyat_regs [dreg] = old ;
+                        break ;
 
 						default:
 						break;
@@ -779,7 +831,13 @@ static void sunyat_execute (WINDOW *win) {
 			return;
 			break;
 		}
-
+        if (debug) {
+            if (0 == (sunyat_clock_ticks%100000))
+                write_reg_watcher() ;
+            if (pause) {
+                debug_pause() ;
+            }
+        }
 	}
 
 }

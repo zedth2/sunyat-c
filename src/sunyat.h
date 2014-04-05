@@ -539,6 +539,21 @@
 #define SIZE_APP_SAVESTATE		SIZE_APP_ROM + SIZE_REG
 
 
+
+/**
+ *  Brief:
+ *      This is the save state command line switch.
+ */
+#define SAVE_STATE_SWITCH   "-s\0"
+
+/**
+ *  Brief:
+ *      This is the debugger switch.
+ */
+#define DEBUGGER_SWITCH     "-d\0"
+
+
+
 int start_sunyat(char *rom, bool state, bool debug) ;
 
 
