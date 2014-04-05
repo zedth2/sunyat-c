@@ -529,7 +529,15 @@
  *  Brief:
  *      Will be thrown when theres an error in ncurses.
  */
-#define EXT_ERR_NCURSES           5 //This should be expand to cover all ncurses errors.
+#define EXT_ERR_NCURSES			5 //This should be expand to cover all ncurses errors.
+
+/**
+ *	Brief:
+ *		Defines size of a savestate file.
+ *
+ */
+#define SIZE_APP_SAVESTATE		SIZE_APP_ROM + SIZE_REG
+
 
 int start_sunyat(char *rom, bool state, bool debug) ;
 

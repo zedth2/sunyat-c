@@ -161,9 +161,42 @@ uint8_t sunyat_regs [SIZE_REG] = {
  *      state : The path to the save state to load.
  *
  */
-static void load_state(char *state) {
+static int load_state(char *rom)
+{
+    uint8_t save_buffer [SIZE_APP_SAVESTATE];
+	FILE *infile = NULL;
 
+	if ((infile = fopen (rom, "rb")) != NULL)
+    {
+		if (SIZE_APP_SAVESTATE != fread (save_buffer, sizeof (uint8_t), SIZE_APP_SAVESTATE, infile))
+		{
+			printf (ERR_BYTE_SIZE);
+			return EXT_ERR_ROM_BIG;
+		}
+		else
+		{
+			if (fgetc (infile) != EOF)
+			{
+				printf (ERR_BYTE_SIZE);
+				return EXT_ERR_BYTE_SIZE;
+			}
+		}
+		fclose (infile);
+		memcpy (app_msg, save_buffer, SIZE_APP_MSG);
+		app_msg [SIZE_APP_MSG] = '\0';
+		printf ("%s\n%s\n%s\n\n", MSG_BAR, app_msg, MSG_BAR);
+		memcpy (sunyat_ram, save_buffer + SIZE_APP_MSG, SIZE_APP_RAM);
+		memcpy (sunyat_regs, save_buffer + SIZE_APP_MSG + SIZE_APP_ROM, SIZE_REG);
+	}
+
+	else
+	{
+		printf (ERR_FILE_NOT_OPEN);
+		return EXT_ERR_FILE_NOT_OPEN;
+	}
+	return EXIT_SUCCESS ;
 }
+
 
 /**
  *  Brief:
@@ -173,63 +206,58 @@ static void load_state(char *state) {
  *  Parameters:
  *      rom : The path to the rom to load.
  */
-static int load_rom(char *rom) {
+static int load_rom(char *rom)
+{
     uint8_t file_buffer [SIZE_APP_ROM];
-
 	FILE *infile = NULL;
 
-    if ((infile = fopen (rom, "rb")) != NULL) {
-		// is it at least SIZE_APP_ROM big ?
-
-		if (SIZE_APP_ROM != fread (file_buffer, sizeof (uint8_t), SIZE_APP_ROM, infile)) {
-			// not big enough
-			printf (ERR_BYTE_SIZE);
-			return EXT_ERR_ROM_BIG;
-		}
-		else {
-			// make sure we're at the EOF
-			if (fgetc (infile) != EOF) {
+	//TRY TO OPEN THE DAMN FILE
+    if ((infile = fopen (rom, "rb")) != NULL)
+    {
+			if (SIZE_APP_ROM != fread (file_buffer, sizeof (uint8_t), SIZE_APP_ROM, infile))
+			{
 				printf (ERR_BYTE_SIZE);
-				return EXT_ERR_BYTE_SIZE;
+				return EXT_ERR_ROM_BIG;
 			}
-		}
+			else
+			{
+				if (fgetc (infile) != EOF)
+				{
+					printf (ERR_BYTE_SIZE);
+					return EXT_ERR_BYTE_SIZE;
+				}
+			}
+		
+		fclose (infile);
+		memcpy (app_msg, file_buffer, SIZE_APP_MSG);
+		app_msg [SIZE_APP_MSG] = '\0';
+		printf ("%s\n%s\n%s\n\n", MSG_BAR, app_msg, MSG_BAR);
+		memcpy (sunyat_ram, file_buffer + SIZE_APP_MSG, SIZE_APP_RAM);
 	}
-	else {
-		// file could not be opened
+	else
+	{
 		printf (ERR_FILE_NOT_OPEN);
 		return EXT_ERR_FILE_NOT_OPEN;
 	}
 
-    /*
-     * The application image looks good. Let's load it up and run.
-     */
 
-    //close the file... we're done with it now
-    fclose (infile);
-
-    // print the application identification message
-    memcpy (app_msg, file_buffer, SIZE_APP_MSG);
-    app_msg [SIZE_APP_MSG] = '\0';	// make sure the ID message is terminated
-    printf ("%s\n%s\n%s\n\n", MSG_BAR, app_msg, MSG_BAR);
-
-    // load RAM from the ROM image
-    memcpy (sunyat_ram, file_buffer + SIZE_APP_MSG, SIZE_APP_RAM);
-
-
-    return EXIT_SUCCESS ;
+	return EXIT_SUCCESS ;
 }
 
 int start_sunyat(char *rom, bool state, bool debug) {
     clock_t clock_start = clock();
     WINDOW *my_win ;
-
     int ReVal = EXIT_SUCCESS ;
-    if (false == state) {
+    
+    if (false == state)
+    {
         if (EXIT_SUCCESS != (ReVal = load_rom(rom))) return ReVal ;
-    } else {
-        //Load save state.
     }
-
+    
+    else
+    {
+        if (EXIT_SUCCESS != (ReVal = load_state(rom))) return ReVal;
+    }
 
     // pause to let user see application info
 	while ((clock () - clock_start) / CLOCKS_PER_SEC < 3);
@@ -705,17 +733,16 @@ static void sunyat_execute (WINDOW *win) {
 			//{
 			//	case 0: //savestate
 				//{
-					//build savestate
-					int i=0;
 					FILE * pFile;
   					pFile = fopen ("savestate_fuck.rom", "wb");
-                    char *fuck = "FUCK YOU" ;
-  					fwrite (sunyat_ram , sizeof(sunyat_ram[0]), sizeof(sunyat_ram), pFile);
-                    fwrite (fuck, sizeof(char), sizeof(fuck), pFile) ;
+
+  					//---------------------------------------------------------------------------
+  					//RAM comes "first" in the file.
   					fwrite (sunyat_regs , sizeof(sunyat_regs[0]), sizeof(sunyat_regs), pFile);
+  					fwrite (sunyat_ram , sizeof(sunyat_ram[0]), sizeof(sunyat_ram), pFile);
+  					//---------------------------------------------------------------------------
   					fclose (pFile);
-                    printf("HERE\n") ;
-  				}
+  		}
   				//}
 
 /*

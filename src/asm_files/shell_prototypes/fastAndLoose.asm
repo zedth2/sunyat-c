@@ -12,7 +12,7 @@
 
 jmp !main
 !cmd_table
-	.variable	cmd_exit_0	0x06 ;!cmd_exit
+	.variable	cmd_exit_0	!cmd_exit ;0x06 ;
 	.variable	cmd_reset_1	0x08 ;!cmd_reset
 	.variable	cmd_awr_2	0x10 ;!cmd_awr
 	.variable	cmd_win_3	!cmd_win ;0x14

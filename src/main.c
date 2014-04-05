@@ -5,7 +5,7 @@
 
 int main (int argc, char *argv []) {
 
-
+	//Gotta switch this up
 	if (argc != 2) 	{
 		//printf (ERR_BAD_USAGE);
 		return EXT_ERR_NO_FILE_ARG;

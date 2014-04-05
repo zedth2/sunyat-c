@@ -4,7 +4,7 @@
 ;String Delimiter: 0x00
 ;------------------------------------
 
-.message	SUNYAT Shell Prototype
+;.message	SUNYAT Shell Prototype
 .constant	TERM 	0xFF
 .constant	CR	0xD
 .constant	LF	0xA
