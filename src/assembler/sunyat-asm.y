@@ -247,6 +247,7 @@ immediate(val) ::= LABEL_DIRECTIVE IDENTIFIER(id). {
 		else {
 			val.data = label_addrs [pos];
 		}
+        printf("DOING LABEL %s %X \n", id.token_str, label_addrs [pos]) ;
 	}
 }
 immediate(val) ::= CHARACTER(ch). {
@@ -277,12 +278,13 @@ variable_line ::= VAR_DIRECTIVE IDENTIFIER(id) var_value(val).	{
 			variables [variable_cnt] = malloc (sizeof (char) * len);
 			strcpy (variables [variable_cnt], id.token_str);
 			variable_addrs [variable_cnt] = address;
-			ram_data [address] = val.data;
+
 			variable_cnt++;
 			address++;
 		}
 	}
 	else {
+        ram_data [address] = val.data;
 		address++;
 	}
 }

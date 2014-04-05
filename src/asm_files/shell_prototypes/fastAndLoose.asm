@@ -15,7 +15,7 @@ jmp !main
 	.variable	cmd_exit_0	0x06 ;!cmd_exit
 	.variable	cmd_reset_1	0x08 ;!cmd_reset
 	.variable	cmd_awr_2	0x10 ;!cmd_awr
-	.variable	cmd_win_3	0x14 ;!cmd_win
+	.variable	cmd_win_3	!cmd_win ;0x14
 ;commands--------------------------------------------------------
 !cmd_exit ;0x06
 	jmp !exit_shell
@@ -38,7 +38,7 @@ jmp !main
 	call !print_line
 	stor TERM R4
 	call !print_line
-	stor TERM R5 
+	stor TERM R5
 	call !print_line
 	stor TERM R6
 	call !print_line
