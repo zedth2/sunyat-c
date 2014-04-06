@@ -183,13 +183,9 @@ static int load_state(char *rom)
 			}
 		}
 		fclose (infile);
-		memcpy (app_msg, save_buffer, SIZE_APP_MSG);
-		app_msg [SIZE_APP_MSG] = '\0';
-		printf ("%s\n%s\n%s\n\n", MSG_BAR, app_msg, MSG_BAR);
-		memcpy (sunyat_ram, save_buffer + SIZE_APP_MSG, SIZE_APP_RAM);
-		memcpy (sunyat_regs, save_buffer + SIZE_APP_MSG + SIZE_APP_ROM, SIZE_REG);
+		memcpy (sunyat_ram, save_buffer, SIZE_APP_RAM);
+		memcpy (sunyat_regs, save_buffer + SIZE_APP_RAM, SIZE_REG);
 	}
-
 	else
 	{
 		printf (ERR_FILE_NOT_OPEN);
@@ -212,7 +208,6 @@ static int load_rom(char *rom)
     uint8_t file_buffer [SIZE_APP_ROM];
 	FILE *infile = NULL;
 
-	//TRY TO OPEN THE DAMN FILE
     if ((infile = fopen (rom, "rb")) != NULL)
     {
 			if (SIZE_APP_ROM != fread (file_buffer, sizeof (uint8_t), SIZE_APP_ROM, infile))
@@ -228,7 +223,6 @@ static int load_rom(char *rom)
 					return EXT_ERR_BYTE_SIZE;
 				}
 			}
-
 		fclose (infile);
 		memcpy (app_msg, file_buffer, SIZE_APP_MSG);
 		app_msg [SIZE_APP_MSG] = '\0';
@@ -240,8 +234,6 @@ static int load_rom(char *rom)
 		printf (ERR_FILE_NOT_OPEN);
 		return EXT_ERR_FILE_NOT_OPEN;
 	}
-
-
 	return EXIT_SUCCESS ;
 }
 
@@ -265,13 +257,15 @@ int debug = 0 ;
  *  Returns : int
  *      If not zero than there was some kind of error.
  */
-int start_sunyat(char *rom, bool lState, bool lDebug) {
+int start_sunyat(char *rom, int lState, bool lDebug) {
     clock_t clock_start = clock();
     WINDOW *my_win ;
 
     int ReVal = EXIT_SUCCESS ;
-    if (false == lState)
+
+    if (0 == lState)
     {
+    	//if (EXIT_SUCCESS != (ReVal = load_state(rom))) return ReVal;
         if (EXIT_SUCCESS != (ReVal = load_rom(rom))) return ReVal ;
     }
     else
@@ -340,7 +334,7 @@ int start_sunyat(char *rom, bool lState, bool lDebug) {
  */
 static void sunyat_execute (WINDOW *win) {
 	bool terminal_too_small_prev_cycle = false;
-    FILE *outtie = fopen("/home/zac/Documents/School/CS528/syat_wr/src/outtie.txt", "w") ;
+    //FILE *outtie = fopen("/home/zac/Documents/School/CS528/syat_wr/src/outtie.txt", "w") ;
     int pause = 0 ;
 	for (;;) {
 		uint8_t opcode;
@@ -559,7 +553,7 @@ static void sunyat_execute (WINDOW *win) {
 				if (!linefeed_buffered)
 				{
 					sunyat_regs [dreg] = getch ();
-                    fprintf(outtie, "FUC_RM %d %X \n", sunyat_regs [dreg] , sunyat_regs [dreg] ) ;
+                   // fprintf(outtie, "FUC_RM %d %X \n", sunyat_regs [dreg] , sunyat_regs [dreg] ) ;
 					switch ((int) sunyat_regs [dreg])
 					{
 						case KEY_ENTER:
@@ -602,7 +596,7 @@ static void sunyat_execute (WINDOW *win) {
                     //uint8_t old = sunyat_regs [dreg] ;
 					sunyat_regs [dreg] = getch ();
                     //fprintf(outtie, "FUCK_RR %d %X \n", sunyat_regs [dreg] , sunyat_regs [dreg] ) ;
-                    fprintf(outtie, "FUC_RM %d %X \n", sunyat_regs [dreg] , sunyat_regs [dreg] ) ;
+                  //  fprintf(outtie, "FUC_RM %d %X \n", sunyat_regs [dreg] , sunyat_regs [dreg] ) ;
 					switch ((int) sunyat_regs [dreg])
 					{
 						case KEY_ENTER:
@@ -790,8 +784,15 @@ static void sunyat_execute (WINDOW *win) {
 
   					//---------------------------------------------------------------------------
   					//RAM comes "first" in the file.
-  					fwrite (sunyat_regs , sizeof(sunyat_regs[0]), sizeof(sunyat_regs), pFile);
-  					fwrite (sunyat_ram , sizeof(sunyat_ram[0]), sizeof(sunyat_ram), pFile);
+  					fwrite (sunyat_ram , sizeof (uint8_t), SIZE_APP_RAM, pFile);
+  					fwrite (sunyat_regs , sizeof (uint8_t), SIZE_REG, pFile);
+  					
+
+
+
+  					//fwrite (sunyat_ram , sizeof(sunyat_ram[0]), sizeof(sunyat_ram), pFile);
+  					//fwrite (sunyat_regs , sizeof(sunyat_regs[0]), sizeof(sunyat_regs), pFile);
+  					
   					//---------------------------------------------------------------------------
   					fclose (pFile);
   		}

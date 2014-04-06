@@ -536,7 +536,7 @@
  *		Defines size of a savestate file.
  *
  */
-#define SIZE_APP_SAVESTATE		SIZE_APP_ROM + SIZE_REG
+#define SIZE_APP_SAVESTATE		SIZE_APP_RAM + SIZE_REG
 
 
 
@@ -554,7 +554,7 @@
 
 
 
-int start_sunyat(char *rom, bool state, bool debug) ;
+int start_sunyat(char *rom, int lState, bool lDebug);
 
 
 
