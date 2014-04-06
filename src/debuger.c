@@ -6,6 +6,8 @@
 
 
 extern uint8_t sunyat_regs [SIZE_REG] ;
+extern uint8_t sunyat_ram [SIZE_APP_RAM];
+
 WINDOW *reg_watcher ;
 WINDOW *mem_win ;
 /**
@@ -91,17 +93,79 @@ WINDOW* main_win_debug(){
 
 
 void write_reg_watcher(){
-    int r = 0 ;
-    for(r = 0 ; SIZE_REG > r ; r++) {
-        mvwprintw(reg_watcher, r+2, 2, " %02d : 0x%02X ", r, sunyat_regs[r]) ;
-    }
-    wrefresh(reg_watcher) ;
+    //int r = 0 ;
+    //int x = 0, y = 0 ;
+    //getmaxyx(reg_watcher, x, y) ;
+    //for(r = 0 ; SIZE_REG > r ; r++) {
+        //mvwprintw(reg_watcher, r+2, 2, " %02d : 0x%02X ", r, sunyat_regs[r]) ;
+    //}
+    //wrefresh(reg_watcher) ;
+
+    //init_pair(1, COLOR_RED, COLOR_BLACK);
+    //print_to_win(reg_watcher, sunyat_regs, sunyat_regs[REG_WIN]) ;
+    //printf("HERE %d %d \t", sunyat_regs, sunyat_regs[REG_WIN]) ;
+	//attron(COLOR_PAIR(1));
+    //print_to_win(reg_watcher, sunyat_regs+sunyat_regs[REG_WIN], SIZE_WIN) ;
+    //printf("HERE2 %d %d \t", sunyat_regs+sunyat_regs[REG_WIN], SIZE_WIN) ;
+	//attroff(COLOR_PAIR(1));
+    //print_to_win(reg_watcher, sunyat_regs+(sunyat_regs[REG_WIN]+SIZE_WIN), SIZE_REG-(sunyat_regs[REG_WIN]+SIZE_WIN)) ;
+    //printf("HERE3 %d %d \t", sunyat_regs+(sunyat_regs[REG_WIN]+SIZE_WIN), SIZE_REG-(sunyat_regs[REG_WIN]+SIZE_WIN)) ;
+
+    print_to_win(reg_watcher, sunyat_regs, SIZE_REG) ;
+
+
+}
+
+void write_mem_win(){
+    //int x = 0, y = 0 ;
+    //getmaxyx(mem_win, x, y) ;
+    //printf(" FUCKER X %d Y %d \n", x, y) ;
+    //getmaxyx(reg_watcher, x, y) ;
+    //printf(" FUCKER_REG X %d Y %d \n", x, y) ;
+    print_to_win(mem_win, sunyat_ram, SIZE_APP_RAM) ;
+
+    //int X = 0, Y = 0, cnt = 0, curCol = 2, curRow = 1, strLen = 10, colSpace = 2;
+    //getmaxyx(mem_win, X, Y) ;
+    //for( ; SIZE_APP_RAM > cnt ; ++cnt, ++curRow) {
+        //mvwprintw(mem_win, curRow, curCol, "%03d : 0x%02X ", cnt, sunyat_ram[cnt]) ;
+        ////for(curRow = 1 ; Y > curRow ; curRow++){
+            ////mvwprintw(mem_win, curRow, curCol, "%03d : 0x%02X ", cnt+curRow-1, *(data+(1-curRow+cnt))) ;
+        ////}
+        //if (curRow >= X-2) {
+            //curRow = 0 ;
+            //curCol += strLen+colSpace ;
+        //}
+    //}
+    //wrefresh(mem_win) ;
+
+
+
 }
 
 void debug_pause() {
-    printf("PAUSING\n") ;
-        while (DEBUG_PAUSE_KEY != getch()){
-                    sleep(1) ; }
+    //printf("PAUSING\n") ;
+    wmove(reg_watcher, 1, 1) ;
+    while (DEBUG_PAUSE_KEY != getch()){
+        sleep(1) ;
+        //printf("sleeping\t") ;
+    }
+
+}
+
+void print_to_win(WINDOW *cwin, uint8_t data[], int len){
+    int X = 0, Y = 0, cnt = 0, curCol = 2, curRow = 1, strLen = 10, colSpace = 2;
+    getmaxyx(cwin, X, Y) ;
+    for( ; len > cnt ; ++cnt, ++curRow) {
+        mvwprintw(cwin, curRow, curCol, "%03d : 0x%02X ", cnt, data[cnt]) ;
+        //for(curRow = 1 ; Y > curRow ; curRow++){
+            //mvwprintw(cwin, curRow, curCol, "%03d : 0x%02X ", cnt+curRow-1, *(data+(1-curRow+cnt))) ;
+        //}
+        if (curRow >= X-2) {
+            curRow = 0 ;
+            curCol += strLen+colSpace ;
+        }
+    }
+    wrefresh(cwin) ;
 }
 
 //void memory_win(WINDOW *mem, int x, int y, int wid, int height) {

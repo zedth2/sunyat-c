@@ -336,6 +336,11 @@ static void sunyat_execute (WINDOW *win) {
 	bool terminal_too_small_prev_cycle = false;
     //FILE *outtie = fopen("/home/zac/Documents/School/CS528/syat_wr/src/outtie.txt", "w") ;
     int pause = 0 ;
+write_mem_win() ;
+                //refresh() ;
+                write_reg_watcher() ;
+
+
 	for (;;) {
 		uint8_t opcode;
 		uint8_t sreg;
@@ -553,7 +558,6 @@ static void sunyat_execute (WINDOW *win) {
 				if (!linefeed_buffered)
 				{
 					sunyat_regs [dreg] = getch ();
-                   // fprintf(outtie, "FUC_RM %d %X \n", sunyat_regs [dreg] , sunyat_regs [dreg] ) ;
 					switch ((int) sunyat_regs [dreg])
 					{
 						case KEY_ENTER:
@@ -562,12 +566,12 @@ static void sunyat_execute (WINDOW *win) {
 						break;
 
 						case ERR:
-						sunyat_regs [dreg] = (uint8_t) 0;
+						printf("ERROR") ;
+                        sunyat_regs [dreg] = (uint8_t) 0;
 						break;
 
-                        case 0x1B:
+                        case DEBUG_PAUSE_KEY:
                         pause = 1 ;
-                        printf("SETTING PAUSE\n") ;
                         //sunyat_regs [dreg] = old ;
                         break ;
 
@@ -596,7 +600,6 @@ static void sunyat_execute (WINDOW *win) {
                     //uint8_t old = sunyat_regs [dreg] ;
 					sunyat_regs [dreg] = getch ();
                     //fprintf(outtie, "FUCK_RR %d %X \n", sunyat_regs [dreg] , sunyat_regs [dreg] ) ;
-                  //  fprintf(outtie, "FUC_RM %d %X \n", sunyat_regs [dreg] , sunyat_regs [dreg] ) ;
 					switch ((int) sunyat_regs [dreg])
 					{
 						case KEY_ENTER:
@@ -605,11 +608,11 @@ static void sunyat_execute (WINDOW *win) {
 						break;
 
 						case ERR:
-						sunyat_regs [dreg] = (uint8_t) 0;
+						printf("ERROR") ;
+                        sunyat_regs [dreg] = (uint8_t) 0;
 						break;
 
-                        case 0x1B:
-                        printf("SETTING PAUSE\n") ;
+                        case DEBUG_PAUSE_KEY:
                         pause = 1 ;
                         //sunyat_regs [dreg] = old ;
                         break ;
@@ -708,7 +711,7 @@ static void sunyat_execute (WINDOW *win) {
 						wprintw (win, "<0x%02X>", c);
 						terminal[cursor_row][cursor_col] = ' ';
 					}
-					refresh ();
+					wrefresh (win);
 				}
 				mvwprintw (win, cursor_row, cursor_col, "");
 				wrefresh (win);
@@ -786,13 +789,13 @@ static void sunyat_execute (WINDOW *win) {
   					//RAM comes "first" in the file.
   					fwrite (sunyat_ram , sizeof (uint8_t), SIZE_APP_RAM, pFile);
   					fwrite (sunyat_regs , sizeof (uint8_t), SIZE_REG, pFile);
-  					
+
 
 
 
   					//fwrite (sunyat_ram , sizeof(sunyat_ram[0]), sizeof(sunyat_ram), pFile);
   					//fwrite (sunyat_regs , sizeof(sunyat_regs[0]), sizeof(sunyat_regs), pFile);
-  					
+
   					//---------------------------------------------------------------------------
   					fclose (pFile);
   		}
@@ -833,10 +836,19 @@ static void sunyat_execute (WINDOW *win) {
 			break;
 		}
         if (debug) {
-            if (0 == (sunyat_clock_ticks%100000))
+            if (0 == (sunyat_clock_ticks%100000)) {
+                write_mem_win() ;
+                //refresh() ;
                 write_reg_watcher() ;
+                //refresh() ;
+            }
+
             if (pause) {
+                //printf("Pausing\t") ;
+
                 debug_pause() ;
+                pause = 0 ;
+
             }
         }
 	}

@@ -11,9 +11,7 @@ int main (int argc, char *argv []) {
 		return EXT_ERR_NO_FILE_ARG;
 	}
     int debug = 0, save_state = 0, i = 0 ;
-    //printf("here1\n") ;
     for(i = 0 ; i < argc ; i++) {
-        printf("here2 %s \n", argv[i]) ;
         if(0 == strcmp(argv[i], SAVE_STATE_SWITCH)) {
             save_state = 1 ;
         } else if (0 == strcmp(argv[i], DEBUGGER_SWITCH)) {
