@@ -3,6 +3,7 @@
 #include <ncurses.h>
 #include "sunyat.h"
 #include "debuger.h"
+#include "sat_scr.h"
 
 
 extern uint8_t sunyat_regs [SIZE_REG] ;
@@ -101,18 +102,26 @@ void write_reg_watcher(){
     //}
     //wrefresh(reg_watcher) ;
 
-    //init_pair(1, COLOR_RED, COLOR_BLACK);
-    //print_to_win(reg_watcher, sunyat_regs, sunyat_regs[REG_WIN]) ;
-    //printf("HERE %d %d \t", sunyat_regs, sunyat_regs[REG_WIN]) ;
-	//attron(COLOR_PAIR(1));
+    int id = 0 ;
+    SatWin *win = init_SatWin() ;
+    win->win = reg_watcher ;
+    win->cur_X = 2 ;
+    win->cur_Y = 1 ;
+//wbkgd(win->win, COLOR_PAIR(1)) ;
+
+
+    id = print_array(win, sunyat_regs, sunyat_regs[REG_WIN], id) ;
+    wattron(win->win, COLOR_PAIR(1));
+    id = print_array(win, sunyat_regs+sunyat_regs[REG_WIN], SIZE_WIN, id) ;
     //print_to_win(reg_watcher, sunyat_regs+sunyat_regs[REG_WIN], SIZE_WIN) ;
-    //printf("HERE2 %d %d \t", sunyat_regs+sunyat_regs[REG_WIN], SIZE_WIN) ;
-	//attroff(COLOR_PAIR(1));
+    wattroff(win->win, COLOR_PAIR(1));
+    id = print_array(win, sunyat_regs+(sunyat_regs[REG_WIN]+SIZE_WIN), SIZE_REG-(sunyat_regs[REG_WIN]+SIZE_WIN), id) ;
     //print_to_win(reg_watcher, sunyat_regs+(sunyat_regs[REG_WIN]+SIZE_WIN), SIZE_REG-(sunyat_regs[REG_WIN]+SIZE_WIN)) ;
-    //printf("HERE3 %d %d \t", sunyat_regs+(sunyat_regs[REG_WIN]+SIZE_WIN), SIZE_REG-(sunyat_regs[REG_WIN]+SIZE_WIN)) ;
 
-    print_to_win(reg_watcher, sunyat_regs, SIZE_REG) ;
+    //print_to_win(reg_watcher, sunyat_regs, SIZE_REG) ;
 
+//refresh() ;
+    //print_array(win, sunyat_regs, SIZE_REG, 0) ;
 
 }
 

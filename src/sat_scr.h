@@ -26,8 +26,36 @@
 
 
 
+/**
+ *  Brief:
+ *      This will contain a window for sunyat.
+ *
+ *  Properties:
+ *      win : *WINDOW
+ *          A pointer to an ncurses window.
+ *      cur_X : int
+ *          The X position of the cursor.
+ *      cur_Y : int
+ *          The Y position of the cursor.
+ *
+ *
+ *
+ *
+ */
+
+typedef struct _SatWin {
+    WINDOW *win ;
+    int cur_X ;
+    int cur_Y ;
+} SatWin ;
+
+
+
+
 int setup_ncurses_terminal();
 void terminal_init();
 void terminal_restore();
-
+SatWin* init_SatWin() ;
+int print_array(SatWin *win, uint8_t arr[], int len, int id_start);
+void get_W_H(SatWin *win, unsigned int *Width, unsigned int *Height) ;
 #endif /* SAT_SCR_H_ */

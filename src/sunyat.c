@@ -336,10 +336,9 @@ static void sunyat_execute (WINDOW *win) {
 	bool terminal_too_small_prev_cycle = false;
     //FILE *outtie = fopen("/home/zac/Documents/School/CS528/syat_wr/src/outtie.txt", "w") ;
     int pause = 0 ;
-write_mem_win() ;
-                //refresh() ;
-                write_reg_watcher() ;
-
+    write_mem_win() ;
+    //refresh() ;
+    write_reg_watcher() ;
 
 	for (;;) {
 		uint8_t opcode;
