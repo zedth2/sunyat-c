@@ -35,14 +35,6 @@
 	.variable cmd2 ' '
 	.variable cmd3 ' '
 	.variable cmd4 ' '
-	.variable cmd5 ' '
-	.variable cmd6 ' '
-	.variable cmd7 ' '
-	.variable cmd8 ' '
-	.variable cmd9 ' '
-	.variable cmd10 ' '
-	.variable cmd11 ' '
-	.variable cmd12 ' '
 
 ;COMMAND DEFS-------------------------------
 !cmd_awr

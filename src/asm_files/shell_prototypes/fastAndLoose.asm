@@ -12,22 +12,24 @@
 
 jmp !main
 !cmd_table
-	.variable	cmd_exit_0	!cmd_exit ;0x06 ;
-	.variable	cmd_reset_1	0x08 ;!cmd_reset
-	.variable	cmd_awr_2	0x10 ;!cmd_awr
-	.variable	cmd_win_3	!cmd_win ;0x14
+	.variable	cmd_exit_0	!cmd_exit
+	.variable	cmd_reset_1	!cmd_reset
+	.variable	cmd_awr_2	!cmd_awr
+	.variable	cmd_win_3	!cmd_win
+	.variable	cmd_populate_reg_4	!cmd_populate_reg
+	.variable	cmd_savestate_5	!cmd_savestate
 ;commands--------------------------------------------------------
-!cmd_exit ;0x06
+!cmd_exit
 	jmp !exit_shell
-!cmd_reset ;0x08
+!cmd_reset
 	mov R0 'R'
 	STOR TERM R0
-	swr 3
+	swr 0
 	jmp !get_cmd_end
-!cmd_awr ;0x10
+!cmd_awr
 	awr 1
 	jmp !get_cmd_end
-!cmd_win ;0X14
+!cmd_win
 	stor TERM R0
 	call !print_line
 	stor TERM R1
@@ -45,7 +47,13 @@ jmp !main
 	stor TERM R7
 	call !print_line
 	jmp !get_cmd_end
-;!cmd_??? ;0x36
+!cmd_populate_reg
+	mov R7 'Z'
+	jmp !get_cmd_end
+!cmd_savestate
+	aux 0
+	jmp !get_cmd_end
+
 
 !cmd_win_end;
 ;end of commands-------------------------------------------------
@@ -82,11 +90,11 @@ jmp !main
 		stor TERM R0
 		call !print_line
 	add R0 -46 ;0 = 48(ascii) !table is location 2.
-	stor TERM R0
-	call !print_line
+	;stor TERM R0
+	;call !print_line
 	loadp R1 R0
-	stor TERM R1
-	call !print_line
+	;stor TERM R1
+	;call !print_line
 	push R1
 	ret
 	!get_cmd_end
