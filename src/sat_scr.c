@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <ncurses.h>
 #include "sat_scr.h"
-
+#include "sunyat.h"
 const char ERR_NCURSES_INIT [] =
 	"\tCould not initialize ncurses\n";
 const char ERR_NCURSES_CBREAK [] =
@@ -37,9 +37,7 @@ int setup_ncurses_terminal () {
 
     if (has_colors()) {
         start_color() ;
-
     }
-    init_pair(1, COLOR_RED, COLOR_BLACK);
 
 	if (ERR == cbreak ()) {
 		printf (ERR_NCURSES_CBREAK);
@@ -65,7 +63,8 @@ int setup_ncurses_terminal () {
 		printf (ERR_NCURSES_CURSOR);
 		return -1;
 	}
-
+    init_pair(1, COLOR_WHITE, COLOR_BLACK);
+    wbkgd(stdscr, COLOR_PAIR(1)) ;
 	return 0;
 }
 
@@ -111,13 +110,29 @@ int print_array(SatWin *win, uint8_t arr[], int len, int id_start) {
         (win->cur_Y)++ ;
         if (win->cur_Y >= W-2) {
             win->cur_Y = 1 ; //It must be two to get past the box outline.
-            win->cur_X += strLen+win->cur_X ;
+            win->cur_X += strLen+2 ;
         }
         id_start++ ;
     }
     wrefresh(win->win) ;
     return id_start ;
 }
+
+void print_array_regs(SatWin *win, uint8_t arr[], int len) {
+    int W = 0, H = 0, cnt = 0, strLen = 10, lblCnt = 0 ;
+    get_W_H(win, &W, &H) ;
+    for (cnt = 0 ; len > cnt ; cnt++, lblCnt++) {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, "R%02d : 0x%02X ", lblCnt, arr[cnt]);
+        (win->cur_Y)++ ;
+        if (win->cur_Y >= W-2) {
+            win->cur_Y = 1 ; //It must be two to get past the box outline.
+            win->cur_X += strLen+2 ;
+        }
+        if(SIZE_WIN <= lblCnt) lblCnt = 0 ;
+    }
+    wrefresh(win->win) ;
+}
+
 
 void reset_cur(SatWin *win) {
     win->cur_X = 0 ;

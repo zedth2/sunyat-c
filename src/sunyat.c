@@ -334,11 +334,13 @@ int start_sunyat(char *rom, int lState, bool lDebug) {
  */
 static void sunyat_execute (WINDOW *win) {
 	bool terminal_too_small_prev_cycle = false;
-    //FILE *outtie = fopen("/home/zac/Documents/School/CS528/syat_wr/src/outtie.txt", "w") ;
+
     int pause = 0 ;
     write_mem_win() ;
     //refresh() ;
     write_reg_watcher() ;
+            //FILE * fuckyou;
+            //fuckyou = fopen ("fuck.txt", "a");
 
 	for (;;) {
 		uint8_t opcode;
@@ -416,6 +418,7 @@ static void sunyat_execute (WINDOW *win) {
 		/*
 		 * EXECUTE
 		 */
+        //fprintf(fuckyou, "FUCK YOU IMM %d OPCODE %d \n", imm, opcode) ;
 		switch (opcode) {
 		case OPCODE_MOV_RR:
 			sunyat_regs [dreg] = sunyat_regs [sreg];
@@ -716,23 +719,6 @@ static void sunyat_execute (WINDOW *win) {
 				wrefresh (win);
 			}
 			break;
-		/*case OPCODE_PUSH_R:
-			if (sunyat_regs [REG_SP] <= 0)
-			{
-				printf (ERR_PUSH);
-				return;
-			}
-			sunyat_regs [REG_SP]--;
-			sunyat_ram [sunyat_regs [REG_SP]] = sunyat_regs [dreg]; //yes, dreg is correct for this one
-			break;
-		case OPCODE_POP_R:
-			if (sunyat_regs [REG_SP] >= SIZE_APP_RAM) {
-				printf (ERR_POP);
-				return;
-			}
-			sunyat_regs [dreg] = sunyat_ram [sunyat_regs [REG_SP]];
-			sunyat_regs [REG_SP]++;
-			break;*/
         case OPCODE_STACKER_R:
             if (0 == imm) { //Push
                 if (sunyat_regs [REG_SP] <= 0)
@@ -773,14 +759,16 @@ static void sunyat_execute (WINDOW *win) {
 				//Auxiliary
 		case OPCODE_AUX_I:
 		{
+            //fprintf(fuckyou, "FUCKING HERE, %d", imm) ;
+
 			if (imm < 0 || imm > 7)
 				{
 					printf("0-7 only!\n");
 				}
-			//switch (imm)
-			//{
-			//	case 0: //savestate
-				//{
+			switch (imm)
+			{
+				case 0: //savestate
+				{
 					FILE * pFile;
   					pFile = fopen ("savestate_fuck.rom", "wb");
 
@@ -789,44 +777,18 @@ static void sunyat_execute (WINDOW *win) {
   					fwrite (sunyat_ram , sizeof (uint8_t), SIZE_APP_RAM, pFile);
   					fwrite (sunyat_regs , sizeof (uint8_t), SIZE_REG, pFile);
 
-
-
-
-  					//fwrite (sunyat_ram , sizeof(sunyat_ram[0]), sizeof(sunyat_ram), pFile);
-  					//fwrite (sunyat_regs , sizeof(sunyat_regs[0]), sizeof(sunyat_regs), pFile);
-
   					//---------------------------------------------------------------------------
   					fclose (pFile);
-  		}
-  				//}
-
-/*
-				break;
-				case 1:
-				//other shit
-				break;
-				case 2:
-				//other shit
-				break;
-				case 3:
-				//other shit
-				break;
-				case 4:
-				//other shit
-				break;
-				case 5:
-				//other shit
-				break;
-				case 6:
-				//other shit
-				break;
-				case 7:
-				//other shit
-				break;
-
-			}
-		}
-*/
+                    break ;
+                }
+                case 1:
+                {
+                    pause = 1 ;
+                    break ;
+                }
+            }
+            break ;
+        }
 		default:
 			// This should be impossible since every opcode is accounted for
 			printf (ERR_IMPOSSIBLE_INSTRUCTION);
@@ -835,12 +797,12 @@ static void sunyat_execute (WINDOW *win) {
 			break;
 		}
         if (debug) {
-            if (0 == (sunyat_clock_ticks%100000)) {
+            //if (0 == (sunyat_clock_ticks%100000)) {
                 write_mem_win() ;
                 //refresh() ;
                 write_reg_watcher() ;
                 //refresh() ;
-            }
+            //}
 
             if (pause) {
                 //printf("Pausing\t") ;
@@ -851,7 +813,7 @@ static void sunyat_execute (WINDOW *win) {
             }
         }
 	}
-
+    //fclose(fuckyou) ;
 }
 
 static uint8_t get_opcode () {

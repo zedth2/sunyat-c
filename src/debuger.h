@@ -11,5 +11,5 @@ void write_reg_watcher() ;
 void debug_pause() ;
 void write_mem_win() ;
 void print_to_win(WINDOW *cwin, uint8_t *data, int len) ;
-
+static void make_reg_labels(char *lbls[SIZE_WIN]);
 #endif

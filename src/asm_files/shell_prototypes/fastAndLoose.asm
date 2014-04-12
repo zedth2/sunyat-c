@@ -78,7 +78,6 @@ jmp !main
 !main
 	mov R0 !prompt
 	call !print ;print the prompt
-
 	!get_cmd
 		load R0 TERM
 		!gc_while

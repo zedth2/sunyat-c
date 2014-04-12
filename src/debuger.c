@@ -1,6 +1,7 @@
 
 
 #include <ncurses.h>
+#include <stdlib.h>
 #include "sunyat.h"
 #include "debuger.h"
 #include "sat_scr.h"
@@ -68,10 +69,14 @@ WINDOW* main_win_debug(){
 
     mem_win = newwin(max_y, max_x - 80, 0, 80) ;
     box(mem_win, 0, 0) ;
+    scrollok(mem_win, TRUE) ;
+    //idlok(mem_win, TRUE) ;
     wrefresh(mem_win) ;
 
     reg_watcher = newwin(max_y - 25, 80, 25, 0) ;
     box(reg_watcher, 0, 0) ;
+    scrollok(reg_watcher, TRUE) ;
+    //idlok(reg_watcher, TRUE) ;
     wrefresh(reg_watcher) ;
 
     return win ;
@@ -109,13 +114,13 @@ void write_reg_watcher(){
     win->cur_Y = 1 ;
 //wbkgd(win->win, COLOR_PAIR(1)) ;
 
-
+init_pair(2, COLOR_GREEN, COLOR_BLACK) ;
     id = print_array(win, sunyat_regs, sunyat_regs[REG_WIN], id) ;
-    wattron(win->win, COLOR_PAIR(1));
-    id = print_array(win, sunyat_regs+sunyat_regs[REG_WIN], SIZE_WIN, id) ;
+    wattron(win->win, COLOR_PAIR(2));
+    print_array_regs(win, sunyat_regs+sunyat_regs[REG_WIN], SIZE_WIN) ;
     //print_to_win(reg_watcher, sunyat_regs+sunyat_regs[REG_WIN], SIZE_WIN) ;
-    wattroff(win->win, COLOR_PAIR(1));
-    id = print_array(win, sunyat_regs+(sunyat_regs[REG_WIN]+SIZE_WIN), SIZE_REG-(sunyat_regs[REG_WIN]+SIZE_WIN), id) ;
+    wattroff(win->win, COLOR_PAIR(2));
+    id = print_array(win, sunyat_regs+(sunyat_regs[REG_WIN]+SIZE_WIN), SIZE_REG-(sunyat_regs[REG_WIN]+SIZE_WIN), id+SIZE_WIN) ;
     //print_to_win(reg_watcher, sunyat_regs+(sunyat_regs[REG_WIN]+SIZE_WIN), SIZE_REG-(sunyat_regs[REG_WIN]+SIZE_WIN)) ;
 
     //print_to_win(reg_watcher, sunyat_regs, SIZE_REG) ;
@@ -125,27 +130,29 @@ void write_reg_watcher(){
 
 }
 
+
 void write_mem_win(){
     //int x = 0, y = 0 ;
     //getmaxyx(mem_win, x, y) ;
     //printf(" FUCKER X %d Y %d \n", x, y) ;
     //getmaxyx(reg_watcher, x, y) ;
     //printf(" FUCKER_REG X %d Y %d \n", x, y) ;
-    print_to_win(mem_win, sunyat_ram, SIZE_APP_RAM) ;
 
-    //int X = 0, Y = 0, cnt = 0, curCol = 2, curRow = 1, strLen = 10, colSpace = 2;
+    //print_to_win(mem_win, sunyat_ram, SIZE_APP_RAM) ;
+    scrollok(mem_win, TRUE) ;
+    int X = 0, Y = 0, cnt = 0, curCol = 2, curRow = 1, strLen = 10, colSpace = 2;
     //getmaxyx(mem_win, X, Y) ;
-    //for( ; SIZE_APP_RAM > cnt ; ++cnt, ++curRow) {
-        //mvwprintw(mem_win, curRow, curCol, "%03d : 0x%02X ", cnt, sunyat_ram[cnt]) ;
-        ////for(curRow = 1 ; Y > curRow ; curRow++){
-            ////mvwprintw(mem_win, curRow, curCol, "%03d : 0x%02X ", cnt+curRow-1, *(data+(1-curRow+cnt))) ;
-        ////}
+    for( ; SIZE_APP_RAM > cnt ; ++cnt, ++curRow) {
+        mvwprintw(mem_win, curRow, curCol, "%03d : 0x%02X ", cnt, sunyat_ram[cnt]) ;
+        //for(curRow = 1 ; Y > curRow ; curRow++){
+            //mvwprintw(mem_win, curRow, curCol, "%03d : 0x%02X ", cnt+curRow-1, *(data+(1-curRow+cnt))) ;
+        //}
         //if (curRow >= X-2) {
             //curRow = 0 ;
             //curCol += strLen+colSpace ;
         //}
-    //}
-    //wrefresh(mem_win) ;
+    }
+    wrefresh(mem_win) ;
 
 
 
@@ -175,6 +182,14 @@ void print_to_win(WINDOW *cwin, uint8_t data[], int len){
         }
     }
     wrefresh(cwin) ;
+}
+
+void print_to_win_lbls(WINDOW *cwin, uint8_t data[], int len, char *lbls, int lbl_len){
+
+}
+
+void move_cursor(WINDOW *cwin){
+
 }
 
 //void memory_win(WINDOW *mem, int x, int y, int wid, int height) {
