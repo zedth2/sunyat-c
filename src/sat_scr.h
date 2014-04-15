@@ -47,6 +47,8 @@ typedef struct _SatWin {
     WINDOW *win ;
     int cur_X ;
     int cur_Y ;
+    unsigned int max_X ;
+    unsigned int max_Y ;
 } SatWin ;
 
 
@@ -58,5 +60,6 @@ void terminal_restore();
 SatWin* init_SatWin() ;
 int print_array(SatWin *win, uint8_t arr[], int len, int id_start);
 void get_W_H(SatWin *win, unsigned int *Width, unsigned int *Height) ;
-void print_array_regs(SatWin *win, uint8_t arr[], int len) ;
+//void print_array_regs(SatWin *win, uint8_t arr[], int len) ;
+void print_sys_reg(SatWin *win, uint8_t arr[]) ;
 #endif /* SAT_SCR_H_ */

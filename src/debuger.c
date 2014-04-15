@@ -4,14 +4,16 @@
 #include <stdlib.h>
 #include "sunyat.h"
 #include "debuger.h"
-#include "sat_scr.h"
+
 
 
 extern uint8_t sunyat_regs [SIZE_REG] ;
 extern uint8_t sunyat_ram [SIZE_APP_RAM];
 
-WINDOW *reg_watcher ;
-WINDOW *mem_win ;
+SatWin *reg_win ; ///This is the SatWin holding the registers window.
+SatWin *mem_win ; ///This is the SatWin holding the memory window.
+extern SatWin *main_win ; ///The main window for the assembly program. Defined in sunyat.{h,c}
+
 /**
  *  brief:
  *      This will do the setup for ncurses for the debugger.
@@ -48,7 +50,6 @@ int debug_setup(){
 	}
 }
 
-
 /**
  * brief:
  *      This will initialize all the debugger screens and return
@@ -57,115 +58,369 @@ int debug_setup(){
  * Returns:
  *      ncurses WINDOW
  */
-WINDOW* main_win_debug(){
+SatWin* main_win_debug(){
     printw("Press F1 to exit");
 	refresh();
     int max_x = getmaxx(stdscr) ;
     int max_y = getmaxy(stdscr) ;
-    WINDOW *win ;
-    win = newwin(25,80,0,0) ;
-    //box(win, 0, 0) ;
-    wrefresh(win) ;
 
-    mem_win = newwin(max_y, max_x - 80, 0, 80) ;
-    box(mem_win, 0, 0) ;
-    scrollok(mem_win, TRUE) ;
-    //idlok(mem_win, TRUE) ;
-    wrefresh(mem_win) ;
+    main_win = init_SatWin() ;
+    main_win->win = newwin(25, 80, 0, 0) ;
+    getmaxyx(main_win->win, main_win->max_Y, main_win->max_X) ;
 
-    reg_watcher = newwin(max_y - 25, 80, 25, 0) ;
-    box(reg_watcher, 0, 0) ;
-    scrollok(reg_watcher, TRUE) ;
-    //idlok(reg_watcher, TRUE) ;
-    wrefresh(reg_watcher) ;
+    reg_win = init_SatWin() ;
+    reg_win->win = newwin(max_y - 25, 80, 25, 0) ;
+    getmaxyx(reg_win->win, reg_win->max_Y, reg_win->max_X) ;
 
-    return win ;
+    box(reg_win->win, 0, 0) ;
+    scrollok(reg_win->win, TRUE) ;
+    wrefresh(reg_win->win) ;
 
-    //WINDOW *wint = newwin(40,80,25,0) ;
-    //box(wint, 0, 0) ;
-    //wrefresh(wint) ;
+    mem_win = init_SatWin() ;
+    mem_win->win = newwin(max_y, max_x - 80, 0, 80) ;
+    getmaxyx(mem_win->win, mem_win->max_Y, mem_win->max_X) ;
+
+    box(mem_win->win, 0, 0) ;
+    scrollok(mem_win->win, TRUE) ;
+    wrefresh(mem_win->win) ;
 
 
-    //int key,x=0,y=0 ;//= getch() ;
-    //getmaxyx(stdscr, x, y) ;
-    //printw("FUCKHER %d %d", getmaxx(stdscr),getmaxy(stdscr));
-    //while ((key = getch()) != KEY_F(1)){
-        //sleep(1) ; }
-
-
-
+    return main_win ;
 }
 
 
-
-void write_reg_watcher(){
-    //int r = 0 ;
-    //int x = 0, y = 0 ;
-    //getmaxyx(reg_watcher, x, y) ;
-    //for(r = 0 ; SIZE_REG > r ; r++) {
-        //mvwprintw(reg_watcher, r+2, 2, " %02d : 0x%02X ", r, sunyat_regs[r]) ;
-    //}
-    //wrefresh(reg_watcher) ;
-
-    int id = 0 ;
-    SatWin *win = init_SatWin() ;
-    win->win = reg_watcher ;
+/**
+ *  Brief:
+ *      This will print out the registers and their values. Giving
+ *      the system registers proper labels and giving color to the
+ *      register window.
+ *
+ *  Parameters:
+ *      win : *SatWin
+ *          The window to print everything out to. If NULL
+ *          it defaults to reg_win.
+ */
+void print_reg_win(SatWin *win) {
+    if (!win) win = reg_win ;
     win->cur_X = 2 ;
     win->cur_Y = 1 ;
-//wbkgd(win->win, COLOR_PAIR(1)) ;
-
-init_pair(2, COLOR_GREEN, COLOR_BLACK) ;
-    id = print_array(win, sunyat_regs, sunyat_regs[REG_WIN], id) ;
-    wattron(win->win, COLOR_PAIR(2));
-    print_array_regs(win, sunyat_regs+sunyat_regs[REG_WIN], SIZE_WIN) ;
-    //print_to_win(reg_watcher, sunyat_regs+sunyat_regs[REG_WIN], SIZE_WIN) ;
-    wattroff(win->win, COLOR_PAIR(2));
-    id = print_array(win, sunyat_regs+(sunyat_regs[REG_WIN]+SIZE_WIN), SIZE_REG-(sunyat_regs[REG_WIN]+SIZE_WIN), id+SIZE_WIN) ;
-    //print_to_win(reg_watcher, sunyat_regs+(sunyat_regs[REG_WIN]+SIZE_WIN), SIZE_REG-(sunyat_regs[REG_WIN]+SIZE_WIN)) ;
-
-    //print_to_win(reg_watcher, sunyat_regs, SIZE_REG) ;
-
-//refresh() ;
-    //print_array(win, sunyat_regs, SIZE_REG, 0) ;
-
+    int cnt = 0, strLen = 10 ;
+    init_pair(2, COLOR_GREEN, COLOR_BLACK) ;
+    for (; SIZE_REG > cnt ; cnt++) {
+        switch(cnt){
+            case REG_PC:
+            {
+                mvwprintw(win->win, win->cur_Y, win->cur_X, " PC : 0x%02X ", sunyat_regs[cnt]);
+                break ;
+            }
+            case REG_IRH:
+            {
+                mvwprintw(win->win, win->cur_Y, win->cur_X, "IRH : 0x%02X ", sunyat_regs[cnt]);
+                break ;
+            }
+            case REG_IRL:
+            {
+                mvwprintw(win->win, win->cur_Y, win->cur_X, "IRL : 0x%02X ", sunyat_regs[cnt]);
+                break ;
+            }
+            case REG_WIN:
+            {
+                mvwprintw(win->win, win->cur_Y, win->cur_X, "WIN : 0x%02X ", sunyat_regs[cnt]);
+                break ;
+            }
+            case REG_SP:
+            {
+                mvwprintw(win->win, win->cur_Y, win->cur_X, " SP : 0x%02X ", sunyat_regs[cnt]);
+                break ;
+            }
+            default:
+            {
+                if (sunyat_regs[REG_WIN] <= cnt && sunyat_regs[REG_WIN]+SIZE_WIN > cnt){
+                    wattron(win->win, COLOR_PAIR(2));
+                    mvwprintw(win->win, win->cur_Y, win->cur_X, "R%02d : 0x%02X ", cnt-sunyat_regs[REG_WIN], sunyat_regs[cnt]);
+                    //int wcnt = 0 ;
+                    //for(; SIZE_WIN > wcnt ; wcnt++) {
+                        //mvwprintw(win->win,
+                    //}
+                    //print_array(win, &(sunyat_regs[cnt]), SIZE_WIN, 0) ;
+                    //cnt += SIZE_WIN ;
+                    wattroff(win->win, COLOR_PAIR(2));
+                } /*else if (sunyat_regs[REG_PC] == cnt || sunyat_regs[REG_PC]-1 == cnt) {
+                    wattron(win->win, COLOR_PAIR(2));
+                    mvwprintw(win->win, win->cur_Y, win->cur_X, "%02d : 0x%02X ", cnt, sunyat_regs[cnt]);
+                    wattroff(win->win, COLOR_PAIR(2));
+                }*/
+                else {
+                    mvwprintw(win->win, win->cur_Y, win->cur_X, "%03d : 0x%02X ", cnt, sunyat_regs[cnt]);
+                }
+                break ;
+            }
+        }
+        (win->cur_Y)++ ;
+        check_cursor(win, strLen) ;
+    }
+    wrefresh(win->win) ;
 }
 
+static void check_cursor(SatWin *win, int strLen) {
+    if (win->cur_Y >= (win->max_Y)-2) {
+        win->cur_Y = 1 ; //It must be two to get past the box outline.
+        win->cur_X += strLen+2 ;
+    }
+}
 
 void write_mem_win(){
-    //int x = 0, y = 0 ;
-    //getmaxyx(mem_win, x, y) ;
-    //printf(" FUCKER X %d Y %d \n", x, y) ;
-    //getmaxyx(reg_watcher, x, y) ;
-    //printf(" FUCKER_REG X %d Y %d \n", x, y) ;
-
-    //print_to_win(mem_win, sunyat_ram, SIZE_APP_RAM) ;
-    scrollok(mem_win, TRUE) ;
-    int X = 0, Y = 0, cnt = 0, curCol = 2, curRow = 1, strLen = 10, colSpace = 2;
-    //getmaxyx(mem_win, X, Y) ;
-    for( ; SIZE_APP_RAM > cnt ; ++cnt, ++curRow) {
-        mvwprintw(mem_win, curRow, curCol, "%03d : 0x%02X ", cnt, sunyat_ram[cnt]) ;
-        //for(curRow = 1 ; Y > curRow ; curRow++){
-            //mvwprintw(mem_win, curRow, curCol, "%03d : 0x%02X ", cnt+curRow-1, *(data+(1-curRow+cnt))) ;
-        //}
-        //if (curRow >= X-2) {
-            //curRow = 0 ;
-            //curCol += strLen+colSpace ;
-        //}
-    }
-    wrefresh(mem_win) ;
-
-
-
+    print_mem_win(mem_win, 0) ;
 }
 
-void debug_pause() {
+/**
+ *  Brief:
+ *      This will print data out to win. The function assumes it's the
+ *      ncurses window showing memory.
+ *
+ *  Parameters:
+ *      win : *SatWin
+ *          A pointer to the window to print to.
+ *
+ *      arr : uint8_t[]
+ *          The array to print out to the window.
+ *
+ *      mode : int
+ *          This will set the mode to print out.
+ *              0 : Will print out all memory with IRL and IRH colored.
+ *              1 : Will print a list of memory with IRL and IRH in the middle.
+ *                  These will be decoded and reconstruct a code line.
+ */
+void print_mem_win(SatWin *win, int mode) {
+    if(!win) win = mem_win ;
+    init_pair(2, COLOR_GREEN, COLOR_BLACK) ;
+    win->cur_X = 2 ;
+    win->cur_Y = 1 ;
+    if (1 == mode) {
+        werase(win->win) ;
+        box(win->win, 0, 0) ;
+        int irh = sunyat_regs[REG_PC]-2, irl = sunyat_regs[REG_PC]-1, id = irh - ((win->max_Y) / 2) ;
+        for (;(win->max_Y)-1 > win->cur_Y && SIZE_APP_RAM > id ; id++) {
+            if (irh == id) {
+                wattron(win->win, COLOR_PAIR(2)) ;
+                mvwprintw(win->win, win->cur_Y, win->cur_X, "IRH : 0x%02X ", sunyat_ram[id]) ;
+                win->cur_X += 10 ;
+                instruction_to_code(win) ;
+                win->cur_X = 2 ;
+                wattroff(win->win, COLOR_PAIR(2)) ;
+            } else if (irl == id) {
+                wattron(win->win, COLOR_PAIR(2)) ;
+                mvwprintw(win->win, win->cur_Y, win->cur_X, "IRL : 0x%02X ", sunyat_ram[id]) ;
+                win->cur_X += 10 ;
+                instruction_to_code(win) ;
+                win->cur_X = 2 ;
+                wattroff(win->win, COLOR_PAIR(2)) ;
+            } else {
+                mvwprintw(win->win, win->cur_Y, win->cur_X, "%03d : 0x%02X ", id, sunyat_ram[id]) ;
+            }
+            win->cur_Y++ ;
+            //check_cursor(win, 10) ;
+        }
+    }
+    else { //Default to 0
+        int id = 0, strLen = 10 ;
+        id = print_array(win, sunyat_ram, sunyat_regs[REG_PC]-2, id) ;
+        wattron(win->win, COLOR_PAIR(2)) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, "IRH : 0x%02X ", sunyat_ram[sunyat_regs[REG_PC]-2]) ;
+        win->cur_Y++ ;
+        check_cursor(win, strLen) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, "IRL : 0x%02X ", sunyat_ram[sunyat_regs[REG_PC]-1]) ;
+        win->cur_Y++ ;
+        check_cursor(win, strLen) ;
+        wattroff(win->win, COLOR_PAIR(2)) ;
+        id = print_array(win, &(sunyat_ram[sunyat_regs[REG_PC]]), 1+SIZE_APP_RAM-sunyat_regs[REG_PC], sunyat_regs[REG_PC]) ;
+    }
+    wrefresh(win->win) ;
+}
+
+
+
+
+int debug_pause(uint8_t opcode, uint8_t sreg, uint8_t dreg, uint8_t mem, int8_t imm, uint8_t cmp_result) {
     //printf("PAUSING\n") ;
-    wmove(reg_watcher, 1, 1) ;
-    while (DEBUG_PAUSE_KEY != getch()){
+    wmove(reg_win->win, 1, 1) ;
+    int curKey = 0, pause_again = 0 ;
+    while (DEBUG_PAUSE_KEY != (curKey = getch()) && !pause_again){
+        if (KEY_F(7) == curKey) {
+            print_mem_win(mem_win, 1) ;
+        } else if (KEY_F(8) == curKey) {
+            pause_again = 1 ;
+        }
         sleep(1) ;
         //printf("sleeping\t") ;
     }
+    return pause_again ;
+}
 
+static void instruction_to_code(SatWin *win) {
+    switch(get_opcode()) {
+    case OPCODE_MOV_RR:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " MOV R%d R%d ", get_dreg(), get_sreg()) ;
+		break ;
+    }
+    case OPCODE_MOV_RI:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " MOV R%d %d ", get_dreg(), get_imm()) ;
+		break ;
+    }
+    case OPCODE_ADD_RR:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " ADD R%d R%d ", get_dreg(), get_sreg()) ;
+		break ;
+    }
+    case OPCODE_ADD_RI:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " ADD R%d %d ", get_dreg(), get_imm()) ;
+		break ;
+    }
+    case OPCODE_SUB_RR:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " SUB R%d R%d ", get_dreg(), get_sreg()) ;
+		break ;
+    }
+    case OPCODE_MUL_RR:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " MUL R%d R%d ", get_dreg(), get_sreg()) ;
+		break ;
+    }
+    case OPCODE_MUL_RI:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " MUL R%d %d ", get_dreg(), get_imm()) ;
+		break ;
+    }
+    case OPCODE_DIV_RR:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " DIV R%d R%d ", get_dreg(), get_sreg()) ;
+		break ;
+    }
+    case OPCODE_DIV_RI:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " DIV R%d %d ", get_dreg(), get_imm()) ;
+		break ;
+    }
+    case OPCODE_CMP_RR:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " CMP R%d R%d ", get_dreg(), get_sreg()) ;
+		break ;
+    }
+    case OPCODE_CMP_RI:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " CMP R%d %d ", get_dreg(), get_imm()) ;
+		break ;
+    }
+    case OPCODE_JMP_M:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " JMP 0x%X ", get_mem()) ;
+		break ;
+    }
+    case OPCODE_JEQ_M:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " JEQ 0x%X ", get_mem()) ;
+		break ;
+    }
+    case OPCODE_JNE_M:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " JNE 0x%X ", get_mem()) ;
+		break ;
+    }
+    case OPCODE_JGR_M:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " JGR 0x%X ", get_mem()) ;
+		break ;
+    }
+    case OPCODE_JLS_M:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " JLS 0x%X ", get_mem()) ;
+		break ;
+    }
+    case OPCODE_CALL_M:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " CALL %d ", get_mem()) ;
+		break ;
+    }
+    case OPCODE_RET:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " RET ") ;
+		break ;
+    }
+    case OPCODE_AND_RR:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " AND R%d R%d ", get_dreg(), get_sreg()) ;
+		break ;
+    }
+    case OPCODE_AND_RI:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " AND R%d %d ", get_dreg(), get_imm()) ;
+		break ;
+    }
+    case OPCODE_OR_RR:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " OR R%d R%d ", get_dreg(), get_sreg()) ;
+		break ;
+    }
+    case OPCODE_OR_RI:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " OR R%d %d ", get_dreg(), get_imm()) ;
+		break ;
+    }
+    case OPCODE_XOR_RR:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " XOR R%d R%d ", get_dreg() - sunyat_regs[REG_WIN], get_sreg() - sunyat_regs[REG_WIN]) ;
+		break ;
+    }
+    case OPCODE_XOR_RI:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " XOR R%d %d ", get_dreg(), get_imm()) ;
+		break ;
+    }
+    case OPCODE_LOAD_RM:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " LOAD R%d %d ", get_dreg(), get_mem()) ;
+		break ;
+
+    }
+    case OPCODE_LOADP_RR:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " LOADP R%d R%d ", get_dreg(), get_sreg()) ;
+		break ;
+    }
+    case OPCODE_STOR_MR:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " STOR %d R%d ", get_mem(), get_sreg()) ;
+		break ;
+    }
+    case OPCODE_STORP_RR:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " STORP R%d R%d ", get_dreg(), get_sreg()) ;
+		break ;
+    }
+    case OPCODE_STACKER_R:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " STACKER R%d R%d ", get_dreg(), get_sreg()) ;
+		break ;
+    }
+    case OPCODE_SWR_I:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " SWR %d ", get_imm()) ;
+		break ;
+    }
+    case OPCODE_AWR_I:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " AWR %d ", get_imm()) ;
+		break ;
+    }
+    case OPCODE_AUX_I:
+    {
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " AUX %d ", get_imm()) ;
+		break ;
+    }
+    }
 }
 
 void print_to_win(WINDOW *cwin, uint8_t data[], int len){

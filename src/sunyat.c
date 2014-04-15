@@ -66,16 +66,6 @@
 
 #define STARTUP_PAUSE       3 //Fucking get rid of this.
 
-//////////////////////////////////////////////////
-//Internal Function Prototypes
-static void sunyat_execute (WINDOW *win);
-static uint8_t get_opcode ();
-static uint8_t get_dreg ();
-static uint8_t get_sreg ();
-static uint8_t get_mem ();
-static int8_t get_imm ();
-static void set_flags (int8_t result);
-////////////////////////////////////////////////
 extern int cursor_row ; //This is defined in sat_scr.{h,c}
 extern int cursor_col ; //This is defined in sat_scr.{h,c}
 extern uint8_t terminal[TERMINAL_HEIGHT][TERMINAL_WIDTH + 1]; //This is defined in sat_scr.{h,c}
@@ -127,6 +117,11 @@ const char ERR_WINDOW_RANGE []=
 	"\tWindow position out of range. (Acceptable Values: 0-29)\n";
 
 
+/**
+ *  Brief:
+ *      This is the main window for the assembly program.
+ */
+SatWin *main_win ;
 /**
  *  Brief:
  *      This is the array being all the ram for the SUNYAT.
@@ -287,14 +282,16 @@ int start_sunyat(char *rom, int lState, bool lDebug) {
 
 	// fetch->decode->exceute until returned beyond RAM
 	if (!lDebug) {
-        my_win = stdscr ;
+        main_win = init_SatWin() ;
+        main_win->win = stdscr ;
+        getmaxyx(main_win->win, main_win->max_Y, main_win->max_X) ;
     } else {
         if (-1 == debug_setup()) {
             printf("Debugger setup failed.\n") ;
             return 100 ;
         }
-
-        if (NULL == (my_win = main_win_debug())) {
+        main_win_debug() ;
+        if (NULL == main_win) {
             printf("The debuggers main window failed.\n") ;
             return 100 ;
         }
@@ -304,11 +301,11 @@ int start_sunyat(char *rom, int lState, bool lDebug) {
         //my_win = //some debug setup function.
     }
 
-    if( NULL == my_win ){
+    if( NULL == main_win || NULL == main_win->win ){
         printf("WINDOW IS NULL\n") ;
         return 100 ;
     }
-    sunyat_execute (my_win);
+    sunyat_execute (main_win->win);
 
 
 	// pause to let user see completed application output
@@ -335,12 +332,12 @@ int start_sunyat(char *rom, int lState, bool lDebug) {
 static void sunyat_execute (WINDOW *win) {
 	bool terminal_too_small_prev_cycle = false;
 
-    int pause = 0 ;
-    write_mem_win() ;
-    //refresh() ;
-    write_reg_watcher() ;
-            //FILE * fuckyou;
-            //fuckyou = fopen ("fuck.txt", "a");
+    int pause = 1 ;
+
+    if(debug){
+        write_mem_win() ;
+        print_reg_win(NULL) ;
+    }
 
 	for (;;) {
 		uint8_t opcode;
@@ -392,7 +389,7 @@ static void sunyat_execute (WINDOW *win) {
 
 		sunyat_clock_ticks++;
 
-		/*
+        /*
 		 * FETCH
 		 */
 
@@ -800,15 +797,15 @@ static void sunyat_execute (WINDOW *win) {
             //if (0 == (sunyat_clock_ticks%100000)) {
                 write_mem_win() ;
                 //refresh() ;
-                write_reg_watcher() ;
+                print_reg_win(NULL) ;
                 //refresh() ;
             //}
 
             if (pause) {
                 //printf("Pausing\t") ;
 
-                debug_pause() ;
-                pause = 0 ;
+
+                pause = debug_pause(opcode, sreg, dreg, mem, imm, cmp_result) ;
 
             }
         }
@@ -816,23 +813,23 @@ static void sunyat_execute (WINDOW *win) {
     //fclose(fuckyou) ;
 }
 
-static uint8_t get_opcode () {
+uint8_t get_opcode () {
 	return sunyat_regs [REG_IRH] >> 3; // top 5 bits are opcode
 }
 
-static uint8_t get_dreg () {
+uint8_t get_dreg () {
 	return sunyat_regs [REG_IRH] & 0x07; // bottom 3 bits are dreg
 }
 
-static uint8_t get_sreg () {
+uint8_t get_sreg () {
 	return sunyat_regs [REG_IRL] & 0x07; // bottom 3 bits are sreg
 }
 
-static uint8_t get_mem () {
+uint8_t get_mem () {
 	return sunyat_regs [REG_IRL];
 }
 
-static int8_t get_imm () {
+int8_t get_imm () {
 	return (int8_t)(sunyat_regs [REG_IRL]);
 }
 

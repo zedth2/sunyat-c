@@ -555,7 +555,13 @@
 
 
 int start_sunyat(char *rom, int lState, bool lDebug);
+uint8_t get_opcode () ;
+uint8_t get_dreg () ;
+uint8_t get_sreg () ;
+uint8_t get_mem () ;
+int8_t get_imm () ;
 
-
+static void sunyat_execute (WINDOW *win);
+static void set_flags (int8_t result);
 
 #endif /* _SUNYAT_H_ */

@@ -103,12 +103,11 @@ SatWin* init_SatWin() {
 
 
 int print_array(SatWin *win, uint8_t arr[], int len, int id_start) {
-    int W = 0, H = 0, cnt = 0, strLen = 10 ;
-    get_W_H(win, &W, &H) ;
+    int cnt = 0, strLen = 10 ;
     for (cnt = 0 ; len > cnt ; cnt++) {
         mvwprintw(win->win, win->cur_Y, win->cur_X, "%03d : 0x%02X ", id_start, arr[cnt]);
         (win->cur_Y)++ ;
-        if (win->cur_Y >= W-2) {
+        if (win->cur_Y >= (win->max_Y)-2) {
             win->cur_Y = 1 ; //It must be two to get past the box outline.
             win->cur_X += strLen+2 ;
         }
@@ -118,20 +117,31 @@ int print_array(SatWin *win, uint8_t arr[], int len, int id_start) {
     return id_start ;
 }
 
-void print_array_regs(SatWin *win, uint8_t arr[], int len) {
-    int W = 0, H = 0, cnt = 0, strLen = 10, lblCnt = 0 ;
-    get_W_H(win, &W, &H) ;
-    for (cnt = 0 ; len > cnt ; cnt++, lblCnt++) {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, "R%02d : 0x%02X ", lblCnt, arr[cnt]);
-        (win->cur_Y)++ ;
-        if (win->cur_Y >= W-2) {
-            win->cur_Y = 1 ; //It must be two to get past the box outline.
-            win->cur_X += strLen+2 ;
-        }
-        if(SIZE_WIN <= lblCnt) lblCnt = 0 ;
-    }
-    wrefresh(win->win) ;
-}
+//void print_array_regs(SatWin *win, uint8_t arr[], int len) {
+    //int cnt = 0, strLen = 10, lblCnt = 0 ;
+    //init_pair(2, COLOR_GREEN, COLOR_BLACK) ;
+    //for (cnt = 0 ; len > cnt ; cnt++) {
+
+        //if (REG_PC == cnt) {
+            //mvwprintw(win->win, win->cur_Y, win->cur_X, " PC : 0x%02X ", cnt, arr[cnt]);
+        //}
+    //}
+
+
+
+    //for (cnt = 0 ; len > cnt ; cnt++, lblCnt++) {
+        //mvwprintw(win->win, win->cur_Y, win->cur_X, "R%02d : 0x%02X ", lblCnt, arr[cnt]);
+        //(win->cur_Y)++ ;
+        //if (win->cur_Y >= (win->max_Y)-2) {
+            //win->cur_Y = 1 ; //It must be two to get past the box outline.
+            //win->cur_X += strLen+2 ;
+        //}
+        //if (SIZE_WIN <= lblCnt) lblCnt = 0 ;
+    //}
+    //wrefresh(win->win) ;
+//}
+
+
 
 
 void reset_cur(SatWin *win) {
