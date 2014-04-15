@@ -102,6 +102,8 @@ SatWin* main_win_debug(){
  */
 void print_reg_win(SatWin *win) {
     if (!win) win = reg_win ;
+    werase(win->win) ;
+    box(win->win, 0, 0) ;
     win->cur_X = 2 ;
     win->cur_Y = 1 ;
     int cnt = 0, strLen = 10 ;
@@ -193,6 +195,8 @@ void write_mem_win(){
  */
 void print_mem_win(SatWin *win, int mode) {
     if(!win) win = mem_win ;
+    werase(win->win) ;
+    box(win->win, 0, 0) ;
     init_pair(2, COLOR_GREEN, COLOR_BLACK) ;
     win->cur_X = 2 ;
     win->cur_Y = 1 ;
@@ -402,7 +406,12 @@ static void instruction_to_code(SatWin *win) {
     }
     case OPCODE_STACKER_R:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " STACKER R%d R%d ", get_dreg(), get_sreg()) ;
+        int imm = get_imm() ;
+        if (imm) { //Pop
+            mvwprintw(win->win, win->cur_Y, win->cur_X, " POP R%d ", get_dreg()) ;
+        } else { //Push
+            mvwprintw(win->win, win->cur_Y, win->cur_X, " PUSH R%d ", get_dreg()) ;
+        }
 		break ;
     }
     case OPCODE_SWR_I:

@@ -334,7 +334,7 @@ static void sunyat_execute (WINDOW *win) {
 
     int pause = 1 ;
 
-    if(debug){
+    if(debug) {
         write_mem_win() ;
         print_reg_win(NULL) ;
     }
