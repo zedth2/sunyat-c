@@ -14,6 +14,8 @@ SatWin *reg_win ; ///This is the SatWin holding the registers window.
 SatWin *mem_win ; ///This is the SatWin holding the memory window.
 extern SatWin *main_win ; ///The main window for the assembly program. Defined in sunyat.{h,c}
 
+int curMode = 0 ; ///This will keep the memory window in whatever mode is was before.
+
 /**
  *  brief:
  *      This will do the setup for ncurses for the debugger.
@@ -102,8 +104,7 @@ SatWin* main_win_debug(){
  */
 void print_reg_win(SatWin *win) {
     if (!win) win = reg_win ;
-    werase(win->win) ;
-    box(win->win, 0, 0) ;
+    erase_box(win) ;
     win->cur_X = 2 ;
     win->cur_Y = 1 ;
     int cnt = 0, strLen = 10 ;
@@ -171,9 +172,11 @@ static void check_cursor(SatWin *win, int strLen) {
     }
 }
 
+
 void write_mem_win(){
-    print_mem_win(mem_win, 0) ;
+    print_mem_win(mem_win, curMode) ;
 }
+
 
 /**
  *  Brief:
@@ -195,14 +198,11 @@ void write_mem_win(){
  */
 void print_mem_win(SatWin *win, int mode) {
     if(!win) win = mem_win ;
-    werase(win->win) ;
-    box(win->win, 0, 0) ;
     init_pair(2, COLOR_GREEN, COLOR_BLACK) ;
     win->cur_X = 2 ;
     win->cur_Y = 1 ;
     if (1 == mode) {
-        werase(win->win) ;
-        box(win->win, 0, 0) ;
+        erase_box(win) ;
         int irh = sunyat_regs[REG_PC]-2, irl = sunyat_regs[REG_PC]-1, id = irh - ((win->max_Y) / 2) ;
         for (;(win->max_Y)-1 > win->cur_Y && SIZE_APP_RAM > id ; id++) {
             if (irh == id) {
@@ -225,8 +225,10 @@ void print_mem_win(SatWin *win, int mode) {
             win->cur_Y++ ;
             //check_cursor(win, 10) ;
         }
+        curMode = 1 ;
     }
     else { //Default to 0
+        if (curMode != 0) erase_box(win) ;
         int id = 0, strLen = 10 ;
         id = print_array(win, sunyat_ram, sunyat_regs[REG_PC]-2, id) ;
         wattron(win->win, COLOR_PAIR(2)) ;
@@ -238,6 +240,7 @@ void print_mem_win(SatWin *win, int mode) {
         check_cursor(win, strLen) ;
         wattroff(win->win, COLOR_PAIR(2)) ;
         id = print_array(win, &(sunyat_ram[sunyat_regs[REG_PC]]), 1+SIZE_APP_RAM-sunyat_regs[REG_PC], sunyat_regs[REG_PC]) ;
+        curMode = 0 ;
     }
     wrefresh(win->win) ;
 }
@@ -245,20 +248,28 @@ void print_mem_win(SatWin *win, int mode) {
 
 
 
-int debug_pause(uint8_t opcode, uint8_t sreg, uint8_t dreg, uint8_t mem, int8_t imm, uint8_t cmp_result) {
+int debug_pause() {
     //printf("PAUSING\n") ;
     wmove(reg_win->win, 1, 1) ;
     int curKey = 0, pause_again = 0 ;
     while (DEBUG_PAUSE_KEY != (curKey = getch()) && !pause_again){
         if (KEY_F(7) == curKey) {
-            print_mem_win(mem_win, 1) ;
+            print_mem_win(mem_win, !curMode) ;
         } else if (KEY_F(8) == curKey) {
             pause_again = 1 ;
         }
         sleep(1) ;
         //printf("sleeping\t") ;
     }
+    erase_box(mem_win) ;
+    curMode = (pause_again && curMode) ;
     return pause_again ;
+}
+
+static void erase_box(SatWin *win) {
+    werase(win->win) ;
+    box(win->win, 0, 0) ;
+
 }
 
 static void instruction_to_code(SatWin *win) {

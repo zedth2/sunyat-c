@@ -805,7 +805,7 @@ static void sunyat_execute (WINDOW *win) {
                 //printf("Pausing\t") ;
 
 
-                pause = debug_pause(opcode, sreg, dreg, mem, imm, cmp_result) ;
+                pause = debug_pause() ;
 
             }
         }

@@ -112,7 +112,6 @@ jmp !main ;back to the top
 ;-Does not print the 0x00
 ;------------------------------------------------------------------------------------------------
 !print
-aux 1
 	push R0 ;backup R1
 	push R1 ;backup R0
 	!while_PP
@@ -123,7 +122,6 @@ aux 1
 		add R0 1 ;Increment array pointer
 		jmp !while_PP ;keep printing
 	!while_PP_end
-    aux 1
 	pop R1	;return value
 	pop R0	;return value
 	ret
