@@ -204,6 +204,7 @@ void print_mem_win(SatWin *win, int mode) {
     if (1 == mode) {
         erase_box(win) ;
         int irh = sunyat_regs[REG_PC]-2, irl = sunyat_regs[REG_PC]-1, id = irh - ((win->max_Y) / 2) ;
+        if (id < 0) id = 0 ;
         for (;(win->max_Y)-1 > win->cur_Y && SIZE_APP_RAM > id ; id++) {
             if (irh == id) {
                 wattron(win->win, COLOR_PAIR(2)) ;
