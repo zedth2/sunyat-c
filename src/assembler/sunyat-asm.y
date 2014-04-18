@@ -247,7 +247,7 @@ immediate(val) ::= LABEL_DIRECTIVE IDENTIFIER(id). {
 		else {
 			val.data = label_addrs [pos];
 		}
-        printf("DOING LABEL %s %X \n", id.token_str, label_addrs [pos]) ;
+        //printf("DOING LABEL %s %X \n", id.token_str, label_addrs [pos]) ;
 	}
 }
 immediate(val) ::= CHARACTER(ch). {

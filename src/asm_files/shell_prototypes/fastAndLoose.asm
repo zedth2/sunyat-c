@@ -5,7 +5,7 @@
 ;------------------------------------
 
 
-.message	SUNYAT Shell 'Fast and Loose' Prototype
+;.message	SUNYAT Shell 'Fast and Loose' Prototype
 .constant	TERM 	0xFF
 .constant	CR	0xD
 .constant	LF	0xA
@@ -19,6 +19,7 @@ jmp !main
 	.variable	cmd_win_3	!cmd_win
 	.variable	cmd_populate_reg_4	!cmd_populate_reg
 	.variable	cmd_savestate_5	!cmd_savestate
+	.variable	cmd_aux2	!cmd_aux2
 ;commands--------------------------------------------------------
 !cmd_exit
 	jmp !exit_shell
@@ -54,7 +55,9 @@ jmp !main
 !cmd_savestate
 	aux 0
 	jmp !get_cmd_end
-
+!cmd_aux2
+	aux 2
+	jmp !get_cmd_end
 
 !cmd_win_end;
 ;end of commands-------------------------------------------------

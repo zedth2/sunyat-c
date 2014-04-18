@@ -4,7 +4,7 @@
 ;String Delimiter: 0x00
 ;------------------------------------
 
-;.message	SUNYAT Shell Prototype
+.message	SUNYAT Shell Prototype
 .constant	TERM 	0xFF
 .constant	CR	0xD
 .constant	LF	0xA
@@ -41,6 +41,9 @@
 	.variable awr0 'a'
 	.variable awr1 'w'
 	.variable awr2 'r'
+
+!cmd_p ;populate R7
+	.variable pop0 	'p'
 
 !cmd_reset
 	.variable reset0 'r'
@@ -244,6 +247,11 @@
 		aux 0
 		jmp !end_of_commands
 	!cmd_save_exec_end
+
+!cmd_p_execute
+	mov R7 'x'
+	jmp !end_of_commands
+!cmd_p_execute_end
 
 	;EXIT - Exit the SUNYAT
 	!cmd_exit_exec

@@ -1,6 +1,6 @@
 
-#ifndef _DEBUGER_H_
-#define _DEBUGER_H_
+#ifndef _DEBUGGER_H_
+#define _DEBUGGER_H_
 
 #include "sat_scr.h"
 

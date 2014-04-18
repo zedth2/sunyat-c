@@ -54,7 +54,7 @@
 
 #include "sunyat.h"
 #include "sat_scr.h"
-#include "debuger.h"
+#include "debugger.h"
 
 #ifndef true
 #define true TRUE
@@ -141,10 +141,10 @@ uint8_t sunyat_ram [SIZE_APP_RAM];
 uint8_t sunyat_regs [SIZE_REG] = {
 	0, 0, 0, 5,                             /* REG_PC, REG_IRH, REG_IRL, REG_WIN */
 	SIZE_APP_RAM,                           /* REG_SP stack grows down from top of RAM */
-	'0', '1', '2', '3', '4', '5', '6', '7', /* GPRS no longer default to Amos' wedding date */
-	'8', '9', '0', '1', '2', '3', '4', '5', /* GPRS no longer default to Amos' wedding date */
-	'6', '7', '8', '9', '0', '1', '2', '3', /* GPRS no longer default to Amos' wedding date */
-	'4', '5', '6', '7', '8', '9', '0', '1', /* GPRS no longer default to Amos' wedding date */
+	'1', '0', '2', '0', '2', '0', '0', '6', /* GPRS no longer default to Amos' wedding date */
+	'1', '0', '2', '0', '2', '0', '0', '6', /* GPRS no longer default to Amos' wedding date */
+	'1', '0', '2', '0', '2', '0', '0', '6', /* GPRS no longer default to Amos' wedding date */
+	'1', '0', '2', '0', '2', '0', '0', '6', /* GPRS no longer default to Amos' wedding date */
 };
 
 
@@ -786,7 +786,7 @@ static void sunyat_execute (WINDOW *win) {
 				case 0: //savestate
 				{
 					FILE * pFile;
-  					pFile = fopen ("savestate_fuck.rom", "wb");
+  					pFile = fopen ("statefile.rom", "wb");
 
   					//---------------------------------------------------------------------------
   					//RAM comes "first" in the file.
@@ -797,10 +797,15 @@ static void sunyat_execute (WINDOW *win) {
   					fclose (pFile);
                     break ;
                 }
-                case 1:
+                case 1: //pause
                 {
                     pause = 1 ;
                     break ;
+                }
+                case 2: //load program
+                {
+                	load_state("testStateRom.rom");
+                	break ;
                 }
             }
             break ;

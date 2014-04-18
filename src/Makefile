@@ -28,13 +28,13 @@ all:	sunyat sunyat-asm
 #----------------------------------------
 # sunyat
 #----------------------------------------
-sunyat:	main.c sunyat.c sunyat.h build_number.h sat_scr.h sat_scr.c debuger.c debuger.h
-	gcc -g -o ../bin/sunyat main.c sunyat.c debuger.c sat_scr.c  -lncurses
+sunyat:	main.c sunyat.c sunyat.h sat_scr.h sat_scr.c debugger.c debugger.h
+	gcc -g -o ../bin/sunyat main.c sunyat.c debugger.c sat_scr.c  -lncurses
 
 #----------------------------------------
 # sunyat-asm
 #----------------------------------------
-sunyat-asm:	lemon sunyat-asm.c lex.yy.c build_number.h assembler/token.h sunyat.h
+sunyat-asm:	lemon sunyat-asm.c lex.yy.c assembler/token.h sunyat.h
 	gcc -g -o ../bin/sunyat-asm assembler/lex.yy.c assembler/sunyat-asm.c
 
 lemon:
@@ -48,27 +48,10 @@ sunyat-asm.h:
 sunyat-asm.c:	assembler/sunyat-asm.y sunyat-asm.h lemon
 	../bin/lemon T=../tools/lemon/lempar.c assembler/sunyat-asm.y
 
-build_number.h:	next_build_number
-
-next_build_number:
-	gcc -o ../bin/build_number build_number.c
-	../bin/build_number
-
-
-#----------------------------------------
-# Run on make
-#----------------------------------------
-
-#windowtest: sunyat windowtest.rom build_number.h
-#	./sunyat windowtest.rom
-#
-#windowtest.rom: sunyat-asm windowtest.asm build_number.h
-#	./sunyat-asm windowtest.asm
-
 
 #----------------------------------------
 # clean
 #----------------------------------------
 clean:
-	rm -f ../bin/build_number ../bin/lemon ../bin/sunyat ../bin/sunyat-asm assembler/lex.yy.c assembler/sunyat-asm.c assembler/sunyat-asm.h assembler/sunyat-asm.out
+	rm -f ../bin/lemon ../bin/sunyat ../bin/sunyat-asm assembler/lex.yy.c assembler/sunyat-asm.c assembler/sunyat-asm.h assembler/sunyat-asm.out
 #windowtest.rom

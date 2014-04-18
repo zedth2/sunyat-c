@@ -3,7 +3,7 @@
 #include <ncurses.h>
 #include <stdlib.h>
 #include "sunyat.h"
-#include "debuger.h"
+#include "debugger.h"
 
 
 
