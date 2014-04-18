@@ -203,25 +203,29 @@ void print_mem_win(SatWin *win, int mode) {
     win->cur_Y = 1 ;
     if (1 == mode) {
         erase_box(win) ;
-        int irh = sunyat_regs[REG_PC]-2, irl = sunyat_regs[REG_PC]-1, id = irh - ((win->max_Y) / 2) ;
+        int irh = sunyat_regs[REG_PC]-2, irl = sunyat_regs[REG_PC]-1, id = (irh % 2) + (irh - ((win->max_Y) / 2)) ;
         if (id < 0) id = 0 ;
-        for (;(win->max_Y)-1 > win->cur_Y && SIZE_APP_RAM > id ; id++) {
+        //else if(id == 0 || id % 2 == 0) id++ ;
+        for (;(win->max_Y)-1 > win->cur_Y && SIZE_APP_RAM > id ; id += 2) {
             if (irh == id) {
                 wattron(win->win, COLOR_PAIR(2)) ;
-                mvwprintw(win->win, win->cur_Y, win->cur_X, "IRH : 0x%02X ", sunyat_ram[id]) ;
-                win->cur_X += 10 ;
-                instruction_to_code(win) ;
+                mvwprintw(win->win, win->cur_Y, win->cur_X, "IRH : 0x%02X_%02X ", sunyat_ram[id], sunyat_ram[id+1]) ;
+                win->cur_X += 13 ;
+                instruction_to_code(win, sunyat_ram[id], sunyat_ram[id+1]) ;
                 win->cur_X = 2 ;
                 wattroff(win->win, COLOR_PAIR(2)) ;
-            } else if (irl == id) {
+            } /*else if (irl == id) {
                 wattron(win->win, COLOR_PAIR(2)) ;
                 mvwprintw(win->win, win->cur_Y, win->cur_X, "IRL : 0x%02X ", sunyat_ram[id]) ;
-                win->cur_X += 10 ;
-                instruction_to_code(win) ;
+                win->cur_X += 13 ;
+                instruction_to_code(win, sunyat_ram[id], sunyat_ram[id+1]) ;
                 win->cur_X = 2 ;
                 wattroff(win->win, COLOR_PAIR(2)) ;
-            } else {
-                mvwprintw(win->win, win->cur_Y, win->cur_X, "%03d : 0x%02X ", id, sunyat_ram[id]) ;
+            } */else {
+                mvwprintw(win->win, win->cur_Y, win->cur_X, "%03d : 0x%02X_%02X ", id, sunyat_ram[id], sunyat_ram[id+1]) ;
+                win->cur_X += 13 ;
+                instruction_to_code(win, sunyat_ram[id], sunyat_ram[id+1]) ;
+                win->cur_X = 2 ;
             }
             win->cur_Y++ ;
             //check_cursor(win, 10) ;
@@ -273,91 +277,91 @@ static void erase_box(SatWin *win) {
 
 }
 
-static void instruction_to_code(SatWin *win) {
-    switch(get_opcode()) {
+static void instruction_to_code(SatWin *win, uint8_t highBits, uint8_t lowBits) {
+    switch(get_opcode(highBits)) {
     case OPCODE_MOV_RR:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " MOV R%d R%d ", get_dreg(), get_sreg()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " MOV R%d R%d ", get_dreg(highBits), get_sreg(lowBits)) ;
 		break ;
     }
     case OPCODE_MOV_RI:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " MOV R%d %d ", get_dreg(), get_imm()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " MOV R%d %d ", get_dreg(highBits), get_imm(lowBits)) ;
 		break ;
     }
     case OPCODE_ADD_RR:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " ADD R%d R%d ", get_dreg(), get_sreg()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " ADD R%d R%d ", get_dreg(highBits), get_sreg(lowBits)) ;
 		break ;
     }
     case OPCODE_ADD_RI:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " ADD R%d %d ", get_dreg(), get_imm()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " ADD R%d %d ", get_dreg(highBits), get_imm(lowBits)) ;
 		break ;
     }
     case OPCODE_SUB_RR:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " SUB R%d R%d ", get_dreg(), get_sreg()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " SUB R%d R%d ", get_dreg(highBits), get_sreg(lowBits)) ;
 		break ;
     }
     case OPCODE_MUL_RR:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " MUL R%d R%d ", get_dreg(), get_sreg()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " MUL R%d R%d ", get_dreg(highBits), get_sreg(lowBits)) ;
 		break ;
     }
     case OPCODE_MUL_RI:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " MUL R%d %d ", get_dreg(), get_imm()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " MUL R%d %d ", get_dreg(highBits), get_imm(lowBits)) ;
 		break ;
     }
     case OPCODE_DIV_RR:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " DIV R%d R%d ", get_dreg(), get_sreg()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " DIV R%d R%d ", get_dreg(highBits), get_sreg(lowBits)) ;
 		break ;
     }
     case OPCODE_DIV_RI:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " DIV R%d %d ", get_dreg(), get_imm()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " DIV R%d %d ", get_dreg(highBits), get_imm(lowBits)) ;
 		break ;
     }
     case OPCODE_CMP_RR:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " CMP R%d R%d ", get_dreg(), get_sreg()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " CMP R%d R%d ", get_dreg(highBits), get_sreg(lowBits)) ;
 		break ;
     }
     case OPCODE_CMP_RI:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " CMP R%d %d ", get_dreg(), get_imm()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " CMP R%d %d ", get_dreg(highBits), get_imm(lowBits)) ;
 		break ;
     }
     case OPCODE_JMP_M:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " JMP 0x%X ", get_mem()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " JMP 0x%X ", get_mem(lowBits)) ;
 		break ;
     }
     case OPCODE_JEQ_M:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " JEQ 0x%X ", get_mem()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " JEQ 0x%X ", get_mem(lowBits)) ;
 		break ;
     }
     case OPCODE_JNE_M:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " JNE 0x%X ", get_mem()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " JNE 0x%X ", get_mem(lowBits)) ;
 		break ;
     }
     case OPCODE_JGR_M:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " JGR 0x%X ", get_mem()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " JGR 0x%X ", get_mem(lowBits)) ;
 		break ;
     }
     case OPCODE_JLS_M:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " JLS 0x%X ", get_mem()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " JLS 0x%X ", get_mem(lowBits)) ;
 		break ;
     }
     case OPCODE_CALL_M:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " CALL %d ", get_mem()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " CALL %d ", get_mem(lowBits)) ;
 		break ;
     }
     case OPCODE_RET:
@@ -367,78 +371,78 @@ static void instruction_to_code(SatWin *win) {
     }
     case OPCODE_AND_RR:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " AND R%d R%d ", get_dreg(), get_sreg()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " AND R%d R%d ", get_dreg(highBits), get_sreg(lowBits)) ;
 		break ;
     }
     case OPCODE_AND_RI:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " AND R%d %d ", get_dreg(), get_imm()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " AND R%d %d ", get_dreg(highBits), get_imm(lowBits)) ;
 		break ;
     }
     case OPCODE_OR_RR:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " OR R%d R%d ", get_dreg(), get_sreg()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " OR R%d R%d ", get_dreg(highBits), get_sreg(lowBits)) ;
 		break ;
     }
     case OPCODE_OR_RI:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " OR R%d %d ", get_dreg(), get_imm()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " OR R%d %d ", get_dreg(highBits), get_imm(lowBits)) ;
 		break ;
     }
     case OPCODE_XOR_RR:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " XOR R%d R%d ", get_dreg() - sunyat_regs[REG_WIN], get_sreg() - sunyat_regs[REG_WIN]) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " XOR R%d R%d ", get_dreg(highBits) - sunyat_regs[REG_WIN], get_sreg(lowBits) - sunyat_regs[REG_WIN]) ;
 		break ;
     }
     case OPCODE_XOR_RI:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " XOR R%d %d ", get_dreg(), get_imm()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " XOR R%d %d ", get_dreg(highBits), get_imm(lowBits)) ;
 		break ;
     }
     case OPCODE_LOAD_RM:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " LOAD R%d %d ", get_dreg(), get_mem()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " LOAD R%d %d ", get_dreg(highBits), get_mem(lowBits)) ;
 		break ;
 
     }
     case OPCODE_LOADP_RR:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " LOADP R%d R%d ", get_dreg(), get_sreg()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " LOADP R%d R%d ", get_dreg(highBits), get_sreg(lowBits)) ;
 		break ;
     }
     case OPCODE_STOR_MR:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " STOR %d R%d ", get_mem(), get_sreg()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " STOR %d R%d ", get_mem(lowBits), get_sreg(lowBits)) ;
 		break ;
     }
     case OPCODE_STORP_RR:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " STORP R%d R%d ", get_dreg(), get_sreg()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " STORP R%d R%d ", get_dreg(highBits), get_sreg(lowBits)) ;
 		break ;
     }
     case OPCODE_STACKER_R:
     {
-        int imm = get_imm() ;
+        int imm = get_imm(lowBits) ;
         if (imm) { //Pop
-            mvwprintw(win->win, win->cur_Y, win->cur_X, " POP R%d ", get_dreg()) ;
+            mvwprintw(win->win, win->cur_Y, win->cur_X, " POP R%d ", get_dreg(highBits)) ;
         } else { //Push
-            mvwprintw(win->win, win->cur_Y, win->cur_X, " PUSH R%d ", get_dreg()) ;
+            mvwprintw(win->win, win->cur_Y, win->cur_X, " PUSH R%d ", get_dreg(highBits)) ;
         }
 		break ;
     }
     case OPCODE_SWR_I:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " SWR %d ", get_imm()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " SWR %d ", get_imm(lowBits)) ;
 		break ;
     }
     case OPCODE_AWR_I:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " AWR %d ", get_imm()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " AWR %d ", get_imm(lowBits)) ;
 		break ;
     }
     case OPCODE_AUX_I:
     {
-        mvwprintw(win->win, win->cur_Y, win->cur_X, " AUX %d ", get_imm()) ;
+        mvwprintw(win->win, win->cur_Y, win->cur_X, " AUX %d ", get_imm(lowBits)) ;
 		break ;
     }
     }

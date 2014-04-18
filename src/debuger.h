@@ -17,5 +17,5 @@ void print_mem_win(SatWin *win, int mode) ;
 void print_to_win(WINDOW *cwin, uint8_t *data, int len) ;
 void write_reg_win() ;
 static void check_cursor(SatWin *win, int strLen) ;
-static void instruction_to_code(SatWin *win) ;
+static void instruction_to_code(SatWin *win, uint8_t highBits, uint8_t lowBits) ;
 #endif

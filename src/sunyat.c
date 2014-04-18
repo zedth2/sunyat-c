@@ -399,18 +399,37 @@ static void sunyat_execute (WINDOW *win) {
 			return;
 		}
 
+
+
 		sunyat_regs [REG_IRH] = sunyat_ram [sunyat_regs [REG_PC]++];
 		sunyat_regs [REG_IRL] = sunyat_ram [sunyat_regs [REG_PC]++];
 
 		/*
 		 * DECODE
 		 */
-		opcode = get_opcode ();
-		sreg = get_sreg () + sunyat_regs [REG_WIN]; //This should be all we need for the offset of the window.
-		dreg = get_dreg () + sunyat_regs [REG_WIN];
+		opcode = get_opcode (sunyat_regs [REG_IRH]);
+		sreg = get_sreg (sunyat_regs [REG_IRL]) + sunyat_regs [REG_WIN]; //This should be all we need for the offset of the window.
+		dreg = get_dreg (sunyat_regs [REG_IRH]) + sunyat_regs [REG_WIN];
         //printf("Accessing %d and des to %d \n", sreg, dreg) ;
-		mem = get_mem ();
-		imm = get_imm ();
+		mem = get_mem (sunyat_regs [REG_IRL]);
+		imm = get_imm (sunyat_regs [REG_IRL]);
+        //printf("FUCK YOU opcode %u  sreg %u dreg %u mem %u imm %d \n", opcode, sreg, dreg, mem, imm) ;
+        if (debug) {
+            //if (0 == (sunyat_clock_ticks%100000)) {
+                write_mem_win() ;
+                //refresh() ;
+                print_reg_win(NULL) ;
+                //refresh() ;
+            //}
+
+            if (pause) {
+                //printf("Pausing\t") ;
+
+
+                pause = debug_pause() ;
+
+            }
+        }
 
 		/*
 		 * EXECUTE
@@ -793,44 +812,28 @@ static void sunyat_execute (WINDOW *win) {
 			return;
 			break;
 		}
-        if (debug) {
-            //if (0 == (sunyat_clock_ticks%100000)) {
-                write_mem_win() ;
-                //refresh() ;
-                print_reg_win(NULL) ;
-                //refresh() ;
-            //}
-
-            if (pause) {
-                //printf("Pausing\t") ;
-
-
-                pause = debug_pause() ;
-
-            }
-        }
 	}
     //fclose(fuckyou) ;
 }
 
-uint8_t get_opcode () {
-	return sunyat_regs [REG_IRH] >> 3; // top 5 bits are opcode
+uint8_t get_opcode (uint8_t highBits) {
+	return highBits >> 3; // top 5 bits are opcode
 }
 
-uint8_t get_dreg () {
-	return sunyat_regs [REG_IRH] & 0x07; // bottom 3 bits are dreg
+uint8_t get_dreg (uint8_t highBits) {
+	return highBits & 0x07; // bottom 3 bits are dreg
 }
 
-uint8_t get_sreg () {
-	return sunyat_regs [REG_IRL] & 0x07; // bottom 3 bits are sreg
+uint8_t get_sreg (uint8_t lowBits) {
+	return lowBits & 0x07; // bottom 3 bits are sreg
 }
 
-uint8_t get_mem () {
-	return sunyat_regs [REG_IRL];
+uint8_t get_mem (uint8_t lowBits) {
+	return lowBits;
 }
 
-int8_t get_imm () {
-	return (int8_t)(sunyat_regs [REG_IRL]);
+int8_t get_imm (uint8_t lowBits) {
+	return (int8_t)(lowBits);
 }
 
 static void set_flags (int8_t result) {
