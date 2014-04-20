@@ -413,7 +413,6 @@ static void sunyat_execute (WINDOW *win) {
         //printf("Accessing %d and des to %d \n", sreg, dreg) ;
 		mem = get_mem (sunyat_regs [REG_IRL]);
 		imm = get_imm (sunyat_regs [REG_IRL]);
-        //printf("FUCK YOU opcode %u  sreg %u dreg %u mem %u imm %d \n", opcode, sreg, dreg, mem, imm) ;
         if (debug) {
             //if (0 == (sunyat_clock_ticks%100000)) {
                 write_mem_win() ;
@@ -434,7 +433,6 @@ static void sunyat_execute (WINDOW *win) {
 		/*
 		 * EXECUTE
 		 */
-        //fprintf(fuckyou, "FUCK YOU IMM %d OPCODE %d \n", imm, opcode) ;
 		switch (opcode) {
 		case OPCODE_MOV_RR:
 			sunyat_regs [dreg] = sunyat_regs [sreg];
@@ -617,7 +615,6 @@ static void sunyat_execute (WINDOW *win) {
 				{
                     //uint8_t old = sunyat_regs [dreg] ;
 					sunyat_regs [dreg] = getch ();
-                    //fprintf(outtie, "FUCK_RR %d %X \n", sunyat_regs [dreg] , sunyat_regs [dreg] ) ;
 					switch ((int) sunyat_regs [dreg])
 					{
 						case KEY_ENTER:
@@ -775,8 +772,6 @@ static void sunyat_execute (WINDOW *win) {
 				//Auxiliary
 		case OPCODE_AUX_I:
 		{
-            //fprintf(fuckyou, "FUCKING HERE, %d", imm) ;
-
 			if (imm < 0 || imm > 7)
 				{
 					printf("0-7 only!\n");
@@ -818,7 +813,6 @@ static void sunyat_execute (WINDOW *win) {
 			break;
 		}
 	}
-    //fclose(fuckyou) ;
 }
 
 uint8_t get_opcode (uint8_t highBits) {

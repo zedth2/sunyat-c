@@ -16,10 +16,8 @@ jmp !main
 	.variable	cmd_exit_0	!cmd_exit
 	.variable	cmd_reset_1	!cmd_reset
 	.variable	cmd_awr_2	!cmd_awr
-	.variable	cmd_win_3	!cmd_win
-	.variable	cmd_populate_reg_4	!cmd_populate_reg
-	.variable	cmd_savestate_5	!cmd_savestate
-	.variable	cmd_aux2	!cmd_aux2
+	.variable	cmd_populate_reg_3	!cmd_populate_reg
+	.variable	cmd_savestate_4	!cmd_savestate
 ;commands--------------------------------------------------------
 !cmd_exit
 	jmp !exit_shell
@@ -31,32 +29,11 @@ jmp !main
 !cmd_awr
 	awr 1
 	jmp !get_cmd_end
-!cmd_win
-	stor TERM R0
-	call !print_line
-	stor TERM R1
-	call !print_line
-	stor TERM R2
-	call !print_line
-	stor TERM R3
-	call !print_line
-	stor TERM R4
-	call !print_line
-	stor TERM R5
-	call !print_line
-	stor TERM R6
-	call !print_line
-	stor TERM R7
-	call !print_line
-	jmp !get_cmd_end
 !cmd_populate_reg
 	mov R7 'Z'
 	jmp !get_cmd_end
 !cmd_savestate
 	aux 0
-	jmp !get_cmd_end
-!cmd_aux2
-	aux 2
 	jmp !get_cmd_end
 
 !cmd_win_end;

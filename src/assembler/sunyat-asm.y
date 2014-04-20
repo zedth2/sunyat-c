@@ -215,7 +215,7 @@ message_line ::= MESSAGE(msg).	{
 address_line ::= ADDR_DIRECTIVE immediate(immed).	{
 	if ((uint8_t)immed.data >= SIZE_APP_RAM) {
 		if (assembler_pass == 1) {
-			warning (immed, ".ADDRESS must be no grater than 253 (inclusive)... ignoring", NULL);
+			warning (immed, ".ADDRESS must be no greater than 253 (inclusive)... ignoring", NULL);
 		}
 	}
 	else {

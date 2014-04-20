@@ -484,8 +484,8 @@
  *  Use:	AUX Imm
  *
  *	0: Save State
- *	1:
- *	2
+ *	1: Pause
+ *	2:
  *	3
  *	4
  *	5
@@ -559,7 +559,7 @@ uint8_t get_opcode (uint8_t highBits) ;
 uint8_t get_dreg (uint8_t highBits) ;
 uint8_t get_sreg (uint8_t lowBits) ;
 uint8_t get_mem (uint8_t lowBits) ;
-int8_t get_imm (uint8_t lowBits) ;
+int8_t get_imm (int8_t lowBits) ;
 
 static void sunyat_execute (WINDOW *win);
 static void set_flags (int8_t result);

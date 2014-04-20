@@ -5,8 +5,11 @@
 jmp !main
 
 !main
-;aux 0
-mov R0 '3'
+mov R0 1
+mul R0 -20
 stor TERM R0
+
+aux 1
+
 !main_end
 ret
