@@ -406,7 +406,7 @@ code_line ::= AWR immediate(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_AWR_I;
 		high_reg = 0 ; //dst.data;
-		low = (uint8_t)src.data & ~(~0<<5) ;
+		low = (uint8_t)src.data;
 		store_instruction ();
 	}
 }

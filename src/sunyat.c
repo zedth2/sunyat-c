@@ -763,9 +763,14 @@ static void sunyat_execute (WINDOW *win) {
 			}
 		case OPCODE_AWR_I: //This has the greatest chance of going beyond MAX_WIN_INDEX
 		{
-			if ((sunyat_regs[REG_WIN] = sunyat_regs[REG_WIN] + imm) > MAX_WIN_INDEX)
+			if ((sunyat_regs[REG_WIN] + imm) > MAX_WIN_INDEX || (sunyat_regs[REG_WIN] + imm) < REG_GEN_START)
 			{
 				printf(ERR_WINDOW_RANGE);
+			}
+			else
+			{
+				sunyat_regs[REG_WIN] += imm;
+				set_flags (sunyat_regs[REG_WIN]);
 			}
 			break;
 		}

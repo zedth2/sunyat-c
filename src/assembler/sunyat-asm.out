@@ -1,0 +1,896 @@
+State 0:
+          program ::= * lines
+          lines ::= * lines line EOL
+          lines ::= * lines error EOL
+      (3) lines ::= *
+
+                       program accept
+                         lines shift  1
+                     {default} reduce 3
+
+State 1:
+      (0) program ::= lines *
+          lines ::= lines * line EOL
+          lines ::= lines * error EOL
+          line ::= * message_line
+          line ::= * address_line
+          line ::= * variable_line
+          line ::= * constant_line
+          line ::= * label_line
+          line ::= * code_line
+     (10) line ::= *
+          message_line ::= * MESSAGE
+          address_line ::= * ADDR_DIRECTIVE immediate
+          variable_line ::= * VAR_DIRECTIVE IDENTIFIER var_value
+          constant_line ::= * CONST_DIRECTIVE IDENTIFIER immediate
+          label_line ::= * LABEL_DIRECTIVE IDENTIFIER
+          code_line ::= * NOP
+          code_line ::= * MOV REGISTER REGISTER
+          code_line ::= * MOV REGISTER immediate
+          code_line ::= * ADD REGISTER REGISTER
+          code_line ::= * ADD REGISTER immediate
+          code_line ::= * SWR immediate
+          code_line ::= * AWR immediate
+          code_line ::= * SUB REGISTER REGISTER
+          code_line ::= * SUB REGISTER immediate
+          code_line ::= * MUL REGISTER REGISTER
+          code_line ::= * MUL REGISTER immediate
+          code_line ::= * DIV REGISTER REGISTER
+          code_line ::= * DIV REGISTER immediate
+          code_line ::= * CMP REGISTER REGISTER
+          code_line ::= * CMP REGISTER immediate
+          code_line ::= * JMP memory
+          code_line ::= * JEQ memory
+          code_line ::= * JNE memory
+          code_line ::= * JGR memory
+          code_line ::= * JLS memory
+          code_line ::= * CALL memory
+          code_line ::= * RET
+          code_line ::= * AND REGISTER REGISTER
+          code_line ::= * AND REGISTER immediate
+          code_line ::= * OR REGISTER REGISTER
+          code_line ::= * OR REGISTER immediate
+          code_line ::= * XOR REGISTER REGISTER
+          code_line ::= * XOR REGISTER immediate
+          code_line ::= * NOT REGISTER
+          code_line ::= * NEG REGISTER
+          code_line ::= * LOAD REGISTER memory
+          code_line ::= * LOADP REGISTER REGISTER
+          code_line ::= * STOR memory REGISTER
+          code_line ::= * STORP REGISTER REGISTER
+          code_line ::= * PUSH REGISTER
+          code_line ::= * POP REGISTER
+          code_line ::= * AUX immediate
+
+                             $ reduce 0
+                       MESSAGE shift  100
+                ADDR_DIRECTIVE shift  16
+               LABEL_DIRECTIVE shift  45
+                 VAR_DIRECTIVE shift  47
+               CONST_DIRECTIVE shift  46
+                           NOP shift  90
+                           MOV shift  44
+                           ADD shift  43
+                           SWR shift  14
+                           AWR shift  13
+                           SUB shift  42
+                           MUL shift  41
+                           DIV shift  40
+                           CMP shift  39
+                           JMP shift  24
+                           JEQ shift  23
+                           JNE shift  22
+                           JGR shift  21
+                           JLS shift  20
+                          CALL shift  19
+                           RET shift  66
+                           AND shift  37
+                            OR shift  36
+                           XOR shift  35
+                           NOT shift  34
+                           NEG shift  33
+                          LOAD shift  32
+                         LOADP shift  31
+                          STOR shift  17
+                         STORP shift  28
+                          PUSH shift  26
+                           POP shift  25
+                           AUX shift  12
+                         error shift  49
+                          line shift  50
+                  message_line shift  106
+                  address_line shift  105
+                 variable_line shift  104
+                 constant_line shift  103
+                    label_line shift  102
+                     code_line shift  101
+                     {default} reduce 10
+
+State 2:
+          immediate ::= * IMMEDIATE
+          immediate ::= * IDENTIFIER
+          immediate ::= * LABEL_DIRECTIVE IDENTIFIER
+          immediate ::= * CHARACTER
+          variable_line ::= VAR_DIRECTIVE IDENTIFIER * var_value
+          var_value ::= * immediate
+     (19) var_value ::= *
+
+                     IMMEDIATE shift  98
+                    IDENTIFIER shift  97
+               LABEL_DIRECTIVE shift  48
+                     CHARACTER shift  95
+                     immediate shift  93
+                     var_value shift  94
+                     {default} reduce 19
+
+State 3:
+          immediate ::= * IMMEDIATE
+          immediate ::= * IDENTIFIER
+          immediate ::= * LABEL_DIRECTIVE IDENTIFIER
+          immediate ::= * CHARACTER
+          code_line ::= XOR REGISTER * REGISTER
+          code_line ::= XOR REGISTER * immediate
+
+                     IMMEDIATE shift  98
+                    IDENTIFIER shift  97
+               LABEL_DIRECTIVE shift  48
+                     CHARACTER shift  95
+                      REGISTER shift  61
+                     immediate shift  60
+
+State 4:
+          immediate ::= * IMMEDIATE
+          immediate ::= * IDENTIFIER
+          immediate ::= * LABEL_DIRECTIVE IDENTIFIER
+          immediate ::= * CHARACTER
+          code_line ::= OR REGISTER * REGISTER
+          code_line ::= OR REGISTER * immediate
+
+                     IMMEDIATE shift  98
+                    IDENTIFIER shift  97
+               LABEL_DIRECTIVE shift  48
+                     CHARACTER shift  95
+                      REGISTER shift  63
+                     immediate shift  62
+
+State 5:
+          immediate ::= * IMMEDIATE
+          immediate ::= * IDENTIFIER
+          immediate ::= * LABEL_DIRECTIVE IDENTIFIER
+          immediate ::= * CHARACTER
+          code_line ::= AND REGISTER * REGISTER
+          code_line ::= AND REGISTER * immediate
+
+                     IMMEDIATE shift  98
+                    IDENTIFIER shift  97
+               LABEL_DIRECTIVE shift  48
+                     CHARACTER shift  95
+                      REGISTER shift  65
+                     immediate shift  64
+
+State 6:
+          immediate ::= * IMMEDIATE
+          immediate ::= * IDENTIFIER
+          immediate ::= * LABEL_DIRECTIVE IDENTIFIER
+          immediate ::= * CHARACTER
+          code_line ::= CMP REGISTER * REGISTER
+          code_line ::= CMP REGISTER * immediate
+
+                     IMMEDIATE shift  98
+                    IDENTIFIER shift  97
+               LABEL_DIRECTIVE shift  48
+                     CHARACTER shift  95
+                      REGISTER shift  77
+                     immediate shift  76
+
+State 7:
+          immediate ::= * IMMEDIATE
+          immediate ::= * IDENTIFIER
+          immediate ::= * LABEL_DIRECTIVE IDENTIFIER
+          immediate ::= * CHARACTER
+          code_line ::= DIV REGISTER * REGISTER
+          code_line ::= DIV REGISTER * immediate
+
+                     IMMEDIATE shift  98
+                    IDENTIFIER shift  97
+               LABEL_DIRECTIVE shift  48
+                     CHARACTER shift  95
+                      REGISTER shift  79
+                     immediate shift  78
+
+State 8:
+          immediate ::= * IMMEDIATE
+          immediate ::= * IDENTIFIER
+          immediate ::= * LABEL_DIRECTIVE IDENTIFIER
+          immediate ::= * CHARACTER
+          code_line ::= MUL REGISTER * REGISTER
+          code_line ::= MUL REGISTER * immediate
+
+                     IMMEDIATE shift  98
+                    IDENTIFIER shift  97
+               LABEL_DIRECTIVE shift  48
+                     CHARACTER shift  95
+                      REGISTER shift  81
+                     immediate shift  80
+
+State 9:
+          immediate ::= * IMMEDIATE
+          immediate ::= * IDENTIFIER
+          immediate ::= * LABEL_DIRECTIVE IDENTIFIER
+          immediate ::= * CHARACTER
+          code_line ::= SUB REGISTER * REGISTER
+          code_line ::= SUB REGISTER * immediate
+
+                     IMMEDIATE shift  98
+                    IDENTIFIER shift  97
+               LABEL_DIRECTIVE shift  48
+                     CHARACTER shift  95
+                      REGISTER shift  83
+                     immediate shift  82
+
+State 10:
+          immediate ::= * IMMEDIATE
+          immediate ::= * IDENTIFIER
+          immediate ::= * LABEL_DIRECTIVE IDENTIFIER
+          immediate ::= * CHARACTER
+          code_line ::= ADD REGISTER * REGISTER
+          code_line ::= ADD REGISTER * immediate
+
+                     IMMEDIATE shift  98
+                    IDENTIFIER shift  97
+               LABEL_DIRECTIVE shift  48
+                     CHARACTER shift  95
+                      REGISTER shift  87
+                     immediate shift  86
+
+State 11:
+          immediate ::= * IMMEDIATE
+          immediate ::= * IDENTIFIER
+          immediate ::= * LABEL_DIRECTIVE IDENTIFIER
+          immediate ::= * CHARACTER
+          code_line ::= MOV REGISTER * REGISTER
+          code_line ::= MOV REGISTER * immediate
+
+                     IMMEDIATE shift  98
+                    IDENTIFIER shift  97
+               LABEL_DIRECTIVE shift  48
+                     CHARACTER shift  95
+                      REGISTER shift  89
+                     immediate shift  88
+
+State 12:
+          immediate ::= * IMMEDIATE
+          immediate ::= * IDENTIFIER
+          immediate ::= * LABEL_DIRECTIVE IDENTIFIER
+          immediate ::= * CHARACTER
+          code_line ::= AUX * immediate
+
+                     IMMEDIATE shift  98
+                    IDENTIFIER shift  97
+               LABEL_DIRECTIVE shift  48
+                     CHARACTER shift  95
+                     immediate shift  51
+
+State 13:
+          immediate ::= * IMMEDIATE
+          immediate ::= * IDENTIFIER
+          immediate ::= * LABEL_DIRECTIVE IDENTIFIER
+          immediate ::= * CHARACTER
+          code_line ::= AWR * immediate
+
+                     IMMEDIATE shift  98
+                    IDENTIFIER shift  97
+               LABEL_DIRECTIVE shift  48
+                     CHARACTER shift  95
+                     immediate shift  84
+
+State 14:
+          immediate ::= * IMMEDIATE
+          immediate ::= * IDENTIFIER
+          immediate ::= * LABEL_DIRECTIVE IDENTIFIER
+          immediate ::= * CHARACTER
+          code_line ::= SWR * immediate
+
+                     IMMEDIATE shift  98
+                    IDENTIFIER shift  97
+               LABEL_DIRECTIVE shift  48
+                     CHARACTER shift  95
+                     immediate shift  85
+
+State 15:
+          immediate ::= * IMMEDIATE
+          immediate ::= * IDENTIFIER
+          immediate ::= * LABEL_DIRECTIVE IDENTIFIER
+          immediate ::= * CHARACTER
+          constant_line ::= CONST_DIRECTIVE IDENTIFIER * immediate
+
+                     IMMEDIATE shift  98
+                    IDENTIFIER shift  97
+               LABEL_DIRECTIVE shift  48
+                     CHARACTER shift  95
+                     immediate shift  92
+
+State 16:
+          address_line ::= ADDR_DIRECTIVE * immediate
+          immediate ::= * IMMEDIATE
+          immediate ::= * IDENTIFIER
+          immediate ::= * LABEL_DIRECTIVE IDENTIFIER
+          immediate ::= * CHARACTER
+
+                     IMMEDIATE shift  98
+                    IDENTIFIER shift  97
+               LABEL_DIRECTIVE shift  48
+                     CHARACTER shift  95
+                     immediate shift  99
+
+State 17:
+          code_line ::= STOR * memory REGISTER
+          memory ::= * IDENTIFIER
+          memory ::= * LABEL_DIRECTIVE IDENTIFIER
+          memory ::= * IMMEDIATE
+
+                     IMMEDIATE shift  72
+                    IDENTIFIER shift  74
+               LABEL_DIRECTIVE shift  38
+                        memory shift  29
+
+State 18:
+          code_line ::= LOAD REGISTER * memory
+          memory ::= * IDENTIFIER
+          memory ::= * LABEL_DIRECTIVE IDENTIFIER
+          memory ::= * IMMEDIATE
+
+                     IMMEDIATE shift  72
+                    IDENTIFIER shift  74
+               LABEL_DIRECTIVE shift  38
+                        memory shift  57
+
+State 19:
+          code_line ::= CALL * memory
+          memory ::= * IDENTIFIER
+          memory ::= * LABEL_DIRECTIVE IDENTIFIER
+          memory ::= * IMMEDIATE
+
+                     IMMEDIATE shift  72
+                    IDENTIFIER shift  74
+               LABEL_DIRECTIVE shift  38
+                        memory shift  67
+
+State 20:
+          code_line ::= JLS * memory
+          memory ::= * IDENTIFIER
+          memory ::= * LABEL_DIRECTIVE IDENTIFIER
+          memory ::= * IMMEDIATE
+
+                     IMMEDIATE shift  72
+                    IDENTIFIER shift  74
+               LABEL_DIRECTIVE shift  38
+                        memory shift  68
+
+State 21:
+          code_line ::= JGR * memory
+          memory ::= * IDENTIFIER
+          memory ::= * LABEL_DIRECTIVE IDENTIFIER
+          memory ::= * IMMEDIATE
+
+                     IMMEDIATE shift  72
+                    IDENTIFIER shift  74
+               LABEL_DIRECTIVE shift  38
+                        memory shift  69
+
+State 22:
+          code_line ::= JNE * memory
+          memory ::= * IDENTIFIER
+          memory ::= * LABEL_DIRECTIVE IDENTIFIER
+          memory ::= * IMMEDIATE
+
+                     IMMEDIATE shift  72
+                    IDENTIFIER shift  74
+               LABEL_DIRECTIVE shift  38
+                        memory shift  70
+
+State 23:
+          code_line ::= JEQ * memory
+          memory ::= * IDENTIFIER
+          memory ::= * LABEL_DIRECTIVE IDENTIFIER
+          memory ::= * IMMEDIATE
+
+                     IMMEDIATE shift  72
+                    IDENTIFIER shift  74
+               LABEL_DIRECTIVE shift  38
+                        memory shift  71
+
+State 24:
+          code_line ::= JMP * memory
+          memory ::= * IDENTIFIER
+          memory ::= * LABEL_DIRECTIVE IDENTIFIER
+          memory ::= * IMMEDIATE
+
+                     IMMEDIATE shift  72
+                    IDENTIFIER shift  74
+               LABEL_DIRECTIVE shift  38
+                        memory shift  75
+
+State 25:
+          code_line ::= POP * REGISTER
+
+                      REGISTER shift  52
+
+State 26:
+          code_line ::= PUSH * REGISTER
+
+                      REGISTER shift  53
+
+State 27:
+          code_line ::= STORP REGISTER * REGISTER
+
+                      REGISTER shift  54
+
+State 28:
+          code_line ::= STORP * REGISTER REGISTER
+
+                      REGISTER shift  27
+
+State 29:
+          code_line ::= STOR memory * REGISTER
+
+                      REGISTER shift  55
+
+State 30:
+          code_line ::= LOADP REGISTER * REGISTER
+
+                      REGISTER shift  56
+
+State 31:
+          code_line ::= LOADP * REGISTER REGISTER
+
+                      REGISTER shift  30
+
+State 32:
+          code_line ::= LOAD * REGISTER memory
+
+                      REGISTER shift  18
+
+State 33:
+          code_line ::= NEG * REGISTER
+
+                      REGISTER shift  58
+
+State 34:
+          code_line ::= NOT * REGISTER
+
+                      REGISTER shift  59
+
+State 35:
+          code_line ::= XOR * REGISTER REGISTER
+          code_line ::= XOR * REGISTER immediate
+
+                      REGISTER shift  3
+
+State 36:
+          code_line ::= OR * REGISTER REGISTER
+          code_line ::= OR * REGISTER immediate
+
+                      REGISTER shift  4
+
+State 37:
+          code_line ::= AND * REGISTER REGISTER
+          code_line ::= AND * REGISTER immediate
+
+                      REGISTER shift  5
+
+State 38:
+          memory ::= LABEL_DIRECTIVE * IDENTIFIER
+
+                    IDENTIFIER shift  73
+
+State 39:
+          code_line ::= CMP * REGISTER REGISTER
+          code_line ::= CMP * REGISTER immediate
+
+                      REGISTER shift  6
+
+State 40:
+          code_line ::= DIV * REGISTER REGISTER
+          code_line ::= DIV * REGISTER immediate
+
+                      REGISTER shift  7
+
+State 41:
+          code_line ::= MUL * REGISTER REGISTER
+          code_line ::= MUL * REGISTER immediate
+
+                      REGISTER shift  8
+
+State 42:
+          code_line ::= SUB * REGISTER REGISTER
+          code_line ::= SUB * REGISTER immediate
+
+                      REGISTER shift  9
+
+State 43:
+          code_line ::= ADD * REGISTER REGISTER
+          code_line ::= ADD * REGISTER immediate
+
+                      REGISTER shift  10
+
+State 44:
+          code_line ::= MOV * REGISTER REGISTER
+          code_line ::= MOV * REGISTER immediate
+
+                      REGISTER shift  11
+
+State 45:
+          label_line ::= LABEL_DIRECTIVE * IDENTIFIER
+
+                    IDENTIFIER shift  91
+
+State 46:
+          constant_line ::= CONST_DIRECTIVE * IDENTIFIER immediate
+
+                    IDENTIFIER shift  15
+
+State 47:
+          variable_line ::= VAR_DIRECTIVE * IDENTIFIER var_value
+
+                    IDENTIFIER shift  2
+
+State 48:
+          immediate ::= LABEL_DIRECTIVE * IDENTIFIER
+
+                    IDENTIFIER shift  96
+
+State 49:
+          lines ::= lines error * EOL
+
+                           EOL shift  107
+
+State 50:
+          lines ::= lines line * EOL
+
+                           EOL shift  108
+
+State 51:
+     (58) code_line ::= AUX immediate *
+
+                     {default} reduce 58
+
+State 52:
+     (57) code_line ::= POP REGISTER *
+
+                     {default} reduce 57
+
+State 53:
+     (56) code_line ::= PUSH REGISTER *
+
+                     {default} reduce 56
+
+State 54:
+     (55) code_line ::= STORP REGISTER REGISTER *
+
+                     {default} reduce 55
+
+State 55:
+     (54) code_line ::= STOR memory REGISTER *
+
+                     {default} reduce 54
+
+State 56:
+     (53) code_line ::= LOADP REGISTER REGISTER *
+
+                     {default} reduce 53
+
+State 57:
+     (52) code_line ::= LOAD REGISTER memory *
+
+                     {default} reduce 52
+
+State 58:
+     (51) code_line ::= NEG REGISTER *
+
+                     {default} reduce 51
+
+State 59:
+     (50) code_line ::= NOT REGISTER *
+
+                     {default} reduce 50
+
+State 60:
+     (49) code_line ::= XOR REGISTER immediate *
+
+                     {default} reduce 49
+
+State 61:
+     (48) code_line ::= XOR REGISTER REGISTER *
+
+                     {default} reduce 48
+
+State 62:
+     (47) code_line ::= OR REGISTER immediate *
+
+                     {default} reduce 47
+
+State 63:
+     (46) code_line ::= OR REGISTER REGISTER *
+
+                     {default} reduce 46
+
+State 64:
+     (45) code_line ::= AND REGISTER immediate *
+
+                     {default} reduce 45
+
+State 65:
+     (44) code_line ::= AND REGISTER REGISTER *
+
+                     {default} reduce 44
+
+State 66:
+     (43) code_line ::= RET *
+
+                     {default} reduce 43
+
+State 67:
+     (42) code_line ::= CALL memory *
+
+                     {default} reduce 42
+
+State 68:
+     (41) code_line ::= JLS memory *
+
+                     {default} reduce 41
+
+State 69:
+     (40) code_line ::= JGR memory *
+
+                     {default} reduce 40
+
+State 70:
+     (39) code_line ::= JNE memory *
+
+                     {default} reduce 39
+
+State 71:
+     (38) code_line ::= JEQ memory *
+
+                     {default} reduce 38
+
+State 72:
+     (61) memory ::= IMMEDIATE *
+
+                     {default} reduce 61
+
+State 73:
+     (60) memory ::= LABEL_DIRECTIVE IDENTIFIER *
+
+                     {default} reduce 60
+
+State 74:
+     (59) memory ::= IDENTIFIER *
+
+                     {default} reduce 59
+
+State 75:
+     (37) code_line ::= JMP memory *
+
+                     {default} reduce 37
+
+State 76:
+     (36) code_line ::= CMP REGISTER immediate *
+
+                     {default} reduce 36
+
+State 77:
+     (35) code_line ::= CMP REGISTER REGISTER *
+
+                     {default} reduce 35
+
+State 78:
+     (34) code_line ::= DIV REGISTER immediate *
+
+                     {default} reduce 34
+
+State 79:
+     (33) code_line ::= DIV REGISTER REGISTER *
+
+                     {default} reduce 33
+
+State 80:
+     (32) code_line ::= MUL REGISTER immediate *
+
+                     {default} reduce 32
+
+State 81:
+     (31) code_line ::= MUL REGISTER REGISTER *
+
+                     {default} reduce 31
+
+State 82:
+     (30) code_line ::= SUB REGISTER immediate *
+
+                     {default} reduce 30
+
+State 83:
+     (29) code_line ::= SUB REGISTER REGISTER *
+
+                     {default} reduce 29
+
+State 84:
+     (28) code_line ::= AWR immediate *
+
+                     {default} reduce 28
+
+State 85:
+     (27) code_line ::= SWR immediate *
+
+                     {default} reduce 27
+
+State 86:
+     (26) code_line ::= ADD REGISTER immediate *
+
+                     {default} reduce 26
+
+State 87:
+     (25) code_line ::= ADD REGISTER REGISTER *
+
+                     {default} reduce 25
+
+State 88:
+     (24) code_line ::= MOV REGISTER immediate *
+
+                     {default} reduce 24
+
+State 89:
+     (23) code_line ::= MOV REGISTER REGISTER *
+
+                     {default} reduce 23
+
+State 90:
+     (22) code_line ::= NOP *
+
+                     {default} reduce 22
+
+State 91:
+     (21) label_line ::= LABEL_DIRECTIVE IDENTIFIER *
+
+                     {default} reduce 21
+
+State 92:
+     (20) constant_line ::= CONST_DIRECTIVE IDENTIFIER immediate *
+
+                     {default} reduce 20
+
+State 93:
+     (18) var_value ::= immediate *
+
+                     {default} reduce 18
+
+State 94:
+     (17) variable_line ::= VAR_DIRECTIVE IDENTIFIER var_value *
+
+                     {default} reduce 17
+
+State 95:
+     (16) immediate ::= CHARACTER *
+
+                     {default} reduce 16
+
+State 96:
+     (15) immediate ::= LABEL_DIRECTIVE IDENTIFIER *
+
+                     {default} reduce 15
+
+State 97:
+     (14) immediate ::= IDENTIFIER *
+
+                     {default} reduce 14
+
+State 98:
+     (13) immediate ::= IMMEDIATE *
+
+                     {default} reduce 13
+
+State 99:
+     (12) address_line ::= ADDR_DIRECTIVE immediate *
+
+                     {default} reduce 12
+
+State 100:
+     (11) message_line ::= MESSAGE *
+
+                     {default} reduce 11
+
+State 101:
+      (9) line ::= code_line *
+
+                     {default} reduce 9
+
+State 102:
+      (8) line ::= label_line *
+
+                     {default} reduce 8
+
+State 103:
+      (7) line ::= constant_line *
+
+                     {default} reduce 7
+
+State 104:
+      (6) line ::= variable_line *
+
+                     {default} reduce 6
+
+State 105:
+      (5) line ::= address_line *
+
+                     {default} reduce 5
+
+State 106:
+      (4) line ::= message_line *
+
+                     {default} reduce 4
+
+State 107:
+      (2) lines ::= lines error EOL *
+
+                     {default} reduce 2
+
+State 108:
+      (1) lines ::= lines line EOL *
+
+                     {default} reduce 1
+
+----------------------------------------------------
+Symbols:
+    0: $:
+    1: EOL
+    2: MESSAGE
+    3: ADDR_DIRECTIVE
+    4: IMMEDIATE
+    5: IDENTIFIER
+    6: LABEL_DIRECTIVE
+    7: CHARACTER
+    8: VAR_DIRECTIVE
+    9: CONST_DIRECTIVE
+   10: NOP
+   11: MOV
+   12: REGISTER
+   13: ADD
+   14: SWR
+   15: AWR
+   16: SUB
+   17: MUL
+   18: DIV
+   19: CMP
+   20: JMP
+   21: JEQ
+   22: JNE
+   23: JGR
+   24: JLS
+   25: CALL
+   26: RET
+   27: AND
+   28: OR
+   29: XOR
+   30: NOT
+   31: NEG
+   32: LOAD
+   33: LOADP
+   34: STOR
+   35: STORP
+   36: PUSH
+   37: POP
+   38: AUX
+   39: error:
+   40: program: <lambda> EOL MESSAGE ADDR_DIRECTIVE LABEL_DIRECTIVE VAR_DIRECTIVE CONST_DIRECTIVE NOP MOV ADD SWR AWR SUB MUL DIV CMP JMP JEQ JNE JGR JLS CALL RET AND OR XOR NOT NEG LOAD LOADP STOR STORP PUSH POP AUX
+   41: lines: <lambda> EOL MESSAGE ADDR_DIRECTIVE LABEL_DIRECTIVE VAR_DIRECTIVE CONST_DIRECTIVE NOP MOV ADD SWR AWR SUB MUL DIV CMP JMP JEQ JNE JGR JLS CALL RET AND OR XOR NOT NEG LOAD LOADP STOR STORP PUSH POP AUX
+   42: line: <lambda> MESSAGE ADDR_DIRECTIVE LABEL_DIRECTIVE VAR_DIRECTIVE CONST_DIRECTIVE NOP MOV ADD SWR AWR SUB MUL DIV CMP JMP JEQ JNE JGR JLS CALL RET AND OR XOR NOT NEG LOAD LOADP STOR STORP PUSH POP AUX
+   43: message_line: MESSAGE
+   44: address_line: ADDR_DIRECTIVE
+   45: variable_line: VAR_DIRECTIVE
+   46: constant_line: CONST_DIRECTIVE
+   47: label_line: LABEL_DIRECTIVE
+   48: code_line: NOP MOV ADD SWR AWR SUB MUL DIV CMP JMP JEQ JNE JGR JLS CALL RET AND OR XOR NOT NEG LOAD LOADP STOR STORP PUSH POP AUX
+   49: immediate: IMMEDIATE IDENTIFIER LABEL_DIRECTIVE CHARACTER
+   50: var_value: <lambda> IMMEDIATE IDENTIFIER LABEL_DIRECTIVE CHARACTER
+   51: memory: IMMEDIATE IDENTIFIER LABEL_DIRECTIVE

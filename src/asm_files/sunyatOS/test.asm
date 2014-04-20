@@ -5,8 +5,8 @@
 jmp !main
 
 !main
-mov R0 1
-mul R0 -20
+mov R0 5
+add R0 -1
 stor TERM R0
 
 aux 1
