@@ -837,7 +837,7 @@ uint8_t get_mem (uint8_t lowBits) {
 	return lowBits;
 }
 
-int8_t get_imm (uint8_t lowBits) {
+int8_t get_imm (int8_t lowBits) {
 	return (int8_t)(lowBits);
 }
 

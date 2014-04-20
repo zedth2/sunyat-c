@@ -263,7 +263,7 @@ int debug_pause() {
         } else if (KEY_F(8) == curKey) {
             pause_again = 1 ;
         }
-        sleep(1) ;
+        //sleep(1) ;
         //printf("sleeping\t") ;
     }
     erase_box(mem_win) ;
