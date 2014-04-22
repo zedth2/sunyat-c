@@ -579,8 +579,18 @@
  *
  *  Returns : A number between NUM_SYS_REG and SIZE_REG
  */
-#define GET_GRWP(imm) ((((sunyat_regs[REG_WIN] - NUM_SYS_REG) + (imm + NUM_GEN_REG)) % NUM_GEN_REG) + NUM_SYS_REG)
-#define GET_GRP(imm) (imm % NUM_GEN_REG) + NUM_SYS_REG
+//#define GET_GRWP(imm) (((sunyat_regs[REG_WIN] - NUM_SYS_REG) + ((((NUM_GEN_REG * (imm / NUM_GEN_REG)) - imm) * -1) + NUM_GEN_REG) % NUM_GEN_REG) + NUM_SYS_REG)
+#define GET_GRP(imm)  modu(tau(imm))   //(imm % NUM_GEN_REG) + NUM_SYS_REG
+
+#define HIGH_OR_LOW(imm) (((0 > imm) * (imm - (NUM_GEN_REG * (imm / NUM_GEN_REG)))) + ((0 < imm) * (NUM_GEN_REG * (imm / NUM_GEN_REG) + imm) % 32))
+#define GET_GRWP(imm) ((((sunyat_regs[REG_WIN] - NUM_SYS_REG) + (NUM_GEN_REG + HIGH_OR_LOW(imm))) % NUM_GEN_REG) + NUM_SYS_REG)
+
+
+//#define tau(imm) ((0 > imm)*-1*imm)+((0 < imm) * imm)
+#define modu(pos) pos //(pos % NUM_GEN_REG)
+
+#define tau(imm) (((NUM_GEN_REG * (imm / NUM_GEN_REG)) - imm) * -1)
+
 
 //Function Prototypes...
 int start_sunyat(char *rom, int lState, bool lDebug);

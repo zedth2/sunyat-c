@@ -350,7 +350,7 @@ static void sunyat_execute (WINDOW *win) {
 		int current_width;
 		int current_height;
 
-		move (cursor_row, cursor_col);
+		wmove (win, cursor_row, cursor_col);
 
 		getmaxyx (win, current_height, current_width);
 
@@ -365,7 +365,7 @@ static void sunyat_execute (WINDOW *win) {
 			terminal_too_small_prev_cycle = true;
 
 			for (y = 0; y < current_height; y++) {
-				move (y, 0);
+				wmove (win, y, 0);
 				for (x = 0; x < current_width; x++) {
 					addch ('@');
 				}
@@ -398,7 +398,6 @@ static void sunyat_execute (WINDOW *win) {
 			printf (ERR_INVALID_PC);
 			return;
 		}
-
 
 
 		sunyat_regs [REG_IRH] = sunyat_ram [sunyat_regs [REG_PC]++];
@@ -754,11 +753,11 @@ static void sunyat_execute (WINDOW *win) {
 			}
 		case OPCODE_AWR_I:
 		{
-            mvwprintw(printf_debug_win->win, printf_debug_win->cur_Y, printf_debug_win->cur_X, "AWR : %d %d %d", (int8_t)sunyat_regs[REG_WIN], GET_GRWP(imm), imm);
-            (printf_debug_win->cur_Y)++ ;
-            wrefresh(printf_debug_win->win) ;
-
-            if (0 > imm)
+#ifdef __DEBUG_ME_SUNYAT__
+            //mvwprintw(printf_debug_win->win, printf_debug_win->cur_Y, printf_debug_win->cur_X, "AWR : REG %d GET_GRWP %d fuck_you %d imm %d eq_sum %d eqq %d", sunyat_regs[REG_WIN], GET_GRWP(imm), fuck_you(imm), imm, (NUM_GEN_REG + fuck_you(imm)), (NUM_GEN_REG + fuck_you(imm))%NUM_GEN_REG);
+            //(printf_debug_win->cur_Y)++ ;
+            //wrefresh(printf_debug_win->win) ;
+#endif
             sunyat_regs[REG_WIN] = GET_GRWP(imm) ;
             set_flags (sunyat_regs[REG_WIN]);
 			break;

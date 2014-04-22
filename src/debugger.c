@@ -90,13 +90,19 @@ SatWin* main_win_debug(){
     wrefresh(reg_win->win) ;
 
     mem_win = init_SatWin() ;
+
+#ifdef __DEBUG_ME_SUNYAT__
     mem_win->win = newwin(max_y/2, max_x - 80, 0, 80) ;
+#else
+    mem_win->win = newwin(max_y, max_x - 80, 0, 80) ;
+#endif
+
     getmaxyx(mem_win->win, mem_win->max_Y, mem_win->max_X) ;
 
     box(mem_win->win, 0, 0) ;
     scrollok(mem_win->win, TRUE) ;
     wrefresh(mem_win->win) ;
-
+#ifdef __DEBUG_ME_SUNYAT__
     printf_debug_win = init_SatWin() ;
     printf_debug_win->win = newwin(max_y/2, max_x - 80, max_y/2, 80) ;
 
@@ -105,7 +111,7 @@ SatWin* main_win_debug(){
     wrefresh(printf_debug_win->win) ;
     printf_debug_win->cur_X = 2 ;
     printf_debug_win->cur_Y = 2 ;
-
+#endif
 
     //if (mem_win->win == NULL || reg_win->win == NULL) {
         //printf("WINDOWS FAILED TO BE CREATED FOR DEBUGGER.\n") ;
@@ -328,7 +334,6 @@ void print_mem_win(SatWin *win, int mode) {
  *      after the next instruction.
  */
 int debug_pause() {
-    //printf("PAUSING\n") ;
     wmove(reg_win->win, 1, 1) ;
     int curKey = 0, pause_again = 0 ;
     while (DEBUG_PAUSE_KEY != (curKey = getch()) && !pause_again){

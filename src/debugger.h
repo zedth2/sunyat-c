@@ -4,9 +4,11 @@
 
 #include "sat_scr.h"
 
-#define DEBUG_PAUSE_KEY 0x1B
+#define DEBUG_PAUSE_KEY 0x1B ///The ESC key
 
-SatWin *printf_debug_win ; ///This is a tempory window to print messages to.
+#ifdef __DEBUG_ME_SUNYAT__
+    SatWin *printf_debug_win ; ///This is a tempory window to print messages to.
+#endif
 
 SatWin *reg_win ; ///This is the SatWin holding the registers window.
 SatWin *mem_win ; ///This is the SatWin holding the memory window.

@@ -1,7 +1,7 @@
 .constant	TERM 	0xFF
 .constant	CR	0xD
 .constant	LF	0xA
-	
+
 
 	jmp	!main
 !cmdTable
@@ -17,7 +17,7 @@
 	.variable	cmdTable9	!awrup
 
 	.variable	cmdTable10	!test ;a
-	;.variable	cmdTable11	! 
+	;.variable	cmdTable11	!
 	;.variable	cmdTable12	!
 	;.variable	cmdTable13	!
 	;.variable	cmdTable14	!
@@ -153,11 +153,13 @@ ret
 	add R6 1
 	jmp !get_character
 !incReg7
-	add R7 1
+    ;aux 1
+	awr -67
+    ;aux 1
 	jmp !get_character
 
 !awrdown	;8
-	awr -1	;DOESN'T WORK
+	awr 65	;DOESN'T WORK
 	jmp !get_character
 
 !awrup	;9
