@@ -10,9 +10,6 @@
 extern uint8_t sunyat_regs [SIZE_REG] ;
 extern uint8_t sunyat_ram [SIZE_APP_RAM];
 
-SatWin *reg_win ; ///This is the SatWin holding the registers window.
-SatWin *mem_win ; ///This is the SatWin holding the memory window.
-
 
 
 extern SatWin *main_win ; ///The main window for the assembly program. Defined in sunyat.{h,c}
@@ -56,8 +53,8 @@ int debug_setup(){
 		//printf (ERR_NCURSES_CURSOR);
 		return -1;
 	}
-    init_pair(1, COLOR_WHITE, COLOR_BLACK);
-    wbkgd(stdscr, COLOR_PAIR(1)) ;
+    //init_pair(1, COLOR_WHITE, COLOR_BLACK);
+    //wbkgd(stdscr, COLOR_PAIR(1)) ;
 	return 0;
 
     return 0 ;
@@ -76,10 +73,10 @@ SatWin* main_win_debug(){
 	refresh();
     int max_x = getmaxx(stdscr) ;
     int max_y = getmaxy(stdscr) ;
-    if (max_x <= 80 || max_y <= 25) {
-        printf("WINDOW NOT BIG ENOUGH %d %d \n", max_x, max_y) ;
-        return NULL ;
-    }
+    //if (max_x <= 80 || max_y <= 25) {
+        //printf("WINDOW NOT BIG ENOUGH %d %d \n", max_x, max_y) ;
+        //return NULL ;
+    //}
     main_win = init_SatWin() ;
     main_win->win = newwin(25, 80, 0, 0) ;
     getmaxyx(main_win->win, main_win->max_Y, main_win->max_X) ;
@@ -110,10 +107,11 @@ SatWin* main_win_debug(){
     //printf_debug_win->cur_Y = 2 ;
 
 
-    if (mem_win->win == NULL || reg_win->win == NULL) {
-        printf("WINDOWS FAILED TO BE CREATED FOR DEBUGGER.\n") ;
-        return NULL ;
-    }
+    //if (mem_win->win == NULL || reg_win->win == NULL) {
+        //printf("WINDOWS FAILED TO BE CREATED FOR DEBUGGER.\n") ;
+        //scanf ( "%d\n", &max_x) ;
+        //return NULL ;
+    //}
 
     return main_win ;
 }
@@ -234,6 +232,7 @@ static void check_cursor(SatWin *win, int strLen) {
  *      the caller needing to do any logic.
  */
 void write_mem_win(){
+
     print_mem_win(mem_win, curMode) ;
 }
 
@@ -260,6 +259,7 @@ void print_mem_win(SatWin *win, int mode) {
     init_pair(2, COLOR_GREEN, COLOR_BLACK) ;
     win->cur_X = 2 ;
     win->cur_Y = 1 ;
+
     if (1 == mode) {
         erase_box(win) ;
         int irh = sunyat_regs[REG_PC]-2, irl = sunyat_regs[REG_PC]-1, id = (irh % 2) + (irh - ((win->max_Y) / 2)) ;
@@ -294,7 +294,12 @@ void print_mem_win(SatWin *win, int mode) {
     else { //Default to 0
         if (curMode != 0) erase_box(win) ;
         int id = 0, strLen = 10 ;
+//printf("write_mem_win %X %d", sunyat_regs[REG_PC], curMode) ;
+    //exit(102) ;
         id = print_array(win, sunyat_ram, sunyat_regs[REG_PC]-2, id) ;
+
+
+
         wattron(win->win, COLOR_PAIR(2)) ;
         mvwprintw(win->win, win->cur_Y, win->cur_X, "IRH : 0x%02X ", sunyat_ram[sunyat_regs[REG_PC]-2]) ;
         win->cur_Y++ ;
@@ -306,6 +311,7 @@ void print_mem_win(SatWin *win, int mode) {
         id = print_array(win, &(sunyat_ram[sunyat_regs[REG_PC]]), 1+SIZE_APP_RAM-sunyat_regs[REG_PC], sunyat_regs[REG_PC]) ;
         curMode = 0 ;
     }
+
     wrefresh(win->win) ;
 }
 

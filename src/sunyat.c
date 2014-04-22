@@ -61,7 +61,7 @@ extern int cursor_row ; //This is defined in sat_scr.{h,c}
 extern int cursor_col ; //This is defined in sat_scr.{h,c}
 extern uint8_t terminal[TERMINAL_HEIGHT][TERMINAL_WIDTH + 1]; //This is defined in sat_scr.{h,c}
 bool linefeed_buffered = false;
-short debug = 0 ; ///Debug will tell us if we are in debugging mode or not.
+int debug = 0 ; ///Debug will tell us if we are in debugging mode or not.
 
 //Get rid of this shit too ⇓⇓⇓⇓⇓
 char app_msg [SIZE_APP_MSG + 1];	/* +1 is to add a guaranteed null terminator */
@@ -132,7 +132,7 @@ uint8_t sunyat_ram [SIZE_APP_RAM];
  * 5-37:	33 General Purpose registers
  */
 uint8_t sunyat_regs [SIZE_REG] = {
-	0, 0, 0, 25,                             /* REG_PC, REG_IRH, REG_IRL, REG_WIN */
+	0, 0, 0, NUM_SYS_REG,                             /* REG_PC, REG_IRH, REG_IRL, REG_WIN */
 	SIZE_APP_RAM,                           /* REG_SP stack grows down from top of RAM */
 	'1', '0', '2', '0', '2', '0', '0', '6', /* GPRS no longer default to Amos' wedding date */
 	'1', '0', '2', '0', '2', '0', '0', '6', /* GPRS no longer default to Amos' wedding date */
@@ -264,40 +264,45 @@ int start_sunyat(char *rom, int lState, bool lDebug) {
 	//while ((clock () - clock_start) / CLOCKS_PER_SEC < 3);
 
 
+        if (-1 == setup_ncurses_terminal ()) {
+            return EXT_ERR_NCURSES;
+        }
 
 
-
+        terminal_init();
 
 	// fetch->decode->exceute until returned beyond RAM
 	if (!lDebug) {
         // get the ncurses terminal going
-        if (-1 == setup_ncurses_terminal ()) {
-            return EXT_ERR_NCURSES;
-        }
-        terminal_init();
+
         main_win = init_SatWin() ;
         main_win->win = stdscr ;
         getmaxyx(main_win->win, main_win->max_Y, main_win->max_X) ;
     } else {
+
         if (-1 == debug_setup()) {
             printf("Debugger setup failed.\n") ;
             return 100 ;
         }
+
         terminal_init();
+
         main_win = main_win_debug() ;
-        if (NULL == main_win) {
+
+        if (NULL == main_win){// || NULL == mem_win->win || NULL == reg_win->win) {
             printf("The debuggers main window failed.\n") ;
             return 100 ;
         }
         debug = 1 ;
     }
 
+
     if( NULL == main_win || NULL == main_win->win ){
         printf("WINDOW IS NULL\n") ;
         return 100 ;
     }
-    sunyat_execute (main_win->win);
 
+    sunyat_execute (main_win->win);
 
 	// pause to let user see completed application output
 	clock_start = clock();
@@ -325,10 +330,12 @@ static void sunyat_execute (WINDOW *win) {
 
     int pause = 1 ;
 
-    if(debug) {
-        write_mem_win() ;
-        print_reg_win(NULL) ;
-    }
+    //if(debug) {
+        //sunyat_regs[REG_PC] += 2 ;
+        //write_mem_win() ;
+        //sunyat_regs[REG_PC] -= 2 ;
+        //print_reg_win(NULL) ;
+    //}
 
 	for (;;) {
 		uint8_t opcode; //This will contain the current opcode for the cycle.

@@ -8,6 +8,9 @@
 
 SatWin *printf_debug_win ; ///This is a tempory window to print messages to.
 
+SatWin *reg_win ; ///This is the SatWin holding the registers window.
+SatWin *mem_win ; ///This is the SatWin holding the memory window.
+
 
 void memory_win(WINDOW *mem, int x, int y, int wid, int height) ;
 SatWin* main_win_debug() ;
