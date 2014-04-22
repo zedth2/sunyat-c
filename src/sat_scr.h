@@ -58,7 +58,7 @@ int setup_ncurses_terminal();
 void terminal_init();
 void terminal_restore();
 SatWin* init_SatWin() ;
-int print_array(SatWin *win, uint8_t arr[], int len, int id_start);
+int print_array(SatWin *win, uint8_t arr[], unsigned int len, int id_start) ;
 void get_W_H(SatWin *win, unsigned int *Width, unsigned int *Height) ;
 //void print_array_regs(SatWin *win, uint8_t arr[], int len) ;
 void print_sys_reg(SatWin *win, uint8_t arr[]) ;

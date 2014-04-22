@@ -12,6 +12,7 @@
 #include <ncurses.h>
 #include "sat_scr.h"
 #include "sunyat.h"
+
 const char ERR_NCURSES_INIT [] =
 	"\tCould not initialize ncurses\n";
 const char ERR_NCURSES_CBREAK [] =
@@ -29,6 +30,13 @@ int cursor_row = 0;
 int cursor_col = 0;
 uint8_t terminal[TERMINAL_HEIGHT][TERMINAL_WIDTH + 1];
 
+/**
+ *  Brief:
+ *      This will execute all the setup functions for ncurses.
+ *
+ *  Returns : int
+ *      Returns 0 if nothing went wrong, -1 otherwise.
+ */
 int setup_ncurses_terminal () {
 	if (NULL == initscr ()) {
 		printf (ERR_NCURSES_INIT);
@@ -68,8 +76,16 @@ int setup_ncurses_terminal () {
 	return 0;
 }
 
-
-
+/**
+ *  Brief:
+ *      This will initialized the main terminal array to spaces.
+ *
+ *  Notes:
+ *      This should be ripped out and replaced with something.
+ *      As of now, 04.21.2014 22:34, when something changes on the
+ *      screen the array is changed and ncurses is forced to redraw
+ *      the whole screen.
+ */
 void terminal_init() {
 	int y;
 	int x;
@@ -82,6 +98,10 @@ void terminal_init() {
 	}
 }
 
+/**
+ *  Brief:
+ *      This will clear out the entire main window.
+ */
 void terminal_restore() {
 	int y;
 
@@ -94,6 +114,14 @@ void terminal_restore() {
 	move (cursor_row, cursor_col);
 }
 
+/**
+ *  Brief:
+ *      This will initialize a SatWin. malloc for it then set cur_X and
+ *      cur_Y to 0 and set win to NULL.
+ *
+ *  Returns : SatWin*
+ *      The initiliazed SatWin.
+ */
 SatWin* init_SatWin() {
     SatWin *win = malloc(sizeof(SatWin)) ;
     win->win = NULL ;
@@ -101,8 +129,26 @@ SatWin* init_SatWin() {
     win->cur_Y = 0 ;
 }
 
-
-int print_array(SatWin *win, uint8_t arr[], int len, int id_start) {
+/**
+ *  Brief:
+ *      This will print the array out to the window.
+ *      It will print the value of the array with a counter on the left...
+ *      ID  : 0xFF
+ *
+ *  Parameters:
+ *      win : *WINDOW
+ *          An ncurses window to print out to.
+ *
+ *      arr : uint8_t[]
+ *          The array of data to print out.
+ *
+ *      len : unsigned int
+ *          The length of the array.
+ *
+ *      id_start : int
+ *          The ID to start with.
+ */
+int print_array(SatWin *win, uint8_t arr[], unsigned int len, int id_start) {
     int cnt = 0, strLen = 10 ;
     for (cnt = 0 ; len > cnt ; cnt++) {
         mvwprintw(win->win, win->cur_Y, win->cur_X, "%03d : 0x%02X ", id_start, arr[cnt]);
@@ -117,38 +163,33 @@ int print_array(SatWin *win, uint8_t arr[], int len, int id_start) {
     return id_start ;
 }
 
-//void print_array_regs(SatWin *win, uint8_t arr[], int len) {
-    //int cnt = 0, strLen = 10, lblCnt = 0 ;
-    //init_pair(2, COLOR_GREEN, COLOR_BLACK) ;
-    //for (cnt = 0 ; len > cnt ; cnt++) {
-
-        //if (REG_PC == cnt) {
-            //mvwprintw(win->win, win->cur_Y, win->cur_X, " PC : 0x%02X ", cnt, arr[cnt]);
-        //}
-    //}
-
-
-
-    //for (cnt = 0 ; len > cnt ; cnt++, lblCnt++) {
-        //mvwprintw(win->win, win->cur_Y, win->cur_X, "R%02d : 0x%02X ", lblCnt, arr[cnt]);
-        //(win->cur_Y)++ ;
-        //if (win->cur_Y >= (win->max_Y)-2) {
-            //win->cur_Y = 1 ; //It must be two to get past the box outline.
-            //win->cur_X += strLen+2 ;
-        //}
-        //if (SIZE_WIN <= lblCnt) lblCnt = 0 ;
-    //}
-    //wrefresh(win->win) ;
-//}
-
-
-
-
+/**
+ *  Brief:
+ *      Will reset cur_X and cur_Y to 0.
+ *
+ *  Parameters:
+ *      win : *SatWin
+ *          A pointer to the SatWin to reset.
+ */
 void reset_cur(SatWin *win) {
     win->cur_X = 0 ;
     win->cur_Y = 0 ;
 }
 
+/**
+ *  Brief:
+ *      This will find the max Y and X and height and width respectively.
+ *
+ *  Parameters:
+ *      win : *SatWin
+ *          The window to check.
+ *
+ *      Width : *unsigned int
+ *          This will be the number of columns in the window.
+ *
+ *      Height : *unsigned int
+ *          This will be the number of rows in the window.
+ */
 void get_W_H(SatWin *win, unsigned int *Width, unsigned int *Height) {
     getmaxyx(win->win, *Width, *Height) ;
 }
