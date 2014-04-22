@@ -22,6 +22,9 @@ int curMode = 0 ; ///This will keep the memory window in whatever mode is was be
 /**
  *  brief:
  *      This will do the setup for ncurses for the debugger.
+ *
+ *  Returns : int
+ *      A -1 if an error occured, 0 otherwise.
  */
 int debug_setup(){
 	if (NULL == initscr ()) {
@@ -53,6 +56,11 @@ int debug_setup(){
 		//printf (ERR_NCURSES_CURSOR);
 		return -1;
 	}
+    init_pair(1, COLOR_WHITE, COLOR_BLACK);
+    wbkgd(stdscr, COLOR_PAIR(1)) ;
+	return 0;
+
+    return 0 ;
 }
 
 /**
@@ -68,7 +76,10 @@ SatWin* main_win_debug(){
 	refresh();
     int max_x = getmaxx(stdscr) ;
     int max_y = getmaxy(stdscr) ;
-
+    if (max_x <= 80 || max_y <= 25) {
+        printf("WINDOW NOT BIG ENOUGH %d %d \n", max_x, max_y) ;
+        return NULL ;
+    }
     main_win = init_SatWin() ;
     main_win->win = newwin(25, 80, 0, 0) ;
     getmaxyx(main_win->win, main_win->max_Y, main_win->max_X) ;
@@ -89,14 +100,20 @@ SatWin* main_win_debug(){
     scrollok(mem_win->win, TRUE) ;
     wrefresh(mem_win->win) ;
 
-    printf_debug_win = init_SatWin() ;
-    printf_debug_win->win = newwin(max_y/2, max_x - 80, max_y/2, 80) ;
+    //printf_debug_win = init_SatWin() ;
+    //printf_debug_win->win = newwin(max_y/2, max_x - 80, max_y/2, 80) ;
 
-    box(printf_debug_win->win, 0, 0) ;
-    scrollok(printf_debug_win->win, TRUE) ;
-    wrefresh(printf_debug_win->win) ;
-    printf_debug_win->cur_X = 2 ;
-    printf_debug_win->cur_Y = 2 ;
+    //box(printf_debug_win->win, 0, 0) ;
+    //scrollok(printf_debug_win->win, TRUE) ;
+    //wrefresh(printf_debug_win->win) ;
+    //printf_debug_win->cur_X = 2 ;
+    //printf_debug_win->cur_Y = 2 ;
+
+
+    if (mem_win->win == NULL || reg_win->win == NULL) {
+        printf("WINDOWS FAILED TO BE CREATED FOR DEBUGGER.\n") ;
+        return NULL ;
+    }
 
     return main_win ;
 }

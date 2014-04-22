@@ -17,7 +17,7 @@ int debug_pause() ;
 static void erase_box(SatWin *win) ;
 void write_mem_win() ;
 void print_mem_win(SatWin *win, int mode) ;
-void print_to_win(WINDOW *cwin, uint8_t *data, int len) ;
+void print_to_win(WINDOW *cwin, uint8_t data[], unsigned int len) ;
 void write_reg_win() ;
 static void check_cursor(SatWin *win, int strLen) ;
 static void instruction_to_code(SatWin *win, uint8_t highBits, uint8_t lowBits) ;

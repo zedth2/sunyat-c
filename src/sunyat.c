@@ -261,19 +261,20 @@ int start_sunyat(char *rom, int lState, bool lDebug) {
     }
 
     // pause to let user see application info
-	while ((clock () - clock_start) / CLOCKS_PER_SEC < 3);
-
-	// get the ncurses terminal going
-	if (-1 == setup_ncurses_terminal ()) {
-		return EXT_ERR_NCURSES;
-	}
+	//while ((clock () - clock_start) / CLOCKS_PER_SEC < 3);
 
 
 
-	terminal_init();
+
+
 
 	// fetch->decode->exceute until returned beyond RAM
 	if (!lDebug) {
+        // get the ncurses terminal going
+        if (-1 == setup_ncurses_terminal ()) {
+            return EXT_ERR_NCURSES;
+        }
+        terminal_init();
         main_win = init_SatWin() ;
         main_win->win = stdscr ;
         getmaxyx(main_win->win, main_win->max_Y, main_win->max_X) ;
@@ -282,7 +283,8 @@ int start_sunyat(char *rom, int lState, bool lDebug) {
             printf("Debugger setup failed.\n") ;
             return 100 ;
         }
-        main_win_debug() ;
+        terminal_init();
+        main_win = main_win_debug() ;
         if (NULL == main_win) {
             printf("The debuggers main window failed.\n") ;
             return 100 ;
@@ -736,18 +738,20 @@ static void sunyat_execute (WINDOW *win) {
 		case OPCODE_SWR_I:
 			{
 
-                mvwprintw(printf_debug_win->win, printf_debug_win->cur_Y, printf_debug_win->cur_X, "SWR : %d %d ", imm, GET_GRP(imm));
-                (printf_debug_win->cur_Y)++ ;
-                wrefresh(printf_debug_win->win) ;
+                //mvwprintw(printf_debug_win->win, printf_debug_win->cur_Y, printf_debug_win->cur_X, "SWR : %d %d ", imm, GET_GRP(imm));
+                //(printf_debug_win->cur_Y)++ ;
+                //wrefresh(printf_debug_win->win) ;
 
 				sunyat_regs[REG_WIN] = GET_GRP(imm);
 				break;
 			}
 		case OPCODE_AWR_I:
 		{
-            mvwprintw(printf_debug_win->win, printf_debug_win->cur_Y, printf_debug_win->cur_X, "AWR : %d %d ", sunyat_regs[REG_WIN], GET_GRWP(imm));
-            (printf_debug_win->cur_Y)++ ;
-            wrefresh(printf_debug_win->win) ;
+            //mvwprintw(printf_debug_win->win, printf_debug_win->cur_Y, printf_debug_win->cur_X, "AWR : %d %d ", sunyat_regs[REG_WIN], GET_GRWP(imm));
+            //(printf_debug_win->cur_Y)++ ;
+            //wrefresh(printf_debug_win->win) ;
+
+
             sunyat_regs[REG_WIN] = GET_GRWP(imm) ;
             set_flags (sunyat_regs[REG_WIN]);
 			break;
