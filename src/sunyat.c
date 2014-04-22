@@ -753,6 +753,7 @@ static void sunyat_execute (WINDOW *win) {
 			}
 		case OPCODE_AWR_I:
 		{
+
 #ifdef __DEBUG_ME_SUNYAT__
             //mvwprintw(printf_debug_win->win, printf_debug_win->cur_Y, printf_debug_win->cur_X, "AWR : REG %d GET_GRWP %d fuck_you %d imm %d eq_sum %d eqq %d", sunyat_regs[REG_WIN], GET_GRWP(imm), fuck_you(imm), imm, (NUM_GEN_REG + fuck_you(imm)), (NUM_GEN_REG + fuck_you(imm))%NUM_GEN_REG);
             //(printf_debug_win->cur_Y)++ ;
