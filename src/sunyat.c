@@ -56,20 +56,12 @@
 #include "sat_scr.h"
 #include "debugger.h"
 
-#ifndef true
-#define true TRUE
-#endif /* true */
-
-#ifndef false
-#define false FALSE
-#endif /* false */
-
-#define STARTUP_PAUSE       3 //Fucking get rid of this.
 
 extern int cursor_row ; //This is defined in sat_scr.{h,c}
 extern int cursor_col ; //This is defined in sat_scr.{h,c}
 extern uint8_t terminal[TERMINAL_HEIGHT][TERMINAL_WIDTH + 1]; //This is defined in sat_scr.{h,c}
 bool linefeed_buffered = false;
+short debug = 0 ; ///Debug will tell us if we are in debugging mode or not.
 
 //Get rid of this shit too ⇓⇓⇓⇓⇓
 char app_msg [SIZE_APP_MSG + 1];	/* +1 is to add a guaranteed null terminator */
@@ -122,6 +114,7 @@ const char ERR_WINDOW_RANGE []=
  *      This is the main window for the assembly program.
  */
 SatWin *main_win ;
+
 /**
  *  Brief:
  *      This is the array being all the ram for the SUNYAT.
@@ -139,7 +132,7 @@ uint8_t sunyat_ram [SIZE_APP_RAM];
  * 5-37:	33 General Purpose registers
  */
 uint8_t sunyat_regs [SIZE_REG] = {
-	0, 0, 0, 5,                             /* REG_PC, REG_IRH, REG_IRL, REG_WIN */
+	0, 0, 0, 25,                             /* REG_PC, REG_IRH, REG_IRL, REG_WIN */
 	SIZE_APP_RAM,                           /* REG_SP stack grows down from top of RAM */
 	'1', '0', '2', '0', '2', '0', '0', '6', /* GPRS no longer default to Amos' wedding date */
 	'1', '0', '2', '0', '2', '0', '0', '6', /* GPRS no longer default to Amos' wedding date */
@@ -232,7 +225,7 @@ static int load_rom(char *rom)
 	return EXIT_SUCCESS ;
 }
 
-int debug = 0 ;
+
 /**
  *  Brief:
  *      This will start the sunyat's execution.
@@ -260,7 +253,6 @@ int start_sunyat(char *rom, int lState, bool lDebug) {
 
     if (0 == lState)
     {
-    	//if (EXIT_SUCCESS != (ReVal = load_state(rom))) return ReVal;
         if (EXIT_SUCCESS != (ReVal = load_rom(rom))) return ReVal ;
     }
     else
@@ -296,9 +288,6 @@ int start_sunyat(char *rom, int lState, bool lDebug) {
             return 100 ;
         }
         debug = 1 ;
-        //printf("NOT IMPLEMENTED\n") ;
-        //return 100 ;
-        //my_win = //some debug setup function.
     }
 
     if( NULL == main_win || NULL == main_win->win ){
@@ -340,13 +329,15 @@ static void sunyat_execute (WINDOW *win) {
     }
 
 	for (;;) {
-		uint8_t opcode;
-		uint8_t sreg;
-		uint8_t dreg;
-		uint8_t mem;
-		int8_t imm;
+		uint8_t opcode; //This will contain the current opcode for the cycle.
+		uint8_t sreg;   //This is the current souce register for the cycle.
+		uint8_t dreg;   //This is the current desination register for the cycle.
+		uint8_t mem;    //The memory location will be accessing for the cycle.
+		int8_t imm;     //The immediate given with the instruction.
 		uint8_t cmp_result;
 
+
+        //Old NCurses code that could probably be torn out.
 		int current_width;
 		int current_height;
 
@@ -408,25 +399,16 @@ static void sunyat_execute (WINDOW *win) {
 		 * DECODE
 		 */
 		opcode = get_opcode (sunyat_regs [REG_IRH]);
-		sreg = get_sreg (sunyat_regs [REG_IRL]) + sunyat_regs [REG_WIN]; //This should be all we need for the offset of the window.
-		dreg = get_dreg (sunyat_regs [REG_IRH]) + sunyat_regs [REG_WIN];
-        //printf("Accessing %d and des to %d \n", sreg, dreg) ;
+		sreg = GET_GRWP(get_sreg (sunyat_regs [REG_IRL])) ; // + sunyat_regs [REG_WIN]; //This should be all we need for the offset of the window.
+		dreg = GET_GRWP(get_dreg (sunyat_regs [REG_IRH])) ; //+ sunyat_regs [REG_WIN];
+
 		mem = get_mem (sunyat_regs [REG_IRL]);
 		imm = get_imm (sunyat_regs [REG_IRL]);
         if (debug) {
-            //if (0 == (sunyat_clock_ticks%100000)) {
                 write_mem_win() ;
-                //refresh() ;
                 print_reg_win(NULL) ;
-                //refresh() ;
-            //}
-
             if (pause) {
-                //printf("Pausing\t") ;
-
-
                 pause = debug_pause() ;
-
             }
         }
 
@@ -753,25 +735,21 @@ static void sunyat_execute (WINDOW *win) {
 		//Windowing opcodes
 		case OPCODE_SWR_I:
 			{
-                //printf("Changing swr %d \n", imm + REG_GEN_START) ;
-				if (imm > MAX_WIN_INDEX)
-				{
-					printf(ERR_WINDOW_RANGE);
-				}
-				sunyat_regs[REG_WIN] = imm + REG_GEN_START;
+
+                mvwprintw(printf_debug_win->win, printf_debug_win->cur_Y, printf_debug_win->cur_X, "SWR : %d %d ", imm, GET_GRP(imm));
+                (printf_debug_win->cur_Y)++ ;
+                wrefresh(printf_debug_win->win) ;
+
+				sunyat_regs[REG_WIN] = GET_GRP(imm);
 				break;
 			}
-		case OPCODE_AWR_I: //This has the greatest chance of going beyond MAX_WIN_INDEX
+		case OPCODE_AWR_I:
 		{
-			if ((sunyat_regs[REG_WIN] + imm) > MAX_WIN_INDEX || (sunyat_regs[REG_WIN] + imm) < REG_GEN_START)
-			{
-				printf(ERR_WINDOW_RANGE);
-			}
-			else
-			{
-				sunyat_regs[REG_WIN] += imm;
-				set_flags (sunyat_regs[REG_WIN]);
-			}
+            mvwprintw(printf_debug_win->win, printf_debug_win->cur_Y, printf_debug_win->cur_X, "AWR : %d %d ", sunyat_regs[REG_WIN], GET_GRWP(imm));
+            (printf_debug_win->cur_Y)++ ;
+            wrefresh(printf_debug_win->win) ;
+            sunyat_regs[REG_WIN] = GET_GRWP(imm) ;
+            set_flags (sunyat_regs[REG_WIN]);
 			break;
 		}
 				//Auxiliary
@@ -825,11 +803,11 @@ uint8_t get_opcode (uint8_t highBits) {
 }
 
 uint8_t get_dreg (uint8_t highBits) {
-	return highBits & 0x07; // bottom 3 bits are dreg
+    return highBits & 0x07; // bottom 3 bits are dreg
 }
 
 uint8_t get_sreg (uint8_t lowBits) {
-	return lowBits & 0x07; // bottom 3 bits are sreg
+    return lowBits & 0x07; // bottom 3 bits are sreg
 }
 
 uint8_t get_mem (uint8_t lowBits) {

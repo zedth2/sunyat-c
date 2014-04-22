@@ -12,6 +12,9 @@ extern uint8_t sunyat_ram [SIZE_APP_RAM];
 
 SatWin *reg_win ; ///This is the SatWin holding the registers window.
 SatWin *mem_win ; ///This is the SatWin holding the memory window.
+
+
+
 extern SatWin *main_win ; ///The main window for the assembly program. Defined in sunyat.{h,c}
 
 int curMode = 0 ; ///This will keep the memory window in whatever mode is was before.
@@ -79,17 +82,24 @@ SatWin* main_win_debug(){
     wrefresh(reg_win->win) ;
 
     mem_win = init_SatWin() ;
-    mem_win->win = newwin(max_y, max_x - 80, 0, 80) ;
+    mem_win->win = newwin(max_y/2, max_x - 80, 0, 80) ;
     getmaxyx(mem_win->win, mem_win->max_Y, mem_win->max_X) ;
 
     box(mem_win->win, 0, 0) ;
     scrollok(mem_win->win, TRUE) ;
     wrefresh(mem_win->win) ;
 
+    printf_debug_win = init_SatWin() ;
+    printf_debug_win->win = newwin(max_y/2, max_x - 80, max_y/2, 80) ;
+
+    box(printf_debug_win->win, 0, 0) ;
+    scrollok(printf_debug_win->win, TRUE) ;
+    wrefresh(printf_debug_win->win) ;
+    printf_debug_win->cur_X = 2 ;
+    printf_debug_win->cur_Y = 2 ;
 
     return main_win ;
 }
-
 
 /**
  *  Brief:
@@ -107,7 +117,7 @@ void print_reg_win(SatWin *win) {
     erase_box(win) ;
     win->cur_X = 2 ;
     win->cur_Y = 1 ;
-    int cnt = 0, strLen = 10 ;
+    unsigned int cnt = 0, strLen = 10, reg_win_cnt = 0 ;
     init_pair(2, COLOR_GREEN, COLOR_BLACK) ;
     for (; SIZE_REG > cnt ; cnt++) {
         switch(cnt){
@@ -138,23 +148,15 @@ void print_reg_win(SatWin *win) {
             }
             default:
             {
-                if (sunyat_regs[REG_WIN] <= cnt && sunyat_regs[REG_WIN]+SIZE_WIN > cnt){
-                    wattron(win->win, COLOR_PAIR(2));
-                    mvwprintw(win->win, win->cur_Y, win->cur_X, "R%02d : 0x%02X ", cnt-sunyat_regs[REG_WIN], sunyat_regs[cnt]);
-                    //int wcnt = 0 ;
-                    //for(; SIZE_WIN > wcnt ; wcnt++) {
-                        //mvwprintw(win->win,
-                    //}
-                    //print_array(win, &(sunyat_regs[cnt]), SIZE_WIN, 0) ;
-                    //cnt += SIZE_WIN ;
-                    wattroff(win->win, COLOR_PAIR(2));
-                } /*else if (sunyat_regs[REG_PC] == cnt || sunyat_regs[REG_PC]-1 == cnt) {
-                    wattron(win->win, COLOR_PAIR(2));
-                    mvwprintw(win->win, win->cur_Y, win->cur_X, "%02d : 0x%02X ", cnt, sunyat_regs[cnt]);
-                    wattroff(win->win, COLOR_PAIR(2));
-                }*/
-                else {
-                    mvwprintw(win->win, win->cur_Y, win->cur_X, "%03d : 0x%02X ", cnt, sunyat_regs[cnt]);
+                if (REG_GEN_START <= cnt || REG_GEN_END >= cnt) {
+                    reg_win_cnt = cnt_to_reg_win(cnt) ;
+                    if (SIZE_WIN > reg_win_cnt) {
+                        wattron(win->win, COLOR_PAIR(2));
+                        mvwprintw(win->win, win->cur_Y, win->cur_X, "R%02d : 0x%02X ", reg_win_cnt, sunyat_regs[cnt]);
+                        wattroff(win->win, COLOR_PAIR(2));
+                    } else {
+                        mvwprintw(win->win, win->cur_Y, win->cur_X, "%03d : 0x%02X ", cnt, sunyat_regs[cnt]);
+                    }
                 }
                 break ;
             }
@@ -165,6 +167,41 @@ void print_reg_win(SatWin *win) {
     wrefresh(win->win) ;
 }
 
+/**
+ *  Brief:
+ *      Gets a number as input and returns the window value of the number.
+ *
+ *  Parameter:
+ *      cnt : unsigned int
+ *          The number to get the associated window position of.
+ *
+ *  Returns : unsigned int
+ *      The number return can be greater than the size of the window.
+ */
+static unsigned int cnt_to_reg_win(unsigned int cnt) {
+    unsigned int rw = sunyat_regs[REG_WIN] - NUM_SYS_REG ;
+    unsigned int base = NUM_GEN_REG - rw + (cnt - NUM_SYS_REG)  ;
+    if (base >= NUM_GEN_REG) {
+        return base - NUM_GEN_REG ;
+    }
+    return base ;
+}
+
+/**
+ *  Brief:
+ *      This does a check to see if the cursor is outside the bounds of then
+ *      boxed window of ncurses. If it detects the value is beyond the window
+ *      then it resets Y to 1 and X to strLen + 2.
+ *      The strLen is the length of the string being printed out in the
+ *      columns so that the cursor is reset to the next column to the right.
+ *
+ *  Parameters:
+ *      win : *SatWin
+ *          The window to check against.
+ *
+ *      strLen : int
+ *          The length of the string being printed through the columns.
+ */
 static void check_cursor(SatWin *win, int strLen) {
     if (win->cur_Y >= (win->max_Y)-2) {
         win->cur_Y = 1 ; //It must be two to get past the box outline.
@@ -173,10 +210,15 @@ static void check_cursor(SatWin *win, int strLen) {
 }
 
 
+/**
+ *  Brief:
+ *      This is just an abstracted call to print_mem_win so that
+ *      it can maintain the current memory window mode without
+ *      the caller needing to do any logic.
+ */
 void write_mem_win(){
     print_mem_win(mem_win, curMode) ;
 }
-
 
 /**
  *  Brief:
@@ -250,9 +292,18 @@ void print_mem_win(SatWin *win, int mode) {
     wrefresh(win->win) ;
 }
 
-
-
-
+/**
+ *  Brief:
+ *      This will run an infinite loop effectively pausing the excution of
+ *      the calling system.
+ *      The user can press F8 to continue for one cycle. F7 will change
+ *      the memory window mode between a list of all memory and the current
+ *      memory being executed.
+ *
+ *  Returns : int
+ *      The returning value has the meaning if the pause should continue
+ *      after the next instruction.
+ */
 int debug_pause() {
     //printf("PAUSING\n") ;
     wmove(reg_win->win, 1, 1) ;
@@ -271,12 +322,36 @@ int debug_pause() {
     return pause_again ;
 }
 
+/**
+ *  Brief:
+ *      This will erase the passed in window and redraw it with a box.
+ *      But does not do a refresh.
+ *
+ *  Parameters:
+ *      win : *SatWin
+ *          The window to operate on.
+ */
 static void erase_box(SatWin *win) {
     werase(win->win) ;
     box(win->win, 0, 0) ;
 
 }
 
+/**
+ *  Brief:
+ *      This will deconstruct the high and low bits and print out the
+ *      assembly code line to the screen.
+ *
+ *  Parameters:
+ *      win : *SatWin
+ *          The window to print the data to.
+ *
+ *      highBits : uint8_t
+ *          The high eight bits for the instruction.
+ *
+ *      lowBits : uint8_t
+ *          The low eight bits for the instruction.
+ */
 static void instruction_to_code(SatWin *win, uint8_t highBits, uint8_t lowBits) {
     switch(get_opcode(highBits)) {
     case OPCODE_MOV_RR:
@@ -448,7 +523,24 @@ static void instruction_to_code(SatWin *win, uint8_t highBits, uint8_t lowBits) 
     }
 }
 
-void print_to_win(WINDOW *cwin, uint8_t data[], int len){
+/**
+ *  Brief:
+ *      This will print the array out to the window.
+ *      It will print the value of the array with a counter on the left...
+ *
+ *      255 : 0xFF
+ *
+ *  Parameters:
+ *      cwin : *WINDOW
+ *          An ncurses window to print out to.
+ *
+ *      data : uint8_t[]
+ *          The array of data to print out.
+ *
+ *      len : unsigned int
+ *          The length of the array.
+ */
+void print_to_win(WINDOW *cwin, uint8_t data[], unsigned int len){
     int X = 0, Y = 0, cnt = 0, curCol = 2, curRow = 1, strLen = 10, colSpace = 2;
     getmaxyx(cwin, X, Y) ;
     for( ; len > cnt ; ++cnt, ++curRow) {
@@ -463,17 +555,3 @@ void print_to_win(WINDOW *cwin, uint8_t data[], int len){
     }
     wrefresh(cwin) ;
 }
-
-void print_to_win_lbls(WINDOW *cwin, uint8_t data[], int len, char *lbls, int lbl_len){
-
-}
-
-void move_cursor(WINDOW *cwin){
-
-}
-
-//void memory_win(WINDOW *mem, int x, int y, int wid, int height) {
-    //mem_win = newwin(wid, height, x, y) ;
-    //box(mem, 0, 0) ;
-    //wrefresh(mem) ;
-//}

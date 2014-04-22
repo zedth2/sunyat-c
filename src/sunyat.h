@@ -96,12 +96,19 @@
 
 
 //General Purpose Registars
+
+/**
+ *  Brief:
+ *      This is the number of general purpose registers.
+ */
+#define NUM_GEN_REG 32
+
 /**
  *  Brief:
  *      This is the total number of registers. It should be the total number
  *          of system registers plus the number of general purpose registers.
  */
-#define SIZE_REG (NUM_SYS_REG + 32)
+#define SIZE_REG (NUM_SYS_REG + NUM_GEN_REG)
 
 /**
  *  Brief:
@@ -113,7 +120,7 @@
  *  Brief:
  *      This is the ending index of the general purpose registers.
  */
-#define REG_GEN_END   SIZE_REG - 1
+#define REG_GEN_END SIZE_REG - 1
 
 /**
  *  Brief:
@@ -553,7 +560,29 @@
 #define DEBUGGER_SWITCH     "-d\0"
 
 
+#ifndef true
+#define true TRUE
+#endif /* true */
 
+#ifndef false
+#define false FALSE
+#endif /* false */
+
+#define STARTUP_PAUSE       3 //Fucking get rid of this.
+
+/**
+ *  Brief:
+ *      Use this in order to get a specific register.
+ *
+ *  Parameters:
+ *      imm : int
+ *
+ *  Returns : A number between NUM_SYS_REG and SIZE_REG
+ */
+#define GET_GRWP(imm) ((((sunyat_regs[REG_WIN] - NUM_SYS_REG) + imm) % NUM_GEN_REG) + NUM_SYS_REG)
+#define GET_GRP(imm) (imm % NUM_GEN_REG) + NUM_SYS_REG
+
+//Function Prototypes...
 int start_sunyat(char *rom, int lState, bool lDebug);
 uint8_t get_opcode (uint8_t highBits) ;
 uint8_t get_dreg (uint8_t highBits) ;
@@ -563,5 +592,7 @@ int8_t get_imm (int8_t lowBits) ;
 
 static void sunyat_execute (WINDOW *win);
 static void set_flags (int8_t result);
+
+
 
 #endif /* _SUNYAT_H_ */
