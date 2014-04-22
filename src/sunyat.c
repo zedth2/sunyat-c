@@ -754,11 +754,11 @@ static void sunyat_execute (WINDOW *win) {
 			}
 		case OPCODE_AWR_I:
 		{
-            //mvwprintw(printf_debug_win->win, printf_debug_win->cur_Y, printf_debug_win->cur_X, "AWR : %d %d ", sunyat_regs[REG_WIN], GET_GRWP(imm));
-            //(printf_debug_win->cur_Y)++ ;
-            //wrefresh(printf_debug_win->win) ;
+            mvwprintw(printf_debug_win->win, printf_debug_win->cur_Y, printf_debug_win->cur_X, "AWR : %d %d %d", (int8_t)sunyat_regs[REG_WIN], GET_GRWP(imm), imm);
+            (printf_debug_win->cur_Y)++ ;
+            wrefresh(printf_debug_win->win) ;
 
-
+            if (0 > imm)
             sunyat_regs[REG_WIN] = GET_GRWP(imm) ;
             set_flags (sunyat_regs[REG_WIN]);
 			break;

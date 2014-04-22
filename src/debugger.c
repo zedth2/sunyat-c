@@ -97,14 +97,14 @@ SatWin* main_win_debug(){
     scrollok(mem_win->win, TRUE) ;
     wrefresh(mem_win->win) ;
 
-    //printf_debug_win = init_SatWin() ;
-    //printf_debug_win->win = newwin(max_y/2, max_x - 80, max_y/2, 80) ;
+    printf_debug_win = init_SatWin() ;
+    printf_debug_win->win = newwin(max_y/2, max_x - 80, max_y/2, 80) ;
 
-    //box(printf_debug_win->win, 0, 0) ;
-    //scrollok(printf_debug_win->win, TRUE) ;
-    //wrefresh(printf_debug_win->win) ;
-    //printf_debug_win->cur_X = 2 ;
-    //printf_debug_win->cur_Y = 2 ;
+    box(printf_debug_win->win, 0, 0) ;
+    scrollok(printf_debug_win->win, TRUE) ;
+    wrefresh(printf_debug_win->win) ;
+    printf_debug_win->cur_X = 2 ;
+    printf_debug_win->cur_Y = 2 ;
 
 
     //if (mem_win->win == NULL || reg_win->win == NULL) {

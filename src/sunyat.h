@@ -579,7 +579,7 @@
  *
  *  Returns : A number between NUM_SYS_REG and SIZE_REG
  */
-#define GET_GRWP(imm) ((((sunyat_regs[REG_WIN] - NUM_SYS_REG) + imm) % NUM_GEN_REG) + NUM_SYS_REG)
+#define GET_GRWP(imm) ((((sunyat_regs[REG_WIN] - NUM_SYS_REG) + (imm + NUM_GEN_REG)) % NUM_GEN_REG) + NUM_SYS_REG)
 #define GET_GRP(imm) (imm % NUM_GEN_REG) + NUM_SYS_REG
 
 //Function Prototypes...
