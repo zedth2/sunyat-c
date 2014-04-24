@@ -440,6 +440,11 @@ static void sunyat_execute (WINDOW *win) {
 			sunyat_regs [dreg] = sunyat_regs [dreg] + imm;
 			set_flags (sunyat_regs [dreg]);
 			break;
+		case OPCODE_SUB_RR:
+			// this should work on signed values as well
+			sunyat_regs [dreg] = sunyat_regs [dreg] - sunyat_regs [sreg];
+			set_flags (sunyat_regs [dreg]);
+			break;
 		case OPCODE_MUL_RR:
 			// this should work on signed values as well
 			sunyat_regs [dreg] = sunyat_regs [dreg] * sunyat_regs [sreg];

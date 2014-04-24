@@ -416,9 +416,9 @@ code_line ::= AWR immediate(src).{
 
 code_line ::= SUB REGISTER(dst) REGISTER(src).{
 	if (assembler_pass == 2) {
-		high_opcode = OPCODE_ADD_RR;
+		high_opcode = OPCODE_SUB_RR;
 		high_reg = dst.data;
-		low = (uint8_t)(-src.data);
+		low = src.data;
 		store_instruction ();
 	}
 }

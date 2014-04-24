@@ -1278,9 +1278,9 @@ static void yy_reduce(
 #line 417 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
-		high_opcode = OPCODE_ADD_RR;
+		high_opcode = OPCODE_SUB_RR;
 		high_reg = yymsp[-1].minor.yy0.data;
-		low = (uint8_t)(-yymsp[0].minor.yy0.data);
+		low = yymsp[0].minor.yy0.data;
 		store_instruction ();
 	}
 }
