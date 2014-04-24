@@ -766,6 +766,10 @@ static void sunyat_execute (WINDOW *win) {
 				//Auxiliary
 		case OPCODE_AUX_I:
 		{
+			if (imm < 0 || imm > 1)
+				{
+					printf("AUX: 0-1 only!\n");
+				}
 			switch (imm)
 			{
 				case 0: //savestate
@@ -787,13 +791,8 @@ static void sunyat_execute (WINDOW *win) {
                     pause = 1 ;
                     break ;
                 }
-                case 2: //load program
-                {
-                	load_state("testStateRom.rom");
-                	break ;
-                }
                 default:
-                    printf("0-7 only for AUX\n");
+                    printf("0-1 only for AUX\n");
             }
             break ;
         }
