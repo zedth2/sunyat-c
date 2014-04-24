@@ -393,9 +393,11 @@ code_line ::= ADD REGISTER(dst) immediate(src).{
 code_line ::= SWR immediate(src).{
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_SWR_I;
-		high_reg = 0 ; //dst.data;
-		if (src.data > MAX_WIN_INDEX) {
-            error (src, "Your set of the beginning window was to large.", src.token_str) ;
+		high_reg = 0 ;
+		if (MAX_WIN_INDEX < src.data) {
+            error (src, "The register window location you gave was to large.", src.token_str) ;
+        } else if (0 > src.data) {
+            error (src, "SWR only accepts positive integers.", src.token_str) ;
         }
         low = (uint8_t)src.data ;
 		store_instruction ();

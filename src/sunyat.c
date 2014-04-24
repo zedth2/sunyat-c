@@ -132,7 +132,7 @@ uint8_t sunyat_ram [SIZE_APP_RAM];
  * 5-37:	33 General Purpose registers
  */
 uint8_t sunyat_regs [SIZE_REG] = {
-	0, 0, 0, NUM_SYS_REG,                             /* REG_PC, REG_IRH, REG_IRL, REG_WIN */
+	0, 0, 0, NUM_SYS_REG,                   /* REG_PC, REG_IRH, REG_IRL, REG_WIN */
 	SIZE_APP_RAM,                           /* REG_SP stack grows down from top of RAM */
 	'1', '0', '2', '0', '2', '0', '0', '6', /* GPRS no longer default to Amos' wedding date */
 	'1', '0', '2', '0', '2', '0', '0', '6', /* GPRS no longer default to Amos' wedding date */
@@ -742,15 +742,10 @@ static void sunyat_execute (WINDOW *win) {
             break ;
 		//Windowing opcodes
 		case OPCODE_SWR_I:
-			{
-
-                //mvwprintw(printf_debug_win->win, printf_debug_win->cur_Y, printf_debug_win->cur_X, "SWR : %d %d ", imm, GET_GRP(imm));
-                //(printf_debug_win->cur_Y)++ ;
-                //wrefresh(printf_debug_win->win) ;
-
-				sunyat_regs[REG_WIN] = GET_GRP(imm);
-				break;
-			}
+        {
+            sunyat_regs[REG_WIN] = imm ;
+            break;
+        }
 		case OPCODE_AWR_I:
 		{
 
@@ -766,10 +761,6 @@ static void sunyat_execute (WINDOW *win) {
 				//Auxiliary
 		case OPCODE_AUX_I:
 		{
-			if (imm < 0 || imm > 7)
-				{
-					printf("0-7 only!\n");
-				}
 			switch (imm)
 			{
 				case 0: //savestate
@@ -796,6 +787,8 @@ static void sunyat_execute (WINDOW *win) {
                 	load_state("testStateRom.rom");
                 	break ;
                 }
+                default:
+                    printf("0-7 only for AUX\n");
             }
             break ;
         }

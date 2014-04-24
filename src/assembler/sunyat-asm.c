@@ -1250,18 +1250,20 @@ static void yy_reduce(
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_SWR_I;
-		high_reg = 0 ; //dst.data;
-		if (yymsp[0].minor.yy0.data > MAX_WIN_INDEX) {
-            error (yymsp[0].minor.yy0, "Your set of the beginning window was to large.", yymsp[0].minor.yy0.token_str) ;
+		high_reg = 0 ;
+		if (MAX_WIN_INDEX < yymsp[0].minor.yy0.data) {
+            error (yymsp[0].minor.yy0, "The register window location you gave was to large.", yymsp[0].minor.yy0.token_str) ;
+        } else if (0 > yymsp[0].minor.yy0.data) {
+            error (yymsp[0].minor.yy0, "SWR only accepts positive integers.", yymsp[0].minor.yy0.token_str) ;
         }
         low = (uint8_t)yymsp[0].minor.yy0.data ;
 		store_instruction ();
 	}
 }
-#line 1262 "assembler/sunyat-asm.c"
+#line 1264 "assembler/sunyat-asm.c"
         break;
       case 28: /* code_line ::= AWR immediate */
-#line 405 "assembler/sunyat-asm.y"
+#line 407 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_AWR_I;
@@ -1270,10 +1272,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1274 "assembler/sunyat-asm.c"
+#line 1276 "assembler/sunyat-asm.c"
         break;
       case 29: /* code_line ::= SUB REGISTER REGISTER */
-#line 415 "assembler/sunyat-asm.y"
+#line 417 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_ADD_RR;
@@ -1282,10 +1284,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1286 "assembler/sunyat-asm.c"
+#line 1288 "assembler/sunyat-asm.c"
         break;
       case 30: /* code_line ::= SUB REGISTER immediate */
-#line 426 "assembler/sunyat-asm.y"
+#line 428 "assembler/sunyat-asm.y"
 { //THIS IS A PSEUDO-INSTRUCTION
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_ADD_RI;
@@ -1294,10 +1296,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1298 "assembler/sunyat-asm.c"
+#line 1300 "assembler/sunyat-asm.c"
         break;
       case 31: /* code_line ::= MUL REGISTER REGISTER */
-#line 435 "assembler/sunyat-asm.y"
+#line 437 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_MUL_RR;
@@ -1306,10 +1308,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1310 "assembler/sunyat-asm.c"
+#line 1312 "assembler/sunyat-asm.c"
         break;
       case 32: /* code_line ::= MUL REGISTER immediate */
-#line 444 "assembler/sunyat-asm.y"
+#line 446 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_MUL_RI;
@@ -1318,10 +1320,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1322 "assembler/sunyat-asm.c"
+#line 1324 "assembler/sunyat-asm.c"
         break;
       case 33: /* code_line ::= DIV REGISTER REGISTER */
-#line 453 "assembler/sunyat-asm.y"
+#line 455 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_DIV_RR;
@@ -1330,10 +1332,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1334 "assembler/sunyat-asm.c"
+#line 1336 "assembler/sunyat-asm.c"
         break;
       case 34: /* code_line ::= DIV REGISTER immediate */
-#line 462 "assembler/sunyat-asm.y"
+#line 464 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_DIV_RI;
@@ -1342,10 +1344,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1346 "assembler/sunyat-asm.c"
+#line 1348 "assembler/sunyat-asm.c"
         break;
       case 35: /* code_line ::= CMP REGISTER REGISTER */
-#line 471 "assembler/sunyat-asm.y"
+#line 473 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_CMP_RR;
@@ -1354,10 +1356,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1358 "assembler/sunyat-asm.c"
+#line 1360 "assembler/sunyat-asm.c"
         break;
       case 36: /* code_line ::= CMP REGISTER immediate */
-#line 480 "assembler/sunyat-asm.y"
+#line 482 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_CMP_RI;
@@ -1366,10 +1368,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1370 "assembler/sunyat-asm.c"
+#line 1372 "assembler/sunyat-asm.c"
         break;
       case 37: /* code_line ::= JMP memory */
-#line 489 "assembler/sunyat-asm.y"
+#line 491 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_JMP_M;
@@ -1378,10 +1380,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1382 "assembler/sunyat-asm.c"
+#line 1384 "assembler/sunyat-asm.c"
         break;
       case 38: /* code_line ::= JEQ memory */
-#line 498 "assembler/sunyat-asm.y"
+#line 500 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_JEQ_M;
@@ -1390,10 +1392,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1394 "assembler/sunyat-asm.c"
+#line 1396 "assembler/sunyat-asm.c"
         break;
       case 39: /* code_line ::= JNE memory */
-#line 507 "assembler/sunyat-asm.y"
+#line 509 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_JNE_M;
@@ -1402,10 +1404,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1406 "assembler/sunyat-asm.c"
+#line 1408 "assembler/sunyat-asm.c"
         break;
       case 40: /* code_line ::= JGR memory */
-#line 516 "assembler/sunyat-asm.y"
+#line 518 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_JGR_M;
@@ -1414,10 +1416,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1418 "assembler/sunyat-asm.c"
+#line 1420 "assembler/sunyat-asm.c"
         break;
       case 41: /* code_line ::= JLS memory */
-#line 525 "assembler/sunyat-asm.y"
+#line 527 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_JLS_M;
@@ -1426,10 +1428,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1430 "assembler/sunyat-asm.c"
+#line 1432 "assembler/sunyat-asm.c"
         break;
       case 42: /* code_line ::= CALL memory */
-#line 534 "assembler/sunyat-asm.y"
+#line 536 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_CALL_M;
@@ -1438,10 +1440,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1442 "assembler/sunyat-asm.c"
+#line 1444 "assembler/sunyat-asm.c"
         break;
       case 43: /* code_line ::= RET */
-#line 543 "assembler/sunyat-asm.y"
+#line 545 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_RET;
@@ -1450,10 +1452,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1454 "assembler/sunyat-asm.c"
+#line 1456 "assembler/sunyat-asm.c"
         break;
       case 44: /* code_line ::= AND REGISTER REGISTER */
-#line 552 "assembler/sunyat-asm.y"
+#line 554 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_AND_RR;
@@ -1462,10 +1464,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1466 "assembler/sunyat-asm.c"
+#line 1468 "assembler/sunyat-asm.c"
         break;
       case 45: /* code_line ::= AND REGISTER immediate */
-#line 561 "assembler/sunyat-asm.y"
+#line 563 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_AND_RI;
@@ -1474,10 +1476,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1478 "assembler/sunyat-asm.c"
+#line 1480 "assembler/sunyat-asm.c"
         break;
       case 46: /* code_line ::= OR REGISTER REGISTER */
-#line 570 "assembler/sunyat-asm.y"
+#line 572 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_OR_RR;
@@ -1486,10 +1488,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1490 "assembler/sunyat-asm.c"
+#line 1492 "assembler/sunyat-asm.c"
         break;
       case 47: /* code_line ::= OR REGISTER immediate */
-#line 579 "assembler/sunyat-asm.y"
+#line 581 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_OR_RI;
@@ -1498,10 +1500,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1502 "assembler/sunyat-asm.c"
+#line 1504 "assembler/sunyat-asm.c"
         break;
       case 48: /* code_line ::= XOR REGISTER REGISTER */
-#line 588 "assembler/sunyat-asm.y"
+#line 590 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_XOR_RR;
@@ -1510,10 +1512,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1514 "assembler/sunyat-asm.c"
+#line 1516 "assembler/sunyat-asm.c"
         break;
       case 49: /* code_line ::= XOR REGISTER immediate */
-#line 597 "assembler/sunyat-asm.y"
+#line 599 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_XOR_RI;
@@ -1522,10 +1524,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1526 "assembler/sunyat-asm.c"
+#line 1528 "assembler/sunyat-asm.c"
         break;
       case 50: /* code_line ::= NOT REGISTER */
-#line 606 "assembler/sunyat-asm.y"
+#line 608 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		/* same as XOR REG 0xFF */
@@ -1535,10 +1537,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1539 "assembler/sunyat-asm.c"
+#line 1541 "assembler/sunyat-asm.c"
         break;
       case 51: /* code_line ::= NEG REGISTER */
-#line 618 "assembler/sunyat-asm.y"
+#line 620 "assembler/sunyat-asm.y"
 { //THIS IS A PSEUDO-INSTRUCTION
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_MUL_RI;
@@ -1547,10 +1549,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1551 "assembler/sunyat-asm.c"
+#line 1553 "assembler/sunyat-asm.c"
         break;
       case 52: /* code_line ::= LOAD REGISTER memory */
-#line 627 "assembler/sunyat-asm.y"
+#line 629 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_LOAD_RM;
@@ -1559,10 +1561,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1563 "assembler/sunyat-asm.c"
+#line 1565 "assembler/sunyat-asm.c"
         break;
       case 53: /* code_line ::= LOADP REGISTER REGISTER */
-#line 636 "assembler/sunyat-asm.y"
+#line 638 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_LOADP_RR;
@@ -1571,10 +1573,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1575 "assembler/sunyat-asm.c"
+#line 1577 "assembler/sunyat-asm.c"
         break;
       case 54: /* code_line ::= STOR memory REGISTER */
-#line 645 "assembler/sunyat-asm.y"
+#line 647 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_STOR_MR;
@@ -1583,10 +1585,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1587 "assembler/sunyat-asm.c"
+#line 1589 "assembler/sunyat-asm.c"
         break;
       case 55: /* code_line ::= STORP REGISTER REGISTER */
-#line 654 "assembler/sunyat-asm.y"
+#line 656 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_STORP_RR;
@@ -1595,10 +1597,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1599 "assembler/sunyat-asm.c"
+#line 1601 "assembler/sunyat-asm.c"
         break;
       case 56: /* code_line ::= PUSH REGISTER */
-#line 663 "assembler/sunyat-asm.y"
+#line 665 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_STACKER_R;
@@ -1607,10 +1609,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1611 "assembler/sunyat-asm.c"
+#line 1613 "assembler/sunyat-asm.c"
         break;
       case 57: /* code_line ::= POP REGISTER */
-#line 672 "assembler/sunyat-asm.y"
+#line 674 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_STACKER_R;
@@ -1619,10 +1621,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1623 "assembler/sunyat-asm.c"
+#line 1625 "assembler/sunyat-asm.c"
         break;
       case 58: /* code_line ::= AUX immediate */
-#line 681 "assembler/sunyat-asm.y"
+#line 683 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		high_opcode = OPCODE_AUX_I;
@@ -1634,10 +1636,10 @@ static void yy_reduce(
 		store_instruction ();
 	}
 }
-#line 1638 "assembler/sunyat-asm.c"
+#line 1640 "assembler/sunyat-asm.c"
         break;
       case 59: /* memory ::= IDENTIFIER */
-#line 695 "assembler/sunyat-asm.y"
+#line 697 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		int pos = variable_pos (yymsp[0].minor.yy0.token_str);
@@ -1657,10 +1659,10 @@ static void yy_reduce(
 		}
 	}
 }
-#line 1661 "assembler/sunyat-asm.c"
+#line 1663 "assembler/sunyat-asm.c"
         break;
       case 60: /* memory ::= LABEL_DIRECTIVE IDENTIFIER */
-#line 714 "assembler/sunyat-asm.y"
+#line 716 "assembler/sunyat-asm.y"
 {
 	if (assembler_pass == 2) {
 		int pos = label_pos (yymsp[0].minor.yy0.token_str);
@@ -1673,7 +1675,7 @@ static void yy_reduce(
 		}
 	}
 }
-#line 1677 "assembler/sunyat-asm.c"
+#line 1679 "assembler/sunyat-asm.c"
         break;
       default:
       /* (1) lines ::= lines line EOL */ yytestcase(yyruleno==1);
@@ -1733,7 +1735,7 @@ static void yy_parse_failed(
 #line 151 "assembler/sunyat-asm.y"
 
 	fprintf (stderr, "Giving up... the parser has gotten completely lost :-x\n");
-#line 1737 "assembler/sunyat-asm.c"
+#line 1739 "assembler/sunyat-asm.c"
   ParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
 #endif /* YYNOERRORRECOVERY */
@@ -1753,7 +1755,7 @@ static void yy_syntax_error(
 	fprintf (stderr, "Syntax error, line %d:%d - \"%s\"\n", TOKEN.line_num
 	, TOKEN.char_pos, TOKEN.long_str);
 	errors_found++;
-#line 1757 "assembler/sunyat-asm.c"
+#line 1759 "assembler/sunyat-asm.c"
   ParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
 
