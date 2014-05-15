@@ -63,7 +63,7 @@ extern uint8_t terminal[TERMINAL_HEIGHT][TERMINAL_WIDTH + 1]; //This is defined 
 bool linefeed_buffered = false;
 int debug = 0 ; ///Debug will tell us if we are in debugging mode or not.
 
-//Get rid of this shit too ⇓⇓⇓⇓⇓
+//Get rid of this too ⇓⇓⇓⇓⇓
 char app_msg [SIZE_APP_MSG + 1];	/* +1 is to add a guaranteed null terminator */
 
 static int sunyat_flag_zero = 0;
@@ -775,7 +775,7 @@ static void sunyat_execute (WINDOW *win) {
 				case 0: //savestate
 				{
 					FILE * pFile;
-  					pFile = fopen ("statefile.rom", "wb");
+  					pFile = fopen ("savestate.rom", "wb");
 
   					//---------------------------------------------------------------------------
   					//RAM comes "first" in the file.
