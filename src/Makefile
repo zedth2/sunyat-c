@@ -54,4 +54,5 @@ sunyat-asm.c:	assembler/sunyat-asm.y sunyat-asm.h lemon
 #----------------------------------------
 clean:
 	rm -f ../bin/lemon ../bin/sunyat ../bin/sunyat-asm assembler/lex.yy.c assembler/sunyat-asm.c assembler/sunyat-asm.h assembler/sunyat-asm.out
+	find ./asm_files/ -name "*.rom" -print0 | xargs -0 rm -f
 #windowtest.rom
