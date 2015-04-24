@@ -157,13 +157,25 @@ SatWin* main_win_debug(){
  *          The window to print everything out to. If NULL
  *          it defaults to reg_win.
  */
+ static short MY_COLORS ;
+ static short MY_BACK_COLORS ;
 void print_reg_win(SatWin *win) {
     if (!win) win = reg_win ;
     erase_box(win) ;
     win->cur_X = 2 ;
     win->cur_Y = 1 ;
     unsigned int cnt = 0, strLen = 10, reg_win_cnt = 0 ;
-    init_pair(2, COLOR_GREEN, COLOR_BLACK) ;
+    if(MY_COLORS < 7){
+        MY_COLORS++ ;
+    } else {
+        MY_COLORS = 0 ;
+    }
+    if(MY_BACK_COLORS > -1){
+        MY_BACK_COLORS-- ;
+    } else {
+        MY_BACK_COLORS = 7 ;
+    }
+    init_pair(2, MY_COLORS, MY_BACK_COLORS) ;
     for (; SIZE_REG > cnt ; cnt++) {
         switch(cnt){
             case REG_PC:
